@@ -5,6 +5,7 @@ import 'package:flutter_application_1/data/repositories/remote/trabajador_remote
 import 'package:flutter_application_1/data/repositories/base_hybrid_repository.dart';
 import 'package:flutter_application_1/domain/entities.dart';
 import 'package:flutter_application_1/domain/repositories.dart';
+
 import 'package:flutter_application_1/core/network/network_info.dart';
 import 'package:flutter_application_1/core/error/exceptions.dart';
 
