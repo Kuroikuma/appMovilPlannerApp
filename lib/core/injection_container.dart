@@ -35,7 +35,9 @@ Future<void> setupDependencies() async {
   );
 
   getIt.registerLazySingleton<ApiClient>(
-    () => ApiClient('https://api.tudominio.com'),
+    () => ApiClient(
+      'http://192.168.1.15:3000/api',
+    ), // Usando IP local
   );
 
   // Remotos

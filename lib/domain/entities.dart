@@ -126,6 +126,7 @@ class SyncEntityD {
   final String action; // 'CREATE', 'UPDATE', 'DELETE'
   final String registerId;
   final DateTime timestamp;
+  final bool isSynced;
 
   SyncEntityD({
     required this.id,
@@ -133,5 +134,6 @@ class SyncEntityD {
     required this.action,
     required this.registerId,
     required this.timestamp,
+    required this.isSynced,
   });
 }

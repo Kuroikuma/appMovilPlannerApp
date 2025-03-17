@@ -26,14 +26,24 @@ class TrabajadorMapper {
   }
 
   static Trabajador fromApiJson(Map<String, dynamic> json) {
-    return Trabajador(
-      id: json['id'],
-      nombre: json['nombre'],
-      apellido: json['apellido'],
-      cedula: json['cedula'],
-      activo: json['activo'],
-      ultimaActualizacion: DateTime.parse(json['ultima_actualizacion']),
-    );
+    print('Mapeando JSON: $json');
+    try {
+      return Trabajador(
+        id: json['id'] ?? 0,
+        nombre: json['nombre']?.toString() ?? '',
+        apellido: json['apellido']?.toString() ?? '',
+        cedula: json['cedula']?.toString() ?? '',
+        activo: json['activo'] ?? false,
+        ultimaActualizacion:
+            json['ultima_actualizacion'] != null
+                ? DateTime.parse(json['ultima_actualizacion'])
+                : DateTime.now(),
+      );
+    } catch (e) {
+      print('Error mapeando JSON: $e');
+      print('JSON problemático: $json');
+      rethrow;
+    }
   }
 
   static Map<String, dynamic> toApiJson(Trabajador entity) {

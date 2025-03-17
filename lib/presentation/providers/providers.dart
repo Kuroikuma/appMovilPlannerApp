@@ -13,7 +13,7 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 });
 
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient('https://api.tudominio.com');
+  return ApiClient('http://192.168.1.15:3000/api');  // Usando IP local
 });
 
 final networkInfoProvider = Provider<NetworkInfo>((ref) {

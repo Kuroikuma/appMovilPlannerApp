@@ -43,13 +43,18 @@ class TrabajadorRepository
   @override
   Future<List<Trabajador>> obtenerTodosTrabajadores() async {
     final localData = await localDataSource.getAllTrabajadores();
-
-    if (await networkInfo.isConnected) {
+    final isConnected = await networkInfo.isConnected;
+    print('isConnected: $isConnected');
+    if (isConnected) {
       try {
+        print('Fetching remote data...');
         final remoteData = await remoteDataSource.getAllTrabajadores();
+        print('Remote data');
         await localDataSource.syncTrabajadores(remoteData);
         return remoteData;
-      } on ApiException {
+      } catch (e, stackTrace) {
+        print('Error inesperado: $e');
+        print(stackTrace);
         return localData.isNotEmpty ? localData : throw CacheException();
       }
     } else {

@@ -12,18 +12,51 @@ class TrabajadorRemoteDataSource {
 
   Future<List<Trabajador>> getAllTrabajadores() async {
     try {
+      print('Fetching dentro de get all');
       final response = await _client.get('/trabajadores');
+      print('Response data type: ${response.data.runtimeType}');
+      print('Response data: ${response.data}');
+
+      List<dynamic> jsonList;
       if (response.data is String) {
-        // Si es string, intentar parsearlo como JSON
-        final List jsonList = json.decode(response.data);
-        return jsonList
-            .map((json) => TrabajadorMapper.fromApiJson(json))
-            .toList();
+        try {
+          jsonList = json.decode(response.data);
+          print('Parsed JSON list: $jsonList');
+        } catch (e) {
+          print('Error parsing JSON string: $e');
+          throw ApiException();
+        }
+      } else if (response.data is List) {
+        jsonList = response.data;
+      } else {
+        print('Unexpected response data type: ${response.data.runtimeType}');
+        throw ApiException();
       }
-      return (response.data as List)
-          .map((json) => TrabajadorMapper.fromApiJson(json))
-          .toList();
-    } on DioException {
+
+      return jsonList.map((json) {
+        try {
+          if (json is! Map<String, dynamic>) {
+            print('JSON item no es un Map: $json');
+            throw ApiException();
+          }
+          return TrabajadorMapper.fromApiJson(json);
+        } catch (e) {
+          print('Error procesando item JSON: $e');
+          print('Item problemático: $json');
+          rethrow;
+        }
+      }).toList();
+    } on DioException catch (e) {
+      print('DioException type: ${e.type}');
+      print('DioException message: ${e.message}');
+      print('DioException error: ${e.error}');
+      if (e.response != null) {
+        print('Response status: ${e.response?.statusCode}');
+        print('Response data: ${e.response?.data}');
+      }
+      throw ApiException();
+    } catch (e) {
+      print('Unexpected error: $e');
       throw ApiException();
     }
   }
