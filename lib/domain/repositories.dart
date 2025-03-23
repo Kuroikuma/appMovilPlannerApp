@@ -3,12 +3,16 @@ import 'package:flutter_application_1/domain/entities.dart';
 abstract class ITrabajadorRepository {
   Future<Trabajador> crearTrabajador(Trabajador trabajador);
   Future<List<Trabajador>> obtenerTodosTrabajadores();
-  Future<Trabajador?> obtenerTrabajadorPorCedula(String cedula);
 }
 
-abstract class IUbicacionRepository {
-  Future<List<Ubicacion>> obtenerUbicacionesPorGrupo(String grupoId);
-  Future<Horario> obtenerHorarioUbicacion(String ubicacionId);
+abstract class ISyncEntityRepository {
+  Future<void> insertSyncEntity(SyncEntity syncEntity);
+  Future<void> syncEntitys(List<Trabajador> trabajadores);
+  Future<void> syncRemoteWithLocalData();
+  Future<void> syncLocalWithRemoteData();
+  Future<List<SyncEntity>> getPendingLocalSyncOperations();
+  Future<List<SyncEntity>> getPendingRemoteSyncOperations();
+  Future<void> markMultipleAsSynced(List<SyncEntity> operations);
 }
 
 abstract class IRegistroRepository {

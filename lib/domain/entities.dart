@@ -1,70 +1,81 @@
 // Enumerado para el método de prueba de vida
+import 'package:flutter/material.dart';
+
 enum MetodoPruebaVida { face, huella, otro }
 
 class Trabajador {
   final int id;
   final String nombre;
-  final String apellido;
-  final String cedula;
-  final bool activo;
-  final DateTime? ultimaActualizacion;
+  final String primerApellido;
+  final String segundoApellido;
+  final bool estado;
+  final int equipoId;
 
   Trabajador({
     this.id = 0,
     required this.nombre,
-    required this.apellido,
-    required this.cedula,
-    this.activo = true,
-    this.ultimaActualizacion,
+    required this.primerApellido,
+    required this.segundoApellido,
+    required this.equipoId,
+    this.estado = true,
   });
 
   Trabajador copyWith({
     int? id,
     String? nombre,
-    String? apellido,
-    String? cedula,
-    bool? activo,
-    DateTime? ultimaActualizacion,
+    String? primerApellido,
+    String? segundoApellido,
+    bool? estado,
+    int? equipoId,
   }) {
     return Trabajador(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
-      apellido: apellido ?? this.apellido,
-      cedula: cedula ?? this.cedula,
-      activo: activo ?? this.activo,
-      ultimaActualizacion: ultimaActualizacion ?? this.ultimaActualizacion,
+      primerApellido: primerApellido ?? this.primerApellido,
+      segundoApellido: segundoApellido ?? this.segundoApellido,
+      equipoId: equipoId ?? this.equipoId,
+      estado: estado ?? this.estado,
     );
   }
 }
 
-class GrupoUbicaciones {
+class GrupoUbicacion {
   final int id;
   final String nombre;
+  final bool estado;
 
-  GrupoUbicaciones({required this.id, required this.nombre});
+  GrupoUbicacion({required this.id, required this.nombre, this.estado = true});
 }
 
 class Ubicacion {
-  final int id;
+  final String id;
   final String nombre;
   final Map<String, dynamic> disponibilidad;
-  final String grupoId;
+  final int grupoId;
+  final bool estado;
+  final int ubicacionId;
 
   Ubicacion({
     required this.id,
     required this.nombre,
     required this.disponibilidad,
     required this.grupoId,
+    required this.ubicacionId,
+    this.estado = true,
   });
 }
 
 class Horario {
   final int id;
-  final String ubicacionId;
+  final int ubicacionId;
   final DateTime fechaInicio;
   final DateTime fechaFin;
-  final Duration horaInicio;
-  final Duration horaFin;
+  final TimeOfDay horaInicio;
+  final TimeOfDay horaFin;
+  final TimeOfDay inicioDescanso;
+  final TimeOfDay finDescanso;
+  final bool pagaAlmuerzo;
+  final bool estado;
 
   Horario({
     required this.id,
@@ -73,6 +84,10 @@ class Horario {
     required this.fechaFin,
     required this.horaInicio,
     required this.horaFin,
+    required this.inicioDescanso,
+    required this.finDescanso,
+    required this.pagaAlmuerzo,
+    required this.estado,
   });
 }
 
@@ -84,6 +99,7 @@ class RegistroBiometrico {
   final bool pruebaVidaExitosa;
   final MetodoPruebaVida metodoPruebaVida;
   final double puntajeConfianza;
+  final bool estado;
 
   RegistroBiometrico({
     required this.id,
@@ -93,6 +109,7 @@ class RegistroBiometrico {
     required this.pruebaVidaExitosa,
     required this.metodoPruebaVida,
     required this.puntajeConfianza,
+    this.estado = true,
   });
 }
 
@@ -101,11 +118,12 @@ class RegistroDiario {
   final String trabajadorId;
   final String registroBiometricoId;
   final DateTime fechaIngreso;
-  final Duration horaIngreso;
+  final TimeOfDay horaIngreso;
   final DateTime? fechaSalida;
-  final Duration? horaSalida;
+  final TimeOfDay? horaSalida;
   final bool ingresofonconizado;
   final bool salidaforconizada;
+  final bool estado;
 
   RegistroDiario({
     required this.id,
@@ -117,23 +135,26 @@ class RegistroDiario {
     this.horaSalida,
     required this.ingresofonconizado,
     required this.salidaforconizada,
+    this.estado = true,
   });
 }
 
-class SyncEntityD {
+class SyncEntity {
   final int id;
   final String entityTableNameToSync;
   final String action; // 'CREATE', 'UPDATE', 'DELETE'
   final String registerId;
   final DateTime timestamp;
   final bool isSynced;
+  final Map<String, dynamic> data;
 
-  SyncEntityD({
+  SyncEntity({
     required this.id,
     required this.entityTableNameToSync,
     required this.action,
     required this.registerId,
     required this.timestamp,
     required this.isSynced,
+    required this.data,
   });
 }

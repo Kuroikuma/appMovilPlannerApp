@@ -6,6 +6,7 @@ import 'package:flutter_application_1/data/mappers/trabajador_mappers.dart';
 import 'package:flutter_application_1/data/repositories/local/trabajador_local.dart';
 import 'package:flutter_application_1/data/repositories/remote/api_client.dart';
 import 'package:flutter_application_1/data/repositories/remote/trabajador_remote.dart';
+import 'package:flutter_application_1/data/repositories/sync_entity_repo.dart';
 import 'package:flutter_application_1/data/repositories/trabajador.dart';
 import 'package:flutter_application_1/domain/repositories.dart';
 import 'package:get_it/get_it.dart';
@@ -35,14 +36,21 @@ Future<void> setupDependencies() async {
   );
 
   getIt.registerLazySingleton<ApiClient>(
-    () => ApiClient(
-      'http://192.168.1.15:3000/api',
-    ), // Usando IP local
+    () => ApiClient('https://plannerapptest.com'), // Usando IP local
   );
 
   // Remotos
   getIt.registerLazySingleton<TrabajadorRemoteDataSource>(
     () => TrabajadorRemoteDataSource(getIt<ApiClient>()),
+  );
+
+  getIt.registerLazySingleton<ISyncEntityRepository>(
+    () => SyncEntityLocalDataSource(
+      getIt<AppDatabase>(),
+      getIt<TrabajadorRemoteDataSource>(),
+      getIt<TrabajadorLocalDataSource>(),
+      getIt<ApiClient>(),
+    ),
   );
 
   // =================== REPOSITORIOS ===================
@@ -51,6 +59,7 @@ Future<void> setupDependencies() async {
       localDataSource: getIt<TrabajadorLocalDataSource>(),
       remoteDataSource: getIt<TrabajadorRemoteDataSource>(),
       networkInfo: getIt<NetworkInfo>(),
+      syncEntityRepository: getIt<ISyncEntityRepository>(),
       // conflictResolver: getIt<ConflictResolver>(),
     ),
   );

@@ -69,6 +69,42 @@ class TrabajadorRemoteDataSource {
     return response.data['id'];
   }
 
+  Future<List<Trabajador>> createTrabajadores(
+    List<Trabajador> trabajadores,
+  ) async {
+    final response = await _client.post(
+      '/trabajadores/many',
+      data: trabajadores.map(TrabajadorMapper.toApiJson).toList(),
+    );
+    return response.data
+        .map((json) => TrabajadorMapper.fromApiJson(json))
+        .toList();
+  }
+
+  Future<List<Trabajador>> updateTrabajadoresBatch(
+    List<Trabajador> trabajadores,
+  ) async {
+    final response = await _client.post(
+      '/trabajadores/update-batch',
+      data: trabajadores.map(TrabajadorMapper.toApiJson).toList(),
+    );
+    return response.data
+        .map((json) => TrabajadorMapper.fromApiJson(json))
+        .toList();
+  }
+
+  Future<List<Trabajador>> deleteTrabajadoresBatch(
+    List<Trabajador> trabajadores,
+  ) async {
+    final response = await _client.post(
+      '/trabajadores/delete-batch',
+      data: trabajadores.map(TrabajadorMapper.toApiJson).toList(),
+    );
+    return response.data
+        .map((json) => TrabajadorMapper.fromApiJson(json))
+        .toList();
+  }
+
   Future<Trabajador?> getTrabajadorByCedula(String cedula) async {
     try {
       final response = await _client.get('/trabajadores/cedula/$cedula');

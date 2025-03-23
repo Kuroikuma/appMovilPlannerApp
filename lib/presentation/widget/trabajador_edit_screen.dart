@@ -24,9 +24,11 @@ class _TrabajadorEditScreenState extends ConsumerState<TrabajadorEditScreen> {
   void initState() {
     super.initState();
     _nombreController = TextEditingController(text: widget.trabajador?.nombre);
-    _cedulaController = TextEditingController(text: widget.trabajador?.cedula);
+    _cedulaController = TextEditingController(
+      text: widget.trabajador?.id.toString(),
+    );
     _apellidoController = TextEditingController(
-      text: widget.trabajador?.apellido,
+      text: widget.trabajador?.primerApellido,
     );
   }
 
@@ -82,8 +84,9 @@ class _TrabajadorEditScreenState extends ConsumerState<TrabajadorEditScreen> {
     if (_formKey.currentState?.validate() ?? false) {
       final trabajador = Trabajador(
         nombre: _nombreController.text,
-        cedula: _cedulaController.text,
-        apellido: _apellidoController.text,
+        primerApellido: _apellidoController.text,
+        segundoApellido: _apellidoController.text,
+        equipoId: widget.trabajador?.equipoId ?? 0,
         // ...otros campos
       );
 

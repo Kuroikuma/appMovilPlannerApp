@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/presentation/providers/use_case/sync_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/use_case.dart';
@@ -18,10 +19,13 @@ class TrabajadoresList extends ConsumerWidget {
         title: const Text("Lista de Trabajadores"),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.plus_one),
             onPressed: () {
-              ref.invalidate(trabajadoresNotifierProvider);
+              ref
+                  .read(syncEntityNotifierProvider.notifier)
+                  .syncRemoteWithLocalData();
             },
+            tooltip: 'Configurar App biométrica',
           ),
         ],
       ),

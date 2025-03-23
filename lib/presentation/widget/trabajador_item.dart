@@ -12,11 +12,11 @@ class TrabajadorItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        title: Text('${trabajador.nombre} ${trabajador.apellido}'),
-        subtitle: Text(trabajador.cedula),
+        title: Text('${trabajador.nombre} ${trabajador.primerApellido}'),
+        subtitle: Text(trabajador.id.toString()),
         trailing: Icon(
-          trabajador.activo ? Icons.check_circle : Icons.cancel,
-          color: trabajador.activo ? Colors.green : Colors.red,
+          trabajador.estado ? Icons.check_circle : Icons.cancel,
+          color: trabajador.estado ? Colors.green : Colors.red,
         ),
         onTap:
             () => Navigator.push(

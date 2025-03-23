@@ -30,7 +30,7 @@ class _DetailContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Nombre: ${trabajador.nombre}'),
-          Text('Cédula: ${trabajador.cedula}'),
+          Text('Cédula: ${trabajador.id}'),
           // Más campos...
         ],
       ),

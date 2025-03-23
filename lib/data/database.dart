@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter_application_1/domain/entities.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart' show TimeOfDay;
 import 'converters/json_converter.dart';
@@ -13,15 +14,12 @@ Uuid uuid = const Uuid();
 @DriftDatabase(
   tables: [
     Trabajadores,
-    GrupoUbicaciones,
+    GruposUbicaciones,
     Ubicaciones,
     Horarios,
     RegistroBiometrico,
     RegistroDiario,
-    SyncEntitys,
-    Equipo,
-    LiderUbicaciones,
-    CargosLiderazgo,
+    SyncsEntitys,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -30,93 +28,72 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 1;
 
-  @override
-  MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async {
-      await m.createAll(); // Crea todas las tablas
+  // @override
+  // MigrationStrategy get migration => MigrationStrategy(
+  //   onCreate: (m) async {
+  //     await m.createAll(); // Crea todas las tablas
 
-      // Inserta registros iniciales
-      await into(trabajadores).insert(
-        TrabajadoresCompanion.insert(
-          nombre: 'Juan',
-          apellido: 'Pérez',
-          cedula: '1234567890',
-          activo: Value(true),
-          ultimaActualizacion: Value(DateTime.now()),
-        ),
-      );
+  //     // Inserta registros iniciales
+  //     await into(trabajadores).insert(
+  //       TrabajadoresCompanion.insert(
+  //         nombre: 'Juan',
+  //         apellido: 'Pérez',
+  //         cedula: '1234567890',
+  //         activo: Value(true),
+  //         ultimaActualizacion: Value(DateTime.now()),
+  //       ),
+  //     );
 
-      await into(trabajadores).insert(
-        TrabajadoresCompanion.insert(
-          nombre: 'María',
-          apellido: 'López',
-          cedula: '0987654321',
-          activo: Value(true),
-          ultimaActualizacion: Value(DateTime.now()),
-        ),
-      );
-    },
-  );
+  //     await into(trabajadores).insert(
+  //       TrabajadoresCompanion.insert(
+  //         nombre: 'María',
+  //         apellido: 'López',
+  //         cedula: '0987654321',
+  //         activo: Value(true),
+  //         ultimaActualizacion: Value(DateTime.now()),
+  //       ),
+  //     );
+  //   },
+  // );
 }
 
 // Tabla: Trabajadores
 class Trabajadores extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get nombre => text()();
-  TextColumn get apellido => text()();
-  TextColumn get cedula => text().unique()();
-  BoolColumn get activo => boolean().withDefault(const Constant(true))();
-  DateTimeColumn get ultimaActualizacion => dateTime().nullable()();
-}
-
-class Equipo extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get liderUbicacionId => text().references(LiderUbicaciones, #id)();
-  TextColumn get trabajadorId => text().references(Trabajadores, #id)();
-  TextColumn get idRegistro => text().references(Trabajadores, #id)();
-  BoolColumn get estado => boolean().withDefault(const Constant(true))();
-}
-
-@DataClassName("LiderUbicacion")
-class LiderUbicaciones extends Table {
-  IntColumn get id => integer().autoIncrement()();
-
-  TextColumn get ubicacionId => text().references(Ubicaciones, #id)();
-  TextColumn get liderId => text().references(Trabajadores, #id)();
-  BoolColumn get estado => boolean().withDefault(const Constant(true))();
-  TextColumn get cargoLiderazgoId => text().references(CargosLiderazgo, #id)();
-}
-
-@DataClassName("CargoLiderazgo")
-class CargosLiderazgo extends Table {
-  IntColumn get id => integer().autoIncrement()();
-
-  TextColumn get nombre => text().withLength(min: 1, max: 50)();
-  TextColumn get observacion => text().withLength(max: 300).nullable()();
+  TextColumn get primerApellido => text()();
+  TextColumn get segundoApellido => text()();
+  IntColumn get equipoId => integer().unique()();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
 }
 
 // Tabla: GrupoUbicaciones
-class GrupoUbicaciones extends Table {
+class GruposUbicaciones extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get nombre => text()();
+  BoolColumn get estado => boolean().withDefault(const Constant(true))();
 }
 
 // Tabla: Ubicaciones
 class Ubicaciones extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  TextColumn get id => text().unique()();
   TextColumn get nombre => text()();
-  TextColumn get disponibilidad => text().map(const JsonConverter())();
-  TextColumn get grupoId => text().references(GrupoUbicaciones, #id)();
+  IntColumn get ubicacionId => integer().unique()();
+  TextColumn get grupoId => text().references(GruposUbicaciones, #id)();
+  BoolColumn get estado => boolean().withDefault(const Constant(true))();
 }
 
 class Horario {
   final int id;
-  final String ubicacionId;
+  final int ubicacionId;
   final DateTime fechaInicio;
   final DateTime fechaFin;
   final TimeOfDay horaInicio;
   final TimeOfDay horaFin;
+  final TimeOfDay inicioDescanso;
+  final TimeOfDay finDescanso;
+  final bool pagaAlmuerzo;
+  final bool estado;
 
   Horario({
     required this.id,
@@ -125,6 +102,10 @@ class Horario {
     required this.fechaFin,
     required this.horaInicio,
     required this.horaFin,
+    required this.inicioDescanso,
+    required this.finDescanso,
+    required this.pagaAlmuerzo,
+    required this.estado,
   });
 }
 
@@ -132,43 +113,52 @@ class Horario {
 @UseRowClass(Horario)
 class Horarios extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get ubicacionId => text().references(Ubicaciones, #id)();
+  IntColumn get ubicacionId =>
+      integer().references(Ubicaciones, #ubicacionId)();
   TextColumn get fechaInicio => text().map(const DateConverter())();
   TextColumn get fechaFin => text().map(const DateConverter())();
   TextColumn get horaInicio => text().map(const TimeOfDayConverter())();
   TextColumn get horaFin => text().map(const TimeOfDayConverter())();
+  BoolColumn get estado => boolean().withDefault(const Constant(true))();
+  BoolColumn get pagaAlmuerzo => boolean().withDefault(const Constant(false))();
+  TextColumn get inicioDescanso => text().map(const TimeOfDayConverter())();
+  TextColumn get finDescanso => text().map(const TimeOfDayConverter())();
 }
 
 // Tabla: RegistroBiometrico
-class RegistroBiometrico extends Table {
+class RegistrosBiometricos extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get trabajadorId => text().references(Trabajadores, #id)();
+  IntColumn get trabajadorId => integer().references(Trabajadores, #equipoId)();
   TextColumn get foto => text()();
   TextColumn get datosBiometricos => text().map(const JsonConverter())();
   BoolColumn get pruebaVidaExitosa => boolean()();
   TextColumn get metodoPruebaVida =>
       text().map(const MetodoPruebaVidaConverter())();
   RealColumn get puntajeConfianza => real()();
+  BoolColumn get estado => boolean().withDefault(const Constant(true))();
 }
 
 // Tabla: RegistroDiario
-class RegistroDiario extends Table {
+class RegistrosDiarios extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get equipoId => text().references(Equipo, #id)();
+  IntColumn get equipoId => integer().references(Trabajadores, #equipoId)();
   TextColumn get registroBiometricoId =>
-      text().references(RegistroBiometrico, #id)();
+      text().references(RegistrosBiometricos, #id)();
   TextColumn get fechaIngreso => text().map(const DateConverter())();
   TextColumn get horaIngreso => text().map(const TimeOfDayConverter())();
   TextColumn get fechaSalida => text().map(const DateConverter())();
   TextColumn get horaSalida => text().map(const TimeOfDayConverter())();
   BoolColumn get ingresoSincronizado => boolean()();
   BoolColumn get salidaSincronizada => boolean()();
+  BoolColumn get estado => boolean().withDefault(const Constant(true))();
 }
 
-class SyncEntitys extends Table {
+class SyncsEntitys extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get entityTableNameToSync => text()();
   TextColumn get action => text()();
   TextColumn get registerId => text()();
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
+  TextColumn get data => text().map(const JsonConverter())();
 }

@@ -31,59 +31,61 @@ class $TrabajadoresTable extends Trabajadores
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _apellidoMeta = const VerificationMeta(
-    'apellido',
+  static const VerificationMeta _primerApellidoMeta = const VerificationMeta(
+    'primerApellido',
   );
   @override
-  late final GeneratedColumn<String> apellido = GeneratedColumn<String>(
-    'apellido',
+  late final GeneratedColumn<String> primerApellido = GeneratedColumn<String>(
+    'primer_apellido',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _cedulaMeta = const VerificationMeta('cedula');
+  static const VerificationMeta _segundoApellidoMeta = const VerificationMeta(
+    'segundoApellido',
+  );
   @override
-  late final GeneratedColumn<String> cedula = GeneratedColumn<String>(
-    'cedula',
+  late final GeneratedColumn<String> segundoApellido = GeneratedColumn<String>(
+    'segundo_apellido',
     aliasedName,
     false,
     type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _equipoIdMeta = const VerificationMeta(
+    'equipoId',
+  );
+  @override
+  late final GeneratedColumn<int> equipoId = GeneratedColumn<int>(
+    'equipo_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
-  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
   @override
-  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
-    'activo',
+  late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
+    'estado',
     aliasedName,
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("activo" IN (0, 1))',
+      'CHECK ("estado" IN (0, 1))',
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _ultimaActualizacionMeta =
-      const VerificationMeta('ultimaActualizacion');
-  @override
-  late final GeneratedColumn<DateTime> ultimaActualizacion =
-      GeneratedColumn<DateTime>(
-        'ultima_actualizacion',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     nombre,
-    apellido,
-    cedula,
-    activo,
-    ultimaActualizacion,
+    primerApellido,
+    segundoApellido,
+    equipoId,
+    estado,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -108,35 +110,40 @@ class $TrabajadoresTable extends Trabajadores
     } else if (isInserting) {
       context.missing(_nombreMeta);
     }
-    if (data.containsKey('apellido')) {
+    if (data.containsKey('primer_apellido')) {
       context.handle(
-        _apellidoMeta,
-        apellido.isAcceptableOrUnknown(data['apellido']!, _apellidoMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_apellidoMeta);
-    }
-    if (data.containsKey('cedula')) {
-      context.handle(
-        _cedulaMeta,
-        cedula.isAcceptableOrUnknown(data['cedula']!, _cedulaMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_cedulaMeta);
-    }
-    if (data.containsKey('activo')) {
-      context.handle(
-        _activoMeta,
-        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
-      );
-    }
-    if (data.containsKey('ultima_actualizacion')) {
-      context.handle(
-        _ultimaActualizacionMeta,
-        ultimaActualizacion.isAcceptableOrUnknown(
-          data['ultima_actualizacion']!,
-          _ultimaActualizacionMeta,
+        _primerApellidoMeta,
+        primerApellido.isAcceptableOrUnknown(
+          data['primer_apellido']!,
+          _primerApellidoMeta,
         ),
+      );
+    } else if (isInserting) {
+      context.missing(_primerApellidoMeta);
+    }
+    if (data.containsKey('segundo_apellido')) {
+      context.handle(
+        _segundoApellidoMeta,
+        segundoApellido.isAcceptableOrUnknown(
+          data['segundo_apellido']!,
+          _segundoApellidoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_segundoApellidoMeta);
+    }
+    if (data.containsKey('equipo_id')) {
+      context.handle(
+        _equipoIdMeta,
+        equipoId.isAcceptableOrUnknown(data['equipo_id']!, _equipoIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_equipoIdMeta);
+    }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
       );
     }
     return context;
@@ -158,25 +165,26 @@ class $TrabajadoresTable extends Trabajadores
             DriftSqlType.string,
             data['${effectivePrefix}nombre'],
           )!,
-      apellido:
+      primerApellido:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
-            data['${effectivePrefix}apellido'],
+            data['${effectivePrefix}primer_apellido'],
           )!,
-      cedula:
+      segundoApellido:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
-            data['${effectivePrefix}cedula'],
+            data['${effectivePrefix}segundo_apellido'],
           )!,
-      activo:
+      equipoId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}equipo_id'],
+          )!,
+      estado:
           attachedDatabase.typeMapping.read(
             DriftSqlType.bool,
-            data['${effectivePrefix}activo'],
+            data['${effectivePrefix}estado'],
           )!,
-      ultimaActualizacion: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}ultima_actualizacion'],
-      ),
     );
   }
 
@@ -189,29 +197,27 @@ class $TrabajadoresTable extends Trabajadores
 class Trabajadore extends DataClass implements Insertable<Trabajadore> {
   final int id;
   final String nombre;
-  final String apellido;
-  final String cedula;
-  final bool activo;
-  final DateTime? ultimaActualizacion;
+  final String primerApellido;
+  final String segundoApellido;
+  final int equipoId;
+  final bool estado;
   const Trabajadore({
     required this.id,
     required this.nombre,
-    required this.apellido,
-    required this.cedula,
-    required this.activo,
-    this.ultimaActualizacion,
+    required this.primerApellido,
+    required this.segundoApellido,
+    required this.equipoId,
+    required this.estado,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['nombre'] = Variable<String>(nombre);
-    map['apellido'] = Variable<String>(apellido);
-    map['cedula'] = Variable<String>(cedula);
-    map['activo'] = Variable<bool>(activo);
-    if (!nullToAbsent || ultimaActualizacion != null) {
-      map['ultima_actualizacion'] = Variable<DateTime>(ultimaActualizacion);
-    }
+    map['primer_apellido'] = Variable<String>(primerApellido);
+    map['segundo_apellido'] = Variable<String>(segundoApellido);
+    map['equipo_id'] = Variable<int>(equipoId);
+    map['estado'] = Variable<bool>(estado);
     return map;
   }
 
@@ -219,13 +225,10 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     return TrabajadoresCompanion(
       id: Value(id),
       nombre: Value(nombre),
-      apellido: Value(apellido),
-      cedula: Value(cedula),
-      activo: Value(activo),
-      ultimaActualizacion:
-          ultimaActualizacion == null && nullToAbsent
-              ? const Value.absent()
-              : Value(ultimaActualizacion),
+      primerApellido: Value(primerApellido),
+      segundoApellido: Value(segundoApellido),
+      equipoId: Value(equipoId),
+      estado: Value(estado),
     );
   }
 
@@ -237,12 +240,10 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     return Trabajadore(
       id: serializer.fromJson<int>(json['id']),
       nombre: serializer.fromJson<String>(json['nombre']),
-      apellido: serializer.fromJson<String>(json['apellido']),
-      cedula: serializer.fromJson<String>(json['cedula']),
-      activo: serializer.fromJson<bool>(json['activo']),
-      ultimaActualizacion: serializer.fromJson<DateTime?>(
-        json['ultimaActualizacion'],
-      ),
+      primerApellido: serializer.fromJson<String>(json['primerApellido']),
+      segundoApellido: serializer.fromJson<String>(json['segundoApellido']),
+      equipoId: serializer.fromJson<int>(json['equipoId']),
+      estado: serializer.fromJson<bool>(json['estado']),
     );
   }
   @override
@@ -251,42 +252,42 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'nombre': serializer.toJson<String>(nombre),
-      'apellido': serializer.toJson<String>(apellido),
-      'cedula': serializer.toJson<String>(cedula),
-      'activo': serializer.toJson<bool>(activo),
-      'ultimaActualizacion': serializer.toJson<DateTime?>(ultimaActualizacion),
+      'primerApellido': serializer.toJson<String>(primerApellido),
+      'segundoApellido': serializer.toJson<String>(segundoApellido),
+      'equipoId': serializer.toJson<int>(equipoId),
+      'estado': serializer.toJson<bool>(estado),
     };
   }
 
   Trabajadore copyWith({
     int? id,
     String? nombre,
-    String? apellido,
-    String? cedula,
-    bool? activo,
-    Value<DateTime?> ultimaActualizacion = const Value.absent(),
+    String? primerApellido,
+    String? segundoApellido,
+    int? equipoId,
+    bool? estado,
   }) => Trabajadore(
     id: id ?? this.id,
     nombre: nombre ?? this.nombre,
-    apellido: apellido ?? this.apellido,
-    cedula: cedula ?? this.cedula,
-    activo: activo ?? this.activo,
-    ultimaActualizacion:
-        ultimaActualizacion.present
-            ? ultimaActualizacion.value
-            : this.ultimaActualizacion,
+    primerApellido: primerApellido ?? this.primerApellido,
+    segundoApellido: segundoApellido ?? this.segundoApellido,
+    equipoId: equipoId ?? this.equipoId,
+    estado: estado ?? this.estado,
   );
   Trabajadore copyWithCompanion(TrabajadoresCompanion data) {
     return Trabajadore(
       id: data.id.present ? data.id.value : this.id,
       nombre: data.nombre.present ? data.nombre.value : this.nombre,
-      apellido: data.apellido.present ? data.apellido.value : this.apellido,
-      cedula: data.cedula.present ? data.cedula.value : this.cedula,
-      activo: data.activo.present ? data.activo.value : this.activo,
-      ultimaActualizacion:
-          data.ultimaActualizacion.present
-              ? data.ultimaActualizacion.value
-              : this.ultimaActualizacion,
+      primerApellido:
+          data.primerApellido.present
+              ? data.primerApellido.value
+              : this.primerApellido,
+      segundoApellido:
+          data.segundoApellido.present
+              ? data.segundoApellido.value
+              : this.segundoApellido,
+      equipoId: data.equipoId.present ? data.equipoId.value : this.equipoId,
+      estado: data.estado.present ? data.estado.value : this.estado,
     );
   }
 
@@ -295,88 +296,94 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     return (StringBuffer('Trabajadore(')
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
-          ..write('apellido: $apellido, ')
-          ..write('cedula: $cedula, ')
-          ..write('activo: $activo, ')
-          ..write('ultimaActualizacion: $ultimaActualizacion')
+          ..write('primerApellido: $primerApellido, ')
+          ..write('segundoApellido: $segundoApellido, ')
+          ..write('equipoId: $equipoId, ')
+          ..write('estado: $estado')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, nombre, apellido, cedula, activo, ultimaActualizacion);
+  int get hashCode => Object.hash(
+    id,
+    nombre,
+    primerApellido,
+    segundoApellido,
+    equipoId,
+    estado,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Trabajadore &&
           other.id == this.id &&
           other.nombre == this.nombre &&
-          other.apellido == this.apellido &&
-          other.cedula == this.cedula &&
-          other.activo == this.activo &&
-          other.ultimaActualizacion == this.ultimaActualizacion);
+          other.primerApellido == this.primerApellido &&
+          other.segundoApellido == this.segundoApellido &&
+          other.equipoId == this.equipoId &&
+          other.estado == this.estado);
 }
 
 class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
   final Value<int> id;
   final Value<String> nombre;
-  final Value<String> apellido;
-  final Value<String> cedula;
-  final Value<bool> activo;
-  final Value<DateTime?> ultimaActualizacion;
+  final Value<String> primerApellido;
+  final Value<String> segundoApellido;
+  final Value<int> equipoId;
+  final Value<bool> estado;
   const TrabajadoresCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
-    this.apellido = const Value.absent(),
-    this.cedula = const Value.absent(),
-    this.activo = const Value.absent(),
-    this.ultimaActualizacion = const Value.absent(),
+    this.primerApellido = const Value.absent(),
+    this.segundoApellido = const Value.absent(),
+    this.equipoId = const Value.absent(),
+    this.estado = const Value.absent(),
   });
   TrabajadoresCompanion.insert({
     this.id = const Value.absent(),
     required String nombre,
-    required String apellido,
-    required String cedula,
-    this.activo = const Value.absent(),
-    this.ultimaActualizacion = const Value.absent(),
+    required String primerApellido,
+    required String segundoApellido,
+    required int equipoId,
+    this.estado = const Value.absent(),
   }) : nombre = Value(nombre),
-       apellido = Value(apellido),
-       cedula = Value(cedula);
+       primerApellido = Value(primerApellido),
+       segundoApellido = Value(segundoApellido),
+       equipoId = Value(equipoId);
   static Insertable<Trabajadore> custom({
     Expression<int>? id,
     Expression<String>? nombre,
-    Expression<String>? apellido,
-    Expression<String>? cedula,
-    Expression<bool>? activo,
-    Expression<DateTime>? ultimaActualizacion,
+    Expression<String>? primerApellido,
+    Expression<String>? segundoApellido,
+    Expression<int>? equipoId,
+    Expression<bool>? estado,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (nombre != null) 'nombre': nombre,
-      if (apellido != null) 'apellido': apellido,
-      if (cedula != null) 'cedula': cedula,
-      if (activo != null) 'activo': activo,
-      if (ultimaActualizacion != null)
-        'ultima_actualizacion': ultimaActualizacion,
+      if (primerApellido != null) 'primer_apellido': primerApellido,
+      if (segundoApellido != null) 'segundo_apellido': segundoApellido,
+      if (equipoId != null) 'equipo_id': equipoId,
+      if (estado != null) 'estado': estado,
     });
   }
 
   TrabajadoresCompanion copyWith({
     Value<int>? id,
     Value<String>? nombre,
-    Value<String>? apellido,
-    Value<String>? cedula,
-    Value<bool>? activo,
-    Value<DateTime?>? ultimaActualizacion,
+    Value<String>? primerApellido,
+    Value<String>? segundoApellido,
+    Value<int>? equipoId,
+    Value<bool>? estado,
   }) {
     return TrabajadoresCompanion(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
-      apellido: apellido ?? this.apellido,
-      cedula: cedula ?? this.cedula,
-      activo: activo ?? this.activo,
-      ultimaActualizacion: ultimaActualizacion ?? this.ultimaActualizacion,
+      primerApellido: primerApellido ?? this.primerApellido,
+      segundoApellido: segundoApellido ?? this.segundoApellido,
+      equipoId: equipoId ?? this.equipoId,
+      estado: estado ?? this.estado,
     );
   }
 
@@ -389,19 +396,17 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     if (nombre.present) {
       map['nombre'] = Variable<String>(nombre.value);
     }
-    if (apellido.present) {
-      map['apellido'] = Variable<String>(apellido.value);
+    if (primerApellido.present) {
+      map['primer_apellido'] = Variable<String>(primerApellido.value);
     }
-    if (cedula.present) {
-      map['cedula'] = Variable<String>(cedula.value);
+    if (segundoApellido.present) {
+      map['segundo_apellido'] = Variable<String>(segundoApellido.value);
     }
-    if (activo.present) {
-      map['activo'] = Variable<bool>(activo.value);
+    if (equipoId.present) {
+      map['equipo_id'] = Variable<int>(equipoId.value);
     }
-    if (ultimaActualizacion.present) {
-      map['ultima_actualizacion'] = Variable<DateTime>(
-        ultimaActualizacion.value,
-      );
+    if (estado.present) {
+      map['estado'] = Variable<bool>(estado.value);
     }
     return map;
   }
@@ -411,21 +416,21 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     return (StringBuffer('TrabajadoresCompanion(')
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
-          ..write('apellido: $apellido, ')
-          ..write('cedula: $cedula, ')
-          ..write('activo: $activo, ')
-          ..write('ultimaActualizacion: $ultimaActualizacion')
+          ..write('primerApellido: $primerApellido, ')
+          ..write('segundoApellido: $segundoApellido, ')
+          ..write('equipoId: $equipoId, ')
+          ..write('estado: $estado')
           ..write(')'))
         .toString();
   }
 }
 
-class $GrupoUbicacionesTable extends GrupoUbicaciones
-    with TableInfo<$GrupoUbicacionesTable, GrupoUbicacione> {
+class $GruposUbicacionesTable extends GruposUbicaciones
+    with TableInfo<$GruposUbicacionesTable, GruposUbicacione> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $GrupoUbicacionesTable(this.attachedDatabase, [this._alias]);
+  $GruposUbicacionesTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -448,16 +453,29 @@ class $GrupoUbicacionesTable extends GrupoUbicaciones
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
   @override
-  List<GeneratedColumn> get $columns => [id, nombre];
+  late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
+    'estado',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("estado" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, nombre, estado];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'grupo_ubicaciones';
+  static const String $name = 'grupos_ubicaciones';
   @override
   VerificationContext validateIntegrity(
-    Insertable<GrupoUbicacione> instance, {
+    Insertable<GruposUbicacione> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -473,15 +491,21 @@ class $GrupoUbicacionesTable extends GrupoUbicaciones
     } else if (isInserting) {
       context.missing(_nombreMeta);
     }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
+      );
+    }
     return context;
   }
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  GrupoUbicacione map(Map<String, dynamic> data, {String? tablePrefix}) {
+  GruposUbicacione map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return GrupoUbicacione(
+    return GruposUbicacione(
       id:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
@@ -492,39 +516,56 @@ class $GrupoUbicacionesTable extends GrupoUbicaciones
             DriftSqlType.string,
             data['${effectivePrefix}nombre'],
           )!,
+      estado:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}estado'],
+          )!,
     );
   }
 
   @override
-  $GrupoUbicacionesTable createAlias(String alias) {
-    return $GrupoUbicacionesTable(attachedDatabase, alias);
+  $GruposUbicacionesTable createAlias(String alias) {
+    return $GruposUbicacionesTable(attachedDatabase, alias);
   }
 }
 
-class GrupoUbicacione extends DataClass implements Insertable<GrupoUbicacione> {
+class GruposUbicacione extends DataClass
+    implements Insertable<GruposUbicacione> {
   final int id;
   final String nombre;
-  const GrupoUbicacione({required this.id, required this.nombre});
+  final bool estado;
+  const GruposUbicacione({
+    required this.id,
+    required this.nombre,
+    required this.estado,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['nombre'] = Variable<String>(nombre);
+    map['estado'] = Variable<bool>(estado);
     return map;
   }
 
-  GrupoUbicacionesCompanion toCompanion(bool nullToAbsent) {
-    return GrupoUbicacionesCompanion(id: Value(id), nombre: Value(nombre));
+  GruposUbicacionesCompanion toCompanion(bool nullToAbsent) {
+    return GruposUbicacionesCompanion(
+      id: Value(id),
+      nombre: Value(nombre),
+      estado: Value(estado),
+    );
   }
 
-  factory GrupoUbicacione.fromJson(
+  factory GruposUbicacione.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return GrupoUbicacione(
+    return GruposUbicacione(
       id: serializer.fromJson<int>(json['id']),
       nombre: serializer.fromJson<String>(json['nombre']),
+      estado: serializer.fromJson<bool>(json['estado']),
     );
   }
   @override
@@ -533,62 +574,80 @@ class GrupoUbicacione extends DataClass implements Insertable<GrupoUbicacione> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'nombre': serializer.toJson<String>(nombre),
+      'estado': serializer.toJson<bool>(estado),
     };
   }
 
-  GrupoUbicacione copyWith({int? id, String? nombre}) =>
-      GrupoUbicacione(id: id ?? this.id, nombre: nombre ?? this.nombre);
-  GrupoUbicacione copyWithCompanion(GrupoUbicacionesCompanion data) {
-    return GrupoUbicacione(
+  GruposUbicacione copyWith({int? id, String? nombre, bool? estado}) =>
+      GruposUbicacione(
+        id: id ?? this.id,
+        nombre: nombre ?? this.nombre,
+        estado: estado ?? this.estado,
+      );
+  GruposUbicacione copyWithCompanion(GruposUbicacionesCompanion data) {
+    return GruposUbicacione(
       id: data.id.present ? data.id.value : this.id,
       nombre: data.nombre.present ? data.nombre.value : this.nombre,
+      estado: data.estado.present ? data.estado.value : this.estado,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('GrupoUbicacione(')
+    return (StringBuffer('GruposUbicacione(')
           ..write('id: $id, ')
-          ..write('nombre: $nombre')
+          ..write('nombre: $nombre, ')
+          ..write('estado: $estado')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, nombre);
+  int get hashCode => Object.hash(id, nombre, estado);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is GrupoUbicacione &&
+      (other is GruposUbicacione &&
           other.id == this.id &&
-          other.nombre == this.nombre);
+          other.nombre == this.nombre &&
+          other.estado == this.estado);
 }
 
-class GrupoUbicacionesCompanion extends UpdateCompanion<GrupoUbicacione> {
+class GruposUbicacionesCompanion extends UpdateCompanion<GruposUbicacione> {
   final Value<int> id;
   final Value<String> nombre;
-  const GrupoUbicacionesCompanion({
+  final Value<bool> estado;
+  const GruposUbicacionesCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
+    this.estado = const Value.absent(),
   });
-  GrupoUbicacionesCompanion.insert({
+  GruposUbicacionesCompanion.insert({
     this.id = const Value.absent(),
     required String nombre,
+    this.estado = const Value.absent(),
   }) : nombre = Value(nombre);
-  static Insertable<GrupoUbicacione> custom({
+  static Insertable<GruposUbicacione> custom({
     Expression<int>? id,
     Expression<String>? nombre,
+    Expression<bool>? estado,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (nombre != null) 'nombre': nombre,
+      if (estado != null) 'estado': estado,
     });
   }
 
-  GrupoUbicacionesCompanion copyWith({Value<int>? id, Value<String>? nombre}) {
-    return GrupoUbicacionesCompanion(
+  GruposUbicacionesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? nombre,
+    Value<bool>? estado,
+  }) {
+    return GruposUbicacionesCompanion(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
+      estado: estado ?? this.estado,
     );
   }
 
@@ -601,14 +660,18 @@ class GrupoUbicacionesCompanion extends UpdateCompanion<GrupoUbicacione> {
     if (nombre.present) {
       map['nombre'] = Variable<String>(nombre.value);
     }
+    if (estado.present) {
+      map['estado'] = Variable<bool>(estado.value);
+    }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('GrupoUbicacionesCompanion(')
+    return (StringBuffer('GruposUbicacionesCompanion(')
           ..write('id: $id, ')
-          ..write('nombre: $nombre')
+          ..write('nombre: $nombre, ')
+          ..write('estado: $estado')
           ..write(')'))
         .toString();
   }
@@ -622,16 +685,13 @@ class $UbicacionesTable extends Ubicaciones
   $UbicacionesTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
     'id',
     aliasedName,
     false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
   static const VerificationMeta _nombreMeta = const VerificationMeta('nombre');
   @override
@@ -642,16 +702,17 @@ class $UbicacionesTable extends Ubicaciones
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _ubicacionIdMeta = const VerificationMeta(
+    'ubicacionId',
+  );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
-  disponibilidad = GeneratedColumn<String>(
-    'disponibilidad',
+  late final GeneratedColumn<int> ubicacionId = GeneratedColumn<int>(
+    'ubicacion_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
-  ).withConverter<Map<String, dynamic>>(
-    $UbicacionesTable.$converterdisponibilidad,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
   static const VerificationMeta _grupoIdMeta = const VerificationMeta(
     'grupoId',
@@ -664,11 +725,30 @@ class $UbicacionesTable extends Ubicaciones
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES grupo_ubicaciones (id)',
+      'REFERENCES grupos_ubicaciones (id)',
     ),
   );
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
   @override
-  List<GeneratedColumn> get $columns => [id, nombre, disponibilidad, grupoId];
+  late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
+    'estado',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("estado" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    nombre,
+    ubicacionId,
+    grupoId,
+    estado,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -683,6 +763,8 @@ class $UbicacionesTable extends Ubicaciones
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('nombre')) {
       context.handle(
@@ -692,6 +774,17 @@ class $UbicacionesTable extends Ubicaciones
     } else if (isInserting) {
       context.missing(_nombreMeta);
     }
+    if (data.containsKey('ubicacion_id')) {
+      context.handle(
+        _ubicacionIdMeta,
+        ubicacionId.isAcceptableOrUnknown(
+          data['ubicacion_id']!,
+          _ubicacionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_ubicacionIdMeta);
+    }
     if (data.containsKey('grupo_id')) {
       context.handle(
         _grupoIdMeta,
@@ -700,18 +793,24 @@ class $UbicacionesTable extends Ubicaciones
     } else if (isInserting) {
       context.missing(_grupoIdMeta);
     }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
+      );
+    }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => const {};
   @override
   Ubicacione map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Ubicacione(
       id:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
+            DriftSqlType.string,
             data['${effectivePrefix}id'],
           )!,
       nombre:
@@ -719,16 +818,20 @@ class $UbicacionesTable extends Ubicaciones
             DriftSqlType.string,
             data['${effectivePrefix}nombre'],
           )!,
-      disponibilidad: $UbicacionesTable.$converterdisponibilidad.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}disponibilidad'],
-        )!,
-      ),
+      ubicacionId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}ubicacion_id'],
+          )!,
       grupoId:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
             data['${effectivePrefix}grupo_id'],
+          )!,
+      estado:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}estado'],
           )!,
     );
   }
@@ -737,33 +840,29 @@ class $UbicacionesTable extends Ubicaciones
   $UbicacionesTable createAlias(String alias) {
     return $UbicacionesTable(attachedDatabase, alias);
   }
-
-  static TypeConverter<Map<String, dynamic>, String> $converterdisponibilidad =
-      const JsonConverter();
 }
 
 class Ubicacione extends DataClass implements Insertable<Ubicacione> {
-  final int id;
+  final String id;
   final String nombre;
-  final Map<String, dynamic> disponibilidad;
+  final int ubicacionId;
   final String grupoId;
+  final bool estado;
   const Ubicacione({
     required this.id,
     required this.nombre,
-    required this.disponibilidad,
+    required this.ubicacionId,
     required this.grupoId,
+    required this.estado,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
+    map['id'] = Variable<String>(id);
     map['nombre'] = Variable<String>(nombre);
-    {
-      map['disponibilidad'] = Variable<String>(
-        $UbicacionesTable.$converterdisponibilidad.toSql(disponibilidad),
-      );
-    }
+    map['ubicacion_id'] = Variable<int>(ubicacionId);
     map['grupo_id'] = Variable<String>(grupoId);
+    map['estado'] = Variable<bool>(estado);
     return map;
   }
 
@@ -771,8 +870,9 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
     return UbicacionesCompanion(
       id: Value(id),
       nombre: Value(nombre),
-      disponibilidad: Value(disponibilidad),
+      ubicacionId: Value(ubicacionId),
       grupoId: Value(grupoId),
+      estado: Value(estado),
     );
   }
 
@@ -782,45 +882,46 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Ubicacione(
-      id: serializer.fromJson<int>(json['id']),
+      id: serializer.fromJson<String>(json['id']),
       nombre: serializer.fromJson<String>(json['nombre']),
-      disponibilidad: serializer.fromJson<Map<String, dynamic>>(
-        json['disponibilidad'],
-      ),
+      ubicacionId: serializer.fromJson<int>(json['ubicacionId']),
       grupoId: serializer.fromJson<String>(json['grupoId']),
+      estado: serializer.fromJson<bool>(json['estado']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
+      'id': serializer.toJson<String>(id),
       'nombre': serializer.toJson<String>(nombre),
-      'disponibilidad': serializer.toJson<Map<String, dynamic>>(disponibilidad),
+      'ubicacionId': serializer.toJson<int>(ubicacionId),
       'grupoId': serializer.toJson<String>(grupoId),
+      'estado': serializer.toJson<bool>(estado),
     };
   }
 
   Ubicacione copyWith({
-    int? id,
+    String? id,
     String? nombre,
-    Map<String, dynamic>? disponibilidad,
+    int? ubicacionId,
     String? grupoId,
+    bool? estado,
   }) => Ubicacione(
     id: id ?? this.id,
     nombre: nombre ?? this.nombre,
-    disponibilidad: disponibilidad ?? this.disponibilidad,
+    ubicacionId: ubicacionId ?? this.ubicacionId,
     grupoId: grupoId ?? this.grupoId,
+    estado: estado ?? this.estado,
   );
   Ubicacione copyWithCompanion(UbicacionesCompanion data) {
     return Ubicacione(
       id: data.id.present ? data.id.value : this.id,
       nombre: data.nombre.present ? data.nombre.value : this.nombre,
-      disponibilidad:
-          data.disponibilidad.present
-              ? data.disponibilidad.value
-              : this.disponibilidad,
+      ubicacionId:
+          data.ubicacionId.present ? data.ubicacionId.value : this.ubicacionId,
       grupoId: data.grupoId.present ? data.grupoId.value : this.grupoId,
+      estado: data.estado.present ? data.estado.value : this.estado,
     );
   }
 
@@ -829,68 +930,85 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
     return (StringBuffer('Ubicacione(')
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
-          ..write('disponibilidad: $disponibilidad, ')
-          ..write('grupoId: $grupoId')
+          ..write('ubicacionId: $ubicacionId, ')
+          ..write('grupoId: $grupoId, ')
+          ..write('estado: $estado')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, nombre, disponibilidad, grupoId);
+  int get hashCode => Object.hash(id, nombre, ubicacionId, grupoId, estado);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Ubicacione &&
           other.id == this.id &&
           other.nombre == this.nombre &&
-          other.disponibilidad == this.disponibilidad &&
-          other.grupoId == this.grupoId);
+          other.ubicacionId == this.ubicacionId &&
+          other.grupoId == this.grupoId &&
+          other.estado == this.estado);
 }
 
 class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
-  final Value<int> id;
+  final Value<String> id;
   final Value<String> nombre;
-  final Value<Map<String, dynamic>> disponibilidad;
+  final Value<int> ubicacionId;
   final Value<String> grupoId;
+  final Value<bool> estado;
+  final Value<int> rowid;
   const UbicacionesCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
-    this.disponibilidad = const Value.absent(),
+    this.ubicacionId = const Value.absent(),
     this.grupoId = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   UbicacionesCompanion.insert({
-    this.id = const Value.absent(),
+    required String id,
     required String nombre,
-    required Map<String, dynamic> disponibilidad,
+    required int ubicacionId,
     required String grupoId,
-  }) : nombre = Value(nombre),
-       disponibilidad = Value(disponibilidad),
+    this.estado = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       nombre = Value(nombre),
+       ubicacionId = Value(ubicacionId),
        grupoId = Value(grupoId);
   static Insertable<Ubicacione> custom({
-    Expression<int>? id,
+    Expression<String>? id,
     Expression<String>? nombre,
-    Expression<String>? disponibilidad,
+    Expression<int>? ubicacionId,
     Expression<String>? grupoId,
+    Expression<bool>? estado,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (nombre != null) 'nombre': nombre,
-      if (disponibilidad != null) 'disponibilidad': disponibilidad,
+      if (ubicacionId != null) 'ubicacion_id': ubicacionId,
       if (grupoId != null) 'grupo_id': grupoId,
+      if (estado != null) 'estado': estado,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   UbicacionesCompanion copyWith({
-    Value<int>? id,
+    Value<String>? id,
     Value<String>? nombre,
-    Value<Map<String, dynamic>>? disponibilidad,
+    Value<int>? ubicacionId,
     Value<String>? grupoId,
+    Value<bool>? estado,
+    Value<int>? rowid,
   }) {
     return UbicacionesCompanion(
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
-      disponibilidad: disponibilidad ?? this.disponibilidad,
+      ubicacionId: ubicacionId ?? this.ubicacionId,
       grupoId: grupoId ?? this.grupoId,
+      estado: estado ?? this.estado,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -898,18 +1016,22 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (nombre.present) {
       map['nombre'] = Variable<String>(nombre.value);
     }
-    if (disponibilidad.present) {
-      map['disponibilidad'] = Variable<String>(
-        $UbicacionesTable.$converterdisponibilidad.toSql(disponibilidad.value),
-      );
+    if (ubicacionId.present) {
+      map['ubicacion_id'] = Variable<int>(ubicacionId.value);
     }
     if (grupoId.present) {
       map['grupo_id'] = Variable<String>(grupoId.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<bool>(estado.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
     }
     return map;
   }
@@ -919,8 +1041,10 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
     return (StringBuffer('UbicacionesCompanion(')
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
-          ..write('disponibilidad: $disponibilidad, ')
-          ..write('grupoId: $grupoId')
+          ..write('ubicacionId: $ubicacionId, ')
+          ..write('grupoId: $grupoId, ')
+          ..write('estado: $estado, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -948,14 +1072,14 @@ class $HorariosTable extends Horarios with TableInfo<$HorariosTable, Horario> {
     'ubicacionId',
   );
   @override
-  late final GeneratedColumn<String> ubicacionId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> ubicacionId = GeneratedColumn<int>(
     'ubicacion_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES ubicaciones (id)',
+      'REFERENCES ubicaciones (ubicacion_id)',
     ),
   );
   @override
@@ -994,6 +1118,52 @@ class $HorariosTable extends Horarios with TableInfo<$HorariosTable, Horario> {
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       ).withConverter<TimeOfDay>($HorariosTable.$converterhoraFin);
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
+  @override
+  late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
+    'estado',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("estado" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _pagaAlmuerzoMeta = const VerificationMeta(
+    'pagaAlmuerzo',
+  );
+  @override
+  late final GeneratedColumn<bool> pagaAlmuerzo = GeneratedColumn<bool>(
+    'paga_almuerzo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("paga_almuerzo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<TimeOfDay, String>
+  inicioDescanso = GeneratedColumn<String>(
+    'inicio_descanso',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<TimeOfDay>($HorariosTable.$converterinicioDescanso);
+  @override
+  late final GeneratedColumnWithTypeConverter<TimeOfDay, String> finDescanso =
+      GeneratedColumn<String>(
+        'fin_descanso',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<TimeOfDay>($HorariosTable.$converterfinDescanso);
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1002,6 +1172,10 @@ class $HorariosTable extends Horarios with TableInfo<$HorariosTable, Horario> {
     fechaFin,
     horaInicio,
     horaFin,
+    estado,
+    pagaAlmuerzo,
+    inicioDescanso,
+    finDescanso,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1029,6 +1203,21 @@ class $HorariosTable extends Horarios with TableInfo<$HorariosTable, Horario> {
     } else if (isInserting) {
       context.missing(_ubicacionIdMeta);
     }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
+      );
+    }
+    if (data.containsKey('paga_almuerzo')) {
+      context.handle(
+        _pagaAlmuerzoMeta,
+        pagaAlmuerzo.isAcceptableOrUnknown(
+          data['paga_almuerzo']!,
+          _pagaAlmuerzoMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1045,7 +1234,7 @@ class $HorariosTable extends Horarios with TableInfo<$HorariosTable, Horario> {
           )!,
       ubicacionId:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.int,
             data['${effectivePrefix}ubicacion_id'],
           )!,
       fechaInicio: $HorariosTable.$converterfechaInicio.fromSql(
@@ -1072,6 +1261,28 @@ class $HorariosTable extends Horarios with TableInfo<$HorariosTable, Horario> {
           data['${effectivePrefix}hora_fin'],
         )!,
       ),
+      inicioDescanso: $HorariosTable.$converterinicioDescanso.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}inicio_descanso'],
+        )!,
+      ),
+      finDescanso: $HorariosTable.$converterfinDescanso.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}fin_descanso'],
+        )!,
+      ),
+      pagaAlmuerzo:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}paga_almuerzo'],
+          )!,
+      estado:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}estado'],
+          )!,
     );
   }
 
@@ -1088,15 +1299,23 @@ class $HorariosTable extends Horarios with TableInfo<$HorariosTable, Horario> {
       const TimeOfDayConverter();
   static TypeConverter<TimeOfDay, String> $converterhoraFin =
       const TimeOfDayConverter();
+  static TypeConverter<TimeOfDay, String> $converterinicioDescanso =
+      const TimeOfDayConverter();
+  static TypeConverter<TimeOfDay, String> $converterfinDescanso =
+      const TimeOfDayConverter();
 }
 
 class HorariosCompanion extends UpdateCompanion<Horario> {
   final Value<int> id;
-  final Value<String> ubicacionId;
+  final Value<int> ubicacionId;
   final Value<DateTime> fechaInicio;
   final Value<DateTime> fechaFin;
   final Value<TimeOfDay> horaInicio;
   final Value<TimeOfDay> horaFin;
+  final Value<bool> estado;
+  final Value<bool> pagaAlmuerzo;
+  final Value<TimeOfDay> inicioDescanso;
+  final Value<TimeOfDay> finDescanso;
   const HorariosCompanion({
     this.id = const Value.absent(),
     this.ubicacionId = const Value.absent(),
@@ -1104,26 +1323,40 @@ class HorariosCompanion extends UpdateCompanion<Horario> {
     this.fechaFin = const Value.absent(),
     this.horaInicio = const Value.absent(),
     this.horaFin = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.pagaAlmuerzo = const Value.absent(),
+    this.inicioDescanso = const Value.absent(),
+    this.finDescanso = const Value.absent(),
   });
   HorariosCompanion.insert({
     this.id = const Value.absent(),
-    required String ubicacionId,
+    required int ubicacionId,
     required DateTime fechaInicio,
     required DateTime fechaFin,
     required TimeOfDay horaInicio,
     required TimeOfDay horaFin,
+    this.estado = const Value.absent(),
+    this.pagaAlmuerzo = const Value.absent(),
+    required TimeOfDay inicioDescanso,
+    required TimeOfDay finDescanso,
   }) : ubicacionId = Value(ubicacionId),
        fechaInicio = Value(fechaInicio),
        fechaFin = Value(fechaFin),
        horaInicio = Value(horaInicio),
-       horaFin = Value(horaFin);
+       horaFin = Value(horaFin),
+       inicioDescanso = Value(inicioDescanso),
+       finDescanso = Value(finDescanso);
   static Insertable<Horario> custom({
     Expression<int>? id,
-    Expression<String>? ubicacionId,
+    Expression<int>? ubicacionId,
     Expression<String>? fechaInicio,
     Expression<String>? fechaFin,
     Expression<String>? horaInicio,
     Expression<String>? horaFin,
+    Expression<bool>? estado,
+    Expression<bool>? pagaAlmuerzo,
+    Expression<String>? inicioDescanso,
+    Expression<String>? finDescanso,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1132,16 +1365,24 @@ class HorariosCompanion extends UpdateCompanion<Horario> {
       if (fechaFin != null) 'fecha_fin': fechaFin,
       if (horaInicio != null) 'hora_inicio': horaInicio,
       if (horaFin != null) 'hora_fin': horaFin,
+      if (estado != null) 'estado': estado,
+      if (pagaAlmuerzo != null) 'paga_almuerzo': pagaAlmuerzo,
+      if (inicioDescanso != null) 'inicio_descanso': inicioDescanso,
+      if (finDescanso != null) 'fin_descanso': finDescanso,
     });
   }
 
   HorariosCompanion copyWith({
     Value<int>? id,
-    Value<String>? ubicacionId,
+    Value<int>? ubicacionId,
     Value<DateTime>? fechaInicio,
     Value<DateTime>? fechaFin,
     Value<TimeOfDay>? horaInicio,
     Value<TimeOfDay>? horaFin,
+    Value<bool>? estado,
+    Value<bool>? pagaAlmuerzo,
+    Value<TimeOfDay>? inicioDescanso,
+    Value<TimeOfDay>? finDescanso,
   }) {
     return HorariosCompanion(
       id: id ?? this.id,
@@ -1150,6 +1391,10 @@ class HorariosCompanion extends UpdateCompanion<Horario> {
       fechaFin: fechaFin ?? this.fechaFin,
       horaInicio: horaInicio ?? this.horaInicio,
       horaFin: horaFin ?? this.horaFin,
+      estado: estado ?? this.estado,
+      pagaAlmuerzo: pagaAlmuerzo ?? this.pagaAlmuerzo,
+      inicioDescanso: inicioDescanso ?? this.inicioDescanso,
+      finDescanso: finDescanso ?? this.finDescanso,
     );
   }
 
@@ -1160,7 +1405,7 @@ class HorariosCompanion extends UpdateCompanion<Horario> {
       map['id'] = Variable<int>(id.value);
     }
     if (ubicacionId.present) {
-      map['ubicacion_id'] = Variable<String>(ubicacionId.value);
+      map['ubicacion_id'] = Variable<int>(ubicacionId.value);
     }
     if (fechaInicio.present) {
       map['fecha_inicio'] = Variable<String>(
@@ -1182,6 +1427,22 @@ class HorariosCompanion extends UpdateCompanion<Horario> {
         $HorariosTable.$converterhoraFin.toSql(horaFin.value),
       );
     }
+    if (estado.present) {
+      map['estado'] = Variable<bool>(estado.value);
+    }
+    if (pagaAlmuerzo.present) {
+      map['paga_almuerzo'] = Variable<bool>(pagaAlmuerzo.value);
+    }
+    if (inicioDescanso.present) {
+      map['inicio_descanso'] = Variable<String>(
+        $HorariosTable.$converterinicioDescanso.toSql(inicioDescanso.value),
+      );
+    }
+    if (finDescanso.present) {
+      map['fin_descanso'] = Variable<String>(
+        $HorariosTable.$converterfinDescanso.toSql(finDescanso.value),
+      );
+    }
     return map;
   }
 
@@ -1193,2192 +1454,22 @@ class HorariosCompanion extends UpdateCompanion<Horario> {
           ..write('fechaInicio: $fechaInicio, ')
           ..write('fechaFin: $fechaFin, ')
           ..write('horaInicio: $horaInicio, ')
-          ..write('horaFin: $horaFin')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $RegistroBiometricoTable extends RegistroBiometrico
-    with TableInfo<$RegistroBiometricoTable, RegistroBiometricoData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $RegistroBiometricoTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _trabajadorIdMeta = const VerificationMeta(
-    'trabajadorId',
-  );
-  @override
-  late final GeneratedColumn<String> trabajadorId = GeneratedColumn<String>(
-    'trabajador_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES trabajadores (id)',
-    ),
-  );
-  static const VerificationMeta _fotoMeta = const VerificationMeta('foto');
-  @override
-  late final GeneratedColumn<String> foto = GeneratedColumn<String>(
-    'foto',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
-  datosBiometricos = GeneratedColumn<String>(
-    'datos_biometricos',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  ).withConverter<Map<String, dynamic>>(
-    $RegistroBiometricoTable.$converterdatosBiometricos,
-  );
-  static const VerificationMeta _pruebaVidaExitosaMeta = const VerificationMeta(
-    'pruebaVidaExitosa',
-  );
-  @override
-  late final GeneratedColumn<bool> pruebaVidaExitosa = GeneratedColumn<bool>(
-    'prueba_vida_exitosa',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("prueba_vida_exitosa" IN (0, 1))',
-    ),
-  );
-  @override
-  late final GeneratedColumnWithTypeConverter<MetodoPruebaVida, String>
-  metodoPruebaVida = GeneratedColumn<String>(
-    'metodo_prueba_vida',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  ).withConverter<MetodoPruebaVida>(
-    $RegistroBiometricoTable.$convertermetodoPruebaVida,
-  );
-  static const VerificationMeta _puntajeConfianzaMeta = const VerificationMeta(
-    'puntajeConfianza',
-  );
-  @override
-  late final GeneratedColumn<double> puntajeConfianza = GeneratedColumn<double>(
-    'puntaje_confianza',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: true,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    trabajadorId,
-    foto,
-    datosBiometricos,
-    pruebaVidaExitosa,
-    metodoPruebaVida,
-    puntajeConfianza,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'registro_biometrico';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<RegistroBiometricoData> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('trabajador_id')) {
-      context.handle(
-        _trabajadorIdMeta,
-        trabajadorId.isAcceptableOrUnknown(
-          data['trabajador_id']!,
-          _trabajadorIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_trabajadorIdMeta);
-    }
-    if (data.containsKey('foto')) {
-      context.handle(
-        _fotoMeta,
-        foto.isAcceptableOrUnknown(data['foto']!, _fotoMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_fotoMeta);
-    }
-    if (data.containsKey('prueba_vida_exitosa')) {
-      context.handle(
-        _pruebaVidaExitosaMeta,
-        pruebaVidaExitosa.isAcceptableOrUnknown(
-          data['prueba_vida_exitosa']!,
-          _pruebaVidaExitosaMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_pruebaVidaExitosaMeta);
-    }
-    if (data.containsKey('puntaje_confianza')) {
-      context.handle(
-        _puntajeConfianzaMeta,
-        puntajeConfianza.isAcceptableOrUnknown(
-          data['puntaje_confianza']!,
-          _puntajeConfianzaMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_puntajeConfianzaMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  RegistroBiometricoData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return RegistroBiometricoData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      trabajadorId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}trabajador_id'],
-          )!,
-      foto:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}foto'],
-          )!,
-      datosBiometricos: $RegistroBiometricoTable.$converterdatosBiometricos
-          .fromSql(
-            attachedDatabase.typeMapping.read(
-              DriftSqlType.string,
-              data['${effectivePrefix}datos_biometricos'],
-            )!,
-          ),
-      pruebaVidaExitosa:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}prueba_vida_exitosa'],
-          )!,
-      metodoPruebaVida: $RegistroBiometricoTable.$convertermetodoPruebaVida
-          .fromSql(
-            attachedDatabase.typeMapping.read(
-              DriftSqlType.string,
-              data['${effectivePrefix}metodo_prueba_vida'],
-            )!,
-          ),
-      puntajeConfianza:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}puntaje_confianza'],
-          )!,
-    );
-  }
-
-  @override
-  $RegistroBiometricoTable createAlias(String alias) {
-    return $RegistroBiometricoTable(attachedDatabase, alias);
-  }
-
-  static TypeConverter<Map<String, dynamic>, String>
-  $converterdatosBiometricos = const JsonConverter();
-  static TypeConverter<MetodoPruebaVida, String> $convertermetodoPruebaVida =
-      const MetodoPruebaVidaConverter();
-}
-
-class RegistroBiometricoData extends DataClass
-    implements Insertable<RegistroBiometricoData> {
-  final int id;
-  final String trabajadorId;
-  final String foto;
-  final Map<String, dynamic> datosBiometricos;
-  final bool pruebaVidaExitosa;
-  final MetodoPruebaVida metodoPruebaVida;
-  final double puntajeConfianza;
-  const RegistroBiometricoData({
-    required this.id,
-    required this.trabajadorId,
-    required this.foto,
-    required this.datosBiometricos,
-    required this.pruebaVidaExitosa,
-    required this.metodoPruebaVida,
-    required this.puntajeConfianza,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['trabajador_id'] = Variable<String>(trabajadorId);
-    map['foto'] = Variable<String>(foto);
-    {
-      map['datos_biometricos'] = Variable<String>(
-        $RegistroBiometricoTable.$converterdatosBiometricos.toSql(
-          datosBiometricos,
-        ),
-      );
-    }
-    map['prueba_vida_exitosa'] = Variable<bool>(pruebaVidaExitosa);
-    {
-      map['metodo_prueba_vida'] = Variable<String>(
-        $RegistroBiometricoTable.$convertermetodoPruebaVida.toSql(
-          metodoPruebaVida,
-        ),
-      );
-    }
-    map['puntaje_confianza'] = Variable<double>(puntajeConfianza);
-    return map;
-  }
-
-  RegistroBiometricoCompanion toCompanion(bool nullToAbsent) {
-    return RegistroBiometricoCompanion(
-      id: Value(id),
-      trabajadorId: Value(trabajadorId),
-      foto: Value(foto),
-      datosBiometricos: Value(datosBiometricos),
-      pruebaVidaExitosa: Value(pruebaVidaExitosa),
-      metodoPruebaVida: Value(metodoPruebaVida),
-      puntajeConfianza: Value(puntajeConfianza),
-    );
-  }
-
-  factory RegistroBiometricoData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return RegistroBiometricoData(
-      id: serializer.fromJson<int>(json['id']),
-      trabajadorId: serializer.fromJson<String>(json['trabajadorId']),
-      foto: serializer.fromJson<String>(json['foto']),
-      datosBiometricos: serializer.fromJson<Map<String, dynamic>>(
-        json['datosBiometricos'],
-      ),
-      pruebaVidaExitosa: serializer.fromJson<bool>(json['pruebaVidaExitosa']),
-      metodoPruebaVida: serializer.fromJson<MetodoPruebaVida>(
-        json['metodoPruebaVida'],
-      ),
-      puntajeConfianza: serializer.fromJson<double>(json['puntajeConfianza']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'trabajadorId': serializer.toJson<String>(trabajadorId),
-      'foto': serializer.toJson<String>(foto),
-      'datosBiometricos': serializer.toJson<Map<String, dynamic>>(
-        datosBiometricos,
-      ),
-      'pruebaVidaExitosa': serializer.toJson<bool>(pruebaVidaExitosa),
-      'metodoPruebaVida': serializer.toJson<MetodoPruebaVida>(metodoPruebaVida),
-      'puntajeConfianza': serializer.toJson<double>(puntajeConfianza),
-    };
-  }
-
-  RegistroBiometricoData copyWith({
-    int? id,
-    String? trabajadorId,
-    String? foto,
-    Map<String, dynamic>? datosBiometricos,
-    bool? pruebaVidaExitosa,
-    MetodoPruebaVida? metodoPruebaVida,
-    double? puntajeConfianza,
-  }) => RegistroBiometricoData(
-    id: id ?? this.id,
-    trabajadorId: trabajadorId ?? this.trabajadorId,
-    foto: foto ?? this.foto,
-    datosBiometricos: datosBiometricos ?? this.datosBiometricos,
-    pruebaVidaExitosa: pruebaVidaExitosa ?? this.pruebaVidaExitosa,
-    metodoPruebaVida: metodoPruebaVida ?? this.metodoPruebaVida,
-    puntajeConfianza: puntajeConfianza ?? this.puntajeConfianza,
-  );
-  RegistroBiometricoData copyWithCompanion(RegistroBiometricoCompanion data) {
-    return RegistroBiometricoData(
-      id: data.id.present ? data.id.value : this.id,
-      trabajadorId:
-          data.trabajadorId.present
-              ? data.trabajadorId.value
-              : this.trabajadorId,
-      foto: data.foto.present ? data.foto.value : this.foto,
-      datosBiometricos:
-          data.datosBiometricos.present
-              ? data.datosBiometricos.value
-              : this.datosBiometricos,
-      pruebaVidaExitosa:
-          data.pruebaVidaExitosa.present
-              ? data.pruebaVidaExitosa.value
-              : this.pruebaVidaExitosa,
-      metodoPruebaVida:
-          data.metodoPruebaVida.present
-              ? data.metodoPruebaVida.value
-              : this.metodoPruebaVida,
-      puntajeConfianza:
-          data.puntajeConfianza.present
-              ? data.puntajeConfianza.value
-              : this.puntajeConfianza,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('RegistroBiometricoData(')
-          ..write('id: $id, ')
-          ..write('trabajadorId: $trabajadorId, ')
-          ..write('foto: $foto, ')
-          ..write('datosBiometricos: $datosBiometricos, ')
-          ..write('pruebaVidaExitosa: $pruebaVidaExitosa, ')
-          ..write('metodoPruebaVida: $metodoPruebaVida, ')
-          ..write('puntajeConfianza: $puntajeConfianza')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    trabajadorId,
-    foto,
-    datosBiometricos,
-    pruebaVidaExitosa,
-    metodoPruebaVida,
-    puntajeConfianza,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is RegistroBiometricoData &&
-          other.id == this.id &&
-          other.trabajadorId == this.trabajadorId &&
-          other.foto == this.foto &&
-          other.datosBiometricos == this.datosBiometricos &&
-          other.pruebaVidaExitosa == this.pruebaVidaExitosa &&
-          other.metodoPruebaVida == this.metodoPruebaVida &&
-          other.puntajeConfianza == this.puntajeConfianza);
-}
-
-class RegistroBiometricoCompanion
-    extends UpdateCompanion<RegistroBiometricoData> {
-  final Value<int> id;
-  final Value<String> trabajadorId;
-  final Value<String> foto;
-  final Value<Map<String, dynamic>> datosBiometricos;
-  final Value<bool> pruebaVidaExitosa;
-  final Value<MetodoPruebaVida> metodoPruebaVida;
-  final Value<double> puntajeConfianza;
-  const RegistroBiometricoCompanion({
-    this.id = const Value.absent(),
-    this.trabajadorId = const Value.absent(),
-    this.foto = const Value.absent(),
-    this.datosBiometricos = const Value.absent(),
-    this.pruebaVidaExitosa = const Value.absent(),
-    this.metodoPruebaVida = const Value.absent(),
-    this.puntajeConfianza = const Value.absent(),
-  });
-  RegistroBiometricoCompanion.insert({
-    this.id = const Value.absent(),
-    required String trabajadorId,
-    required String foto,
-    required Map<String, dynamic> datosBiometricos,
-    required bool pruebaVidaExitosa,
-    required MetodoPruebaVida metodoPruebaVida,
-    required double puntajeConfianza,
-  }) : trabajadorId = Value(trabajadorId),
-       foto = Value(foto),
-       datosBiometricos = Value(datosBiometricos),
-       pruebaVidaExitosa = Value(pruebaVidaExitosa),
-       metodoPruebaVida = Value(metodoPruebaVida),
-       puntajeConfianza = Value(puntajeConfianza);
-  static Insertable<RegistroBiometricoData> custom({
-    Expression<int>? id,
-    Expression<String>? trabajadorId,
-    Expression<String>? foto,
-    Expression<String>? datosBiometricos,
-    Expression<bool>? pruebaVidaExitosa,
-    Expression<String>? metodoPruebaVida,
-    Expression<double>? puntajeConfianza,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (trabajadorId != null) 'trabajador_id': trabajadorId,
-      if (foto != null) 'foto': foto,
-      if (datosBiometricos != null) 'datos_biometricos': datosBiometricos,
-      if (pruebaVidaExitosa != null) 'prueba_vida_exitosa': pruebaVidaExitosa,
-      if (metodoPruebaVida != null) 'metodo_prueba_vida': metodoPruebaVida,
-      if (puntajeConfianza != null) 'puntaje_confianza': puntajeConfianza,
-    });
-  }
-
-  RegistroBiometricoCompanion copyWith({
-    Value<int>? id,
-    Value<String>? trabajadorId,
-    Value<String>? foto,
-    Value<Map<String, dynamic>>? datosBiometricos,
-    Value<bool>? pruebaVidaExitosa,
-    Value<MetodoPruebaVida>? metodoPruebaVida,
-    Value<double>? puntajeConfianza,
-  }) {
-    return RegistroBiometricoCompanion(
-      id: id ?? this.id,
-      trabajadorId: trabajadorId ?? this.trabajadorId,
-      foto: foto ?? this.foto,
-      datosBiometricos: datosBiometricos ?? this.datosBiometricos,
-      pruebaVidaExitosa: pruebaVidaExitosa ?? this.pruebaVidaExitosa,
-      metodoPruebaVida: metodoPruebaVida ?? this.metodoPruebaVida,
-      puntajeConfianza: puntajeConfianza ?? this.puntajeConfianza,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (trabajadorId.present) {
-      map['trabajador_id'] = Variable<String>(trabajadorId.value);
-    }
-    if (foto.present) {
-      map['foto'] = Variable<String>(foto.value);
-    }
-    if (datosBiometricos.present) {
-      map['datos_biometricos'] = Variable<String>(
-        $RegistroBiometricoTable.$converterdatosBiometricos.toSql(
-          datosBiometricos.value,
-        ),
-      );
-    }
-    if (pruebaVidaExitosa.present) {
-      map['prueba_vida_exitosa'] = Variable<bool>(pruebaVidaExitosa.value);
-    }
-    if (metodoPruebaVida.present) {
-      map['metodo_prueba_vida'] = Variable<String>(
-        $RegistroBiometricoTable.$convertermetodoPruebaVida.toSql(
-          metodoPruebaVida.value,
-        ),
-      );
-    }
-    if (puntajeConfianza.present) {
-      map['puntaje_confianza'] = Variable<double>(puntajeConfianza.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('RegistroBiometricoCompanion(')
-          ..write('id: $id, ')
-          ..write('trabajadorId: $trabajadorId, ')
-          ..write('foto: $foto, ')
-          ..write('datosBiometricos: $datosBiometricos, ')
-          ..write('pruebaVidaExitosa: $pruebaVidaExitosa, ')
-          ..write('metodoPruebaVida: $metodoPruebaVida, ')
-          ..write('puntajeConfianza: $puntajeConfianza')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $CargosLiderazgoTable extends CargosLiderazgo
-    with TableInfo<$CargosLiderazgoTable, CargoLiderazgo> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $CargosLiderazgoTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _nombreMeta = const VerificationMeta('nombre');
-  @override
-  late final GeneratedColumn<String> nombre = GeneratedColumn<String>(
-    'nombre',
-    aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 50,
-    ),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _observacionMeta = const VerificationMeta(
-    'observacion',
-  );
-  @override
-  late final GeneratedColumn<String> observacion = GeneratedColumn<String>(
-    'observacion',
-    aliasedName,
-    true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
-  @override
-  late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
-    'estado',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("estado" IN (0, 1))',
-    ),
-    defaultValue: const Constant(true),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [id, nombre, observacion, estado];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'cargos_liderazgo';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<CargoLiderazgo> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('nombre')) {
-      context.handle(
-        _nombreMeta,
-        nombre.isAcceptableOrUnknown(data['nombre']!, _nombreMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_nombreMeta);
-    }
-    if (data.containsKey('observacion')) {
-      context.handle(
-        _observacionMeta,
-        observacion.isAcceptableOrUnknown(
-          data['observacion']!,
-          _observacionMeta,
-        ),
-      );
-    }
-    if (data.containsKey('estado')) {
-      context.handle(
-        _estadoMeta,
-        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  CargoLiderazgo map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CargoLiderazgo(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      nombre:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}nombre'],
-          )!,
-      observacion: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}observacion'],
-      ),
-      estado:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}estado'],
-          )!,
-    );
-  }
-
-  @override
-  $CargosLiderazgoTable createAlias(String alias) {
-    return $CargosLiderazgoTable(attachedDatabase, alias);
-  }
-}
-
-class CargoLiderazgo extends DataClass implements Insertable<CargoLiderazgo> {
-  final int id;
-  final String nombre;
-  final String? observacion;
-  final bool estado;
-  const CargoLiderazgo({
-    required this.id,
-    required this.nombre,
-    this.observacion,
-    required this.estado,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['nombre'] = Variable<String>(nombre);
-    if (!nullToAbsent || observacion != null) {
-      map['observacion'] = Variable<String>(observacion);
-    }
-    map['estado'] = Variable<bool>(estado);
-    return map;
-  }
-
-  CargosLiderazgoCompanion toCompanion(bool nullToAbsent) {
-    return CargosLiderazgoCompanion(
-      id: Value(id),
-      nombre: Value(nombre),
-      observacion:
-          observacion == null && nullToAbsent
-              ? const Value.absent()
-              : Value(observacion),
-      estado: Value(estado),
-    );
-  }
-
-  factory CargoLiderazgo.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CargoLiderazgo(
-      id: serializer.fromJson<int>(json['id']),
-      nombre: serializer.fromJson<String>(json['nombre']),
-      observacion: serializer.fromJson<String?>(json['observacion']),
-      estado: serializer.fromJson<bool>(json['estado']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'nombre': serializer.toJson<String>(nombre),
-      'observacion': serializer.toJson<String?>(observacion),
-      'estado': serializer.toJson<bool>(estado),
-    };
-  }
-
-  CargoLiderazgo copyWith({
-    int? id,
-    String? nombre,
-    Value<String?> observacion = const Value.absent(),
-    bool? estado,
-  }) => CargoLiderazgo(
-    id: id ?? this.id,
-    nombre: nombre ?? this.nombre,
-    observacion: observacion.present ? observacion.value : this.observacion,
-    estado: estado ?? this.estado,
-  );
-  CargoLiderazgo copyWithCompanion(CargosLiderazgoCompanion data) {
-    return CargoLiderazgo(
-      id: data.id.present ? data.id.value : this.id,
-      nombre: data.nombre.present ? data.nombre.value : this.nombre,
-      observacion:
-          data.observacion.present ? data.observacion.value : this.observacion,
-      estado: data.estado.present ? data.estado.value : this.estado,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CargoLiderazgo(')
-          ..write('id: $id, ')
-          ..write('nombre: $nombre, ')
-          ..write('observacion: $observacion, ')
-          ..write('estado: $estado')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, nombre, observacion, estado);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is CargoLiderazgo &&
-          other.id == this.id &&
-          other.nombre == this.nombre &&
-          other.observacion == this.observacion &&
-          other.estado == this.estado);
-}
-
-class CargosLiderazgoCompanion extends UpdateCompanion<CargoLiderazgo> {
-  final Value<int> id;
-  final Value<String> nombre;
-  final Value<String?> observacion;
-  final Value<bool> estado;
-  const CargosLiderazgoCompanion({
-    this.id = const Value.absent(),
-    this.nombre = const Value.absent(),
-    this.observacion = const Value.absent(),
-    this.estado = const Value.absent(),
-  });
-  CargosLiderazgoCompanion.insert({
-    this.id = const Value.absent(),
-    required String nombre,
-    this.observacion = const Value.absent(),
-    this.estado = const Value.absent(),
-  }) : nombre = Value(nombre);
-  static Insertable<CargoLiderazgo> custom({
-    Expression<int>? id,
-    Expression<String>? nombre,
-    Expression<String>? observacion,
-    Expression<bool>? estado,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (nombre != null) 'nombre': nombre,
-      if (observacion != null) 'observacion': observacion,
-      if (estado != null) 'estado': estado,
-    });
-  }
-
-  CargosLiderazgoCompanion copyWith({
-    Value<int>? id,
-    Value<String>? nombre,
-    Value<String?>? observacion,
-    Value<bool>? estado,
-  }) {
-    return CargosLiderazgoCompanion(
-      id: id ?? this.id,
-      nombre: nombre ?? this.nombre,
-      observacion: observacion ?? this.observacion,
-      estado: estado ?? this.estado,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (nombre.present) {
-      map['nombre'] = Variable<String>(nombre.value);
-    }
-    if (observacion.present) {
-      map['observacion'] = Variable<String>(observacion.value);
-    }
-    if (estado.present) {
-      map['estado'] = Variable<bool>(estado.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CargosLiderazgoCompanion(')
-          ..write('id: $id, ')
-          ..write('nombre: $nombre, ')
-          ..write('observacion: $observacion, ')
-          ..write('estado: $estado')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $LiderUbicacionesTable extends LiderUbicaciones
-    with TableInfo<$LiderUbicacionesTable, LiderUbicacion> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $LiderUbicacionesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _ubicacionIdMeta = const VerificationMeta(
-    'ubicacionId',
-  );
-  @override
-  late final GeneratedColumn<String> ubicacionId = GeneratedColumn<String>(
-    'ubicacion_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES ubicaciones (id)',
-    ),
-  );
-  static const VerificationMeta _liderIdMeta = const VerificationMeta(
-    'liderId',
-  );
-  @override
-  late final GeneratedColumn<String> liderId = GeneratedColumn<String>(
-    'lider_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES trabajadores (id)',
-    ),
-  );
-  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
-  @override
-  late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
-    'estado',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("estado" IN (0, 1))',
-    ),
-    defaultValue: const Constant(true),
-  );
-  static const VerificationMeta _cargoLiderazgoIdMeta = const VerificationMeta(
-    'cargoLiderazgoId',
-  );
-  @override
-  late final GeneratedColumn<String> cargoLiderazgoId = GeneratedColumn<String>(
-    'cargo_liderazgo_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES cargos_liderazgo (id)',
-    ),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    ubicacionId,
-    liderId,
-    estado,
-    cargoLiderazgoId,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'lider_ubicaciones';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<LiderUbicacion> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('ubicacion_id')) {
-      context.handle(
-        _ubicacionIdMeta,
-        ubicacionId.isAcceptableOrUnknown(
-          data['ubicacion_id']!,
-          _ubicacionIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_ubicacionIdMeta);
-    }
-    if (data.containsKey('lider_id')) {
-      context.handle(
-        _liderIdMeta,
-        liderId.isAcceptableOrUnknown(data['lider_id']!, _liderIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_liderIdMeta);
-    }
-    if (data.containsKey('estado')) {
-      context.handle(
-        _estadoMeta,
-        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
-      );
-    }
-    if (data.containsKey('cargo_liderazgo_id')) {
-      context.handle(
-        _cargoLiderazgoIdMeta,
-        cargoLiderazgoId.isAcceptableOrUnknown(
-          data['cargo_liderazgo_id']!,
-          _cargoLiderazgoIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_cargoLiderazgoIdMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  LiderUbicacion map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return LiderUbicacion(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      ubicacionId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}ubicacion_id'],
-          )!,
-      liderId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}lider_id'],
-          )!,
-      estado:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}estado'],
-          )!,
-      cargoLiderazgoId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}cargo_liderazgo_id'],
-          )!,
-    );
-  }
-
-  @override
-  $LiderUbicacionesTable createAlias(String alias) {
-    return $LiderUbicacionesTable(attachedDatabase, alias);
-  }
-}
-
-class LiderUbicacion extends DataClass implements Insertable<LiderUbicacion> {
-  final int id;
-  final String ubicacionId;
-  final String liderId;
-  final bool estado;
-  final String cargoLiderazgoId;
-  const LiderUbicacion({
-    required this.id,
-    required this.ubicacionId,
-    required this.liderId,
-    required this.estado,
-    required this.cargoLiderazgoId,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['ubicacion_id'] = Variable<String>(ubicacionId);
-    map['lider_id'] = Variable<String>(liderId);
-    map['estado'] = Variable<bool>(estado);
-    map['cargo_liderazgo_id'] = Variable<String>(cargoLiderazgoId);
-    return map;
-  }
-
-  LiderUbicacionesCompanion toCompanion(bool nullToAbsent) {
-    return LiderUbicacionesCompanion(
-      id: Value(id),
-      ubicacionId: Value(ubicacionId),
-      liderId: Value(liderId),
-      estado: Value(estado),
-      cargoLiderazgoId: Value(cargoLiderazgoId),
-    );
-  }
-
-  factory LiderUbicacion.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return LiderUbicacion(
-      id: serializer.fromJson<int>(json['id']),
-      ubicacionId: serializer.fromJson<String>(json['ubicacionId']),
-      liderId: serializer.fromJson<String>(json['liderId']),
-      estado: serializer.fromJson<bool>(json['estado']),
-      cargoLiderazgoId: serializer.fromJson<String>(json['cargoLiderazgoId']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'ubicacionId': serializer.toJson<String>(ubicacionId),
-      'liderId': serializer.toJson<String>(liderId),
-      'estado': serializer.toJson<bool>(estado),
-      'cargoLiderazgoId': serializer.toJson<String>(cargoLiderazgoId),
-    };
-  }
-
-  LiderUbicacion copyWith({
-    int? id,
-    String? ubicacionId,
-    String? liderId,
-    bool? estado,
-    String? cargoLiderazgoId,
-  }) => LiderUbicacion(
-    id: id ?? this.id,
-    ubicacionId: ubicacionId ?? this.ubicacionId,
-    liderId: liderId ?? this.liderId,
-    estado: estado ?? this.estado,
-    cargoLiderazgoId: cargoLiderazgoId ?? this.cargoLiderazgoId,
-  );
-  LiderUbicacion copyWithCompanion(LiderUbicacionesCompanion data) {
-    return LiderUbicacion(
-      id: data.id.present ? data.id.value : this.id,
-      ubicacionId:
-          data.ubicacionId.present ? data.ubicacionId.value : this.ubicacionId,
-      liderId: data.liderId.present ? data.liderId.value : this.liderId,
-      estado: data.estado.present ? data.estado.value : this.estado,
-      cargoLiderazgoId:
-          data.cargoLiderazgoId.present
-              ? data.cargoLiderazgoId.value
-              : this.cargoLiderazgoId,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('LiderUbicacion(')
-          ..write('id: $id, ')
-          ..write('ubicacionId: $ubicacionId, ')
-          ..write('liderId: $liderId, ')
+          ..write('horaFin: $horaFin, ')
           ..write('estado: $estado, ')
-          ..write('cargoLiderazgoId: $cargoLiderazgoId')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(id, ubicacionId, liderId, estado, cargoLiderazgoId);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is LiderUbicacion &&
-          other.id == this.id &&
-          other.ubicacionId == this.ubicacionId &&
-          other.liderId == this.liderId &&
-          other.estado == this.estado &&
-          other.cargoLiderazgoId == this.cargoLiderazgoId);
-}
-
-class LiderUbicacionesCompanion extends UpdateCompanion<LiderUbicacion> {
-  final Value<int> id;
-  final Value<String> ubicacionId;
-  final Value<String> liderId;
-  final Value<bool> estado;
-  final Value<String> cargoLiderazgoId;
-  const LiderUbicacionesCompanion({
-    this.id = const Value.absent(),
-    this.ubicacionId = const Value.absent(),
-    this.liderId = const Value.absent(),
-    this.estado = const Value.absent(),
-    this.cargoLiderazgoId = const Value.absent(),
-  });
-  LiderUbicacionesCompanion.insert({
-    this.id = const Value.absent(),
-    required String ubicacionId,
-    required String liderId,
-    this.estado = const Value.absent(),
-    required String cargoLiderazgoId,
-  }) : ubicacionId = Value(ubicacionId),
-       liderId = Value(liderId),
-       cargoLiderazgoId = Value(cargoLiderazgoId);
-  static Insertable<LiderUbicacion> custom({
-    Expression<int>? id,
-    Expression<String>? ubicacionId,
-    Expression<String>? liderId,
-    Expression<bool>? estado,
-    Expression<String>? cargoLiderazgoId,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (ubicacionId != null) 'ubicacion_id': ubicacionId,
-      if (liderId != null) 'lider_id': liderId,
-      if (estado != null) 'estado': estado,
-      if (cargoLiderazgoId != null) 'cargo_liderazgo_id': cargoLiderazgoId,
-    });
-  }
-
-  LiderUbicacionesCompanion copyWith({
-    Value<int>? id,
-    Value<String>? ubicacionId,
-    Value<String>? liderId,
-    Value<bool>? estado,
-    Value<String>? cargoLiderazgoId,
-  }) {
-    return LiderUbicacionesCompanion(
-      id: id ?? this.id,
-      ubicacionId: ubicacionId ?? this.ubicacionId,
-      liderId: liderId ?? this.liderId,
-      estado: estado ?? this.estado,
-      cargoLiderazgoId: cargoLiderazgoId ?? this.cargoLiderazgoId,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (ubicacionId.present) {
-      map['ubicacion_id'] = Variable<String>(ubicacionId.value);
-    }
-    if (liderId.present) {
-      map['lider_id'] = Variable<String>(liderId.value);
-    }
-    if (estado.present) {
-      map['estado'] = Variable<bool>(estado.value);
-    }
-    if (cargoLiderazgoId.present) {
-      map['cargo_liderazgo_id'] = Variable<String>(cargoLiderazgoId.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('LiderUbicacionesCompanion(')
-          ..write('id: $id, ')
-          ..write('ubicacionId: $ubicacionId, ')
-          ..write('liderId: $liderId, ')
-          ..write('estado: $estado, ')
-          ..write('cargoLiderazgoId: $cargoLiderazgoId')
+          ..write('pagaAlmuerzo: $pagaAlmuerzo, ')
+          ..write('inicioDescanso: $inicioDescanso, ')
+          ..write('finDescanso: $finDescanso')
           ..write(')'))
         .toString();
   }
 }
 
-class $EquipoTable extends Equipo with TableInfo<$EquipoTable, EquipoData> {
+class $SyncsEntitysTable extends SyncsEntitys
+    with TableInfo<$SyncsEntitysTable, SyncsEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $EquipoTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _liderUbicacionIdMeta = const VerificationMeta(
-    'liderUbicacionId',
-  );
-  @override
-  late final GeneratedColumn<String> liderUbicacionId = GeneratedColumn<String>(
-    'lider_ubicacion_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES lider_ubicaciones (id)',
-    ),
-  );
-  static const VerificationMeta _trabajadorIdMeta = const VerificationMeta(
-    'trabajadorId',
-  );
-  @override
-  late final GeneratedColumn<String> trabajadorId = GeneratedColumn<String>(
-    'trabajador_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES trabajadores (id)',
-    ),
-  );
-  static const VerificationMeta _idRegistroMeta = const VerificationMeta(
-    'idRegistro',
-  );
-  @override
-  late final GeneratedColumn<String> idRegistro = GeneratedColumn<String>(
-    'id_registro',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES trabajadores (id)',
-    ),
-  );
-  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
-  @override
-  late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
-    'estado',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("estado" IN (0, 1))',
-    ),
-    defaultValue: const Constant(true),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    liderUbicacionId,
-    trabajadorId,
-    idRegistro,
-    estado,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'equipo';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<EquipoData> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('lider_ubicacion_id')) {
-      context.handle(
-        _liderUbicacionIdMeta,
-        liderUbicacionId.isAcceptableOrUnknown(
-          data['lider_ubicacion_id']!,
-          _liderUbicacionIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_liderUbicacionIdMeta);
-    }
-    if (data.containsKey('trabajador_id')) {
-      context.handle(
-        _trabajadorIdMeta,
-        trabajadorId.isAcceptableOrUnknown(
-          data['trabajador_id']!,
-          _trabajadorIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_trabajadorIdMeta);
-    }
-    if (data.containsKey('id_registro')) {
-      context.handle(
-        _idRegistroMeta,
-        idRegistro.isAcceptableOrUnknown(data['id_registro']!, _idRegistroMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_idRegistroMeta);
-    }
-    if (data.containsKey('estado')) {
-      context.handle(
-        _estadoMeta,
-        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  EquipoData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return EquipoData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      liderUbicacionId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}lider_ubicacion_id'],
-          )!,
-      trabajadorId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}trabajador_id'],
-          )!,
-      idRegistro:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id_registro'],
-          )!,
-      estado:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}estado'],
-          )!,
-    );
-  }
-
-  @override
-  $EquipoTable createAlias(String alias) {
-    return $EquipoTable(attachedDatabase, alias);
-  }
-}
-
-class EquipoData extends DataClass implements Insertable<EquipoData> {
-  final int id;
-  final String liderUbicacionId;
-  final String trabajadorId;
-  final String idRegistro;
-  final bool estado;
-  const EquipoData({
-    required this.id,
-    required this.liderUbicacionId,
-    required this.trabajadorId,
-    required this.idRegistro,
-    required this.estado,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['lider_ubicacion_id'] = Variable<String>(liderUbicacionId);
-    map['trabajador_id'] = Variable<String>(trabajadorId);
-    map['id_registro'] = Variable<String>(idRegistro);
-    map['estado'] = Variable<bool>(estado);
-    return map;
-  }
-
-  EquipoCompanion toCompanion(bool nullToAbsent) {
-    return EquipoCompanion(
-      id: Value(id),
-      liderUbicacionId: Value(liderUbicacionId),
-      trabajadorId: Value(trabajadorId),
-      idRegistro: Value(idRegistro),
-      estado: Value(estado),
-    );
-  }
-
-  factory EquipoData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return EquipoData(
-      id: serializer.fromJson<int>(json['id']),
-      liderUbicacionId: serializer.fromJson<String>(json['liderUbicacionId']),
-      trabajadorId: serializer.fromJson<String>(json['trabajadorId']),
-      idRegistro: serializer.fromJson<String>(json['idRegistro']),
-      estado: serializer.fromJson<bool>(json['estado']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'liderUbicacionId': serializer.toJson<String>(liderUbicacionId),
-      'trabajadorId': serializer.toJson<String>(trabajadorId),
-      'idRegistro': serializer.toJson<String>(idRegistro),
-      'estado': serializer.toJson<bool>(estado),
-    };
-  }
-
-  EquipoData copyWith({
-    int? id,
-    String? liderUbicacionId,
-    String? trabajadorId,
-    String? idRegistro,
-    bool? estado,
-  }) => EquipoData(
-    id: id ?? this.id,
-    liderUbicacionId: liderUbicacionId ?? this.liderUbicacionId,
-    trabajadorId: trabajadorId ?? this.trabajadorId,
-    idRegistro: idRegistro ?? this.idRegistro,
-    estado: estado ?? this.estado,
-  );
-  EquipoData copyWithCompanion(EquipoCompanion data) {
-    return EquipoData(
-      id: data.id.present ? data.id.value : this.id,
-      liderUbicacionId:
-          data.liderUbicacionId.present
-              ? data.liderUbicacionId.value
-              : this.liderUbicacionId,
-      trabajadorId:
-          data.trabajadorId.present
-              ? data.trabajadorId.value
-              : this.trabajadorId,
-      idRegistro:
-          data.idRegistro.present ? data.idRegistro.value : this.idRegistro,
-      estado: data.estado.present ? data.estado.value : this.estado,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('EquipoData(')
-          ..write('id: $id, ')
-          ..write('liderUbicacionId: $liderUbicacionId, ')
-          ..write('trabajadorId: $trabajadorId, ')
-          ..write('idRegistro: $idRegistro, ')
-          ..write('estado: $estado')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(id, liderUbicacionId, trabajadorId, idRegistro, estado);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is EquipoData &&
-          other.id == this.id &&
-          other.liderUbicacionId == this.liderUbicacionId &&
-          other.trabajadorId == this.trabajadorId &&
-          other.idRegistro == this.idRegistro &&
-          other.estado == this.estado);
-}
-
-class EquipoCompanion extends UpdateCompanion<EquipoData> {
-  final Value<int> id;
-  final Value<String> liderUbicacionId;
-  final Value<String> trabajadorId;
-  final Value<String> idRegistro;
-  final Value<bool> estado;
-  const EquipoCompanion({
-    this.id = const Value.absent(),
-    this.liderUbicacionId = const Value.absent(),
-    this.trabajadorId = const Value.absent(),
-    this.idRegistro = const Value.absent(),
-    this.estado = const Value.absent(),
-  });
-  EquipoCompanion.insert({
-    this.id = const Value.absent(),
-    required String liderUbicacionId,
-    required String trabajadorId,
-    required String idRegistro,
-    this.estado = const Value.absent(),
-  }) : liderUbicacionId = Value(liderUbicacionId),
-       trabajadorId = Value(trabajadorId),
-       idRegistro = Value(idRegistro);
-  static Insertable<EquipoData> custom({
-    Expression<int>? id,
-    Expression<String>? liderUbicacionId,
-    Expression<String>? trabajadorId,
-    Expression<String>? idRegistro,
-    Expression<bool>? estado,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (liderUbicacionId != null) 'lider_ubicacion_id': liderUbicacionId,
-      if (trabajadorId != null) 'trabajador_id': trabajadorId,
-      if (idRegistro != null) 'id_registro': idRegistro,
-      if (estado != null) 'estado': estado,
-    });
-  }
-
-  EquipoCompanion copyWith({
-    Value<int>? id,
-    Value<String>? liderUbicacionId,
-    Value<String>? trabajadorId,
-    Value<String>? idRegistro,
-    Value<bool>? estado,
-  }) {
-    return EquipoCompanion(
-      id: id ?? this.id,
-      liderUbicacionId: liderUbicacionId ?? this.liderUbicacionId,
-      trabajadorId: trabajadorId ?? this.trabajadorId,
-      idRegistro: idRegistro ?? this.idRegistro,
-      estado: estado ?? this.estado,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (liderUbicacionId.present) {
-      map['lider_ubicacion_id'] = Variable<String>(liderUbicacionId.value);
-    }
-    if (trabajadorId.present) {
-      map['trabajador_id'] = Variable<String>(trabajadorId.value);
-    }
-    if (idRegistro.present) {
-      map['id_registro'] = Variable<String>(idRegistro.value);
-    }
-    if (estado.present) {
-      map['estado'] = Variable<bool>(estado.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('EquipoCompanion(')
-          ..write('id: $id, ')
-          ..write('liderUbicacionId: $liderUbicacionId, ')
-          ..write('trabajadorId: $trabajadorId, ')
-          ..write('idRegistro: $idRegistro, ')
-          ..write('estado: $estado')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $RegistroDiarioTable extends RegistroDiario
-    with TableInfo<$RegistroDiarioTable, RegistroDiarioData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $RegistroDiarioTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _equipoIdMeta = const VerificationMeta(
-    'equipoId',
-  );
-  @override
-  late final GeneratedColumn<String> equipoId = GeneratedColumn<String>(
-    'equipo_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES equipo (id)',
-    ),
-  );
-  static const VerificationMeta _registroBiometricoIdMeta =
-      const VerificationMeta('registroBiometricoId');
-  @override
-  late final GeneratedColumn<String> registroBiometricoId =
-      GeneratedColumn<String>(
-        'registro_biometrico_id',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-        defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES registro_biometrico (id)',
-        ),
-      );
-  @override
-  late final GeneratedColumnWithTypeConverter<DateTime, String> fechaIngreso =
-      GeneratedColumn<String>(
-        'fecha_ingreso',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<DateTime>($RegistroDiarioTable.$converterfechaIngreso);
-  @override
-  late final GeneratedColumnWithTypeConverter<TimeOfDay, String> horaIngreso =
-      GeneratedColumn<String>(
-        'hora_ingreso',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<TimeOfDay>($RegistroDiarioTable.$converterhoraIngreso);
-  @override
-  late final GeneratedColumnWithTypeConverter<DateTime, String> fechaSalida =
-      GeneratedColumn<String>(
-        'fecha_salida',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<DateTime>($RegistroDiarioTable.$converterfechaSalida);
-  @override
-  late final GeneratedColumnWithTypeConverter<TimeOfDay, String> horaSalida =
-      GeneratedColumn<String>(
-        'hora_salida',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<TimeOfDay>($RegistroDiarioTable.$converterhoraSalida);
-  static const VerificationMeta _ingresoSincronizadoMeta =
-      const VerificationMeta('ingresoSincronizado');
-  @override
-  late final GeneratedColumn<bool> ingresoSincronizado = GeneratedColumn<bool>(
-    'ingreso_sincronizado',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("ingreso_sincronizado" IN (0, 1))',
-    ),
-  );
-  static const VerificationMeta _salidaSincronizadaMeta =
-      const VerificationMeta('salidaSincronizada');
-  @override
-  late final GeneratedColumn<bool> salidaSincronizada = GeneratedColumn<bool>(
-    'salida_sincronizada',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("salida_sincronizada" IN (0, 1))',
-    ),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    equipoId,
-    registroBiometricoId,
-    fechaIngreso,
-    horaIngreso,
-    fechaSalida,
-    horaSalida,
-    ingresoSincronizado,
-    salidaSincronizada,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'registro_diario';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<RegistroDiarioData> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('equipo_id')) {
-      context.handle(
-        _equipoIdMeta,
-        equipoId.isAcceptableOrUnknown(data['equipo_id']!, _equipoIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_equipoIdMeta);
-    }
-    if (data.containsKey('registro_biometrico_id')) {
-      context.handle(
-        _registroBiometricoIdMeta,
-        registroBiometricoId.isAcceptableOrUnknown(
-          data['registro_biometrico_id']!,
-          _registroBiometricoIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_registroBiometricoIdMeta);
-    }
-    if (data.containsKey('ingreso_sincronizado')) {
-      context.handle(
-        _ingresoSincronizadoMeta,
-        ingresoSincronizado.isAcceptableOrUnknown(
-          data['ingreso_sincronizado']!,
-          _ingresoSincronizadoMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_ingresoSincronizadoMeta);
-    }
-    if (data.containsKey('salida_sincronizada')) {
-      context.handle(
-        _salidaSincronizadaMeta,
-        salidaSincronizada.isAcceptableOrUnknown(
-          data['salida_sincronizada']!,
-          _salidaSincronizadaMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_salidaSincronizadaMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  RegistroDiarioData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return RegistroDiarioData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      equipoId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}equipo_id'],
-          )!,
-      registroBiometricoId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}registro_biometrico_id'],
-          )!,
-      fechaIngreso: $RegistroDiarioTable.$converterfechaIngreso.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}fecha_ingreso'],
-        )!,
-      ),
-      horaIngreso: $RegistroDiarioTable.$converterhoraIngreso.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}hora_ingreso'],
-        )!,
-      ),
-      fechaSalida: $RegistroDiarioTable.$converterfechaSalida.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}fecha_salida'],
-        )!,
-      ),
-      horaSalida: $RegistroDiarioTable.$converterhoraSalida.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}hora_salida'],
-        )!,
-      ),
-      ingresoSincronizado:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}ingreso_sincronizado'],
-          )!,
-      salidaSincronizada:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}salida_sincronizada'],
-          )!,
-    );
-  }
-
-  @override
-  $RegistroDiarioTable createAlias(String alias) {
-    return $RegistroDiarioTable(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DateTime, String> $converterfechaIngreso =
-      const DateConverter();
-  static TypeConverter<TimeOfDay, String> $converterhoraIngreso =
-      const TimeOfDayConverter();
-  static TypeConverter<DateTime, String> $converterfechaSalida =
-      const DateConverter();
-  static TypeConverter<TimeOfDay, String> $converterhoraSalida =
-      const TimeOfDayConverter();
-}
-
-class RegistroDiarioData extends DataClass
-    implements Insertable<RegistroDiarioData> {
-  final int id;
-  final String equipoId;
-  final String registroBiometricoId;
-  final DateTime fechaIngreso;
-  final TimeOfDay horaIngreso;
-  final DateTime fechaSalida;
-  final TimeOfDay horaSalida;
-  final bool ingresoSincronizado;
-  final bool salidaSincronizada;
-  const RegistroDiarioData({
-    required this.id,
-    required this.equipoId,
-    required this.registroBiometricoId,
-    required this.fechaIngreso,
-    required this.horaIngreso,
-    required this.fechaSalida,
-    required this.horaSalida,
-    required this.ingresoSincronizado,
-    required this.salidaSincronizada,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['equipo_id'] = Variable<String>(equipoId);
-    map['registro_biometrico_id'] = Variable<String>(registroBiometricoId);
-    {
-      map['fecha_ingreso'] = Variable<String>(
-        $RegistroDiarioTable.$converterfechaIngreso.toSql(fechaIngreso),
-      );
-    }
-    {
-      map['hora_ingreso'] = Variable<String>(
-        $RegistroDiarioTable.$converterhoraIngreso.toSql(horaIngreso),
-      );
-    }
-    {
-      map['fecha_salida'] = Variable<String>(
-        $RegistroDiarioTable.$converterfechaSalida.toSql(fechaSalida),
-      );
-    }
-    {
-      map['hora_salida'] = Variable<String>(
-        $RegistroDiarioTable.$converterhoraSalida.toSql(horaSalida),
-      );
-    }
-    map['ingreso_sincronizado'] = Variable<bool>(ingresoSincronizado);
-    map['salida_sincronizada'] = Variable<bool>(salidaSincronizada);
-    return map;
-  }
-
-  RegistroDiarioCompanion toCompanion(bool nullToAbsent) {
-    return RegistroDiarioCompanion(
-      id: Value(id),
-      equipoId: Value(equipoId),
-      registroBiometricoId: Value(registroBiometricoId),
-      fechaIngreso: Value(fechaIngreso),
-      horaIngreso: Value(horaIngreso),
-      fechaSalida: Value(fechaSalida),
-      horaSalida: Value(horaSalida),
-      ingresoSincronizado: Value(ingresoSincronizado),
-      salidaSincronizada: Value(salidaSincronizada),
-    );
-  }
-
-  factory RegistroDiarioData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return RegistroDiarioData(
-      id: serializer.fromJson<int>(json['id']),
-      equipoId: serializer.fromJson<String>(json['equipoId']),
-      registroBiometricoId: serializer.fromJson<String>(
-        json['registroBiometricoId'],
-      ),
-      fechaIngreso: serializer.fromJson<DateTime>(json['fechaIngreso']),
-      horaIngreso: serializer.fromJson<TimeOfDay>(json['horaIngreso']),
-      fechaSalida: serializer.fromJson<DateTime>(json['fechaSalida']),
-      horaSalida: serializer.fromJson<TimeOfDay>(json['horaSalida']),
-      ingresoSincronizado: serializer.fromJson<bool>(
-        json['ingresoSincronizado'],
-      ),
-      salidaSincronizada: serializer.fromJson<bool>(json['salidaSincronizada']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'equipoId': serializer.toJson<String>(equipoId),
-      'registroBiometricoId': serializer.toJson<String>(registroBiometricoId),
-      'fechaIngreso': serializer.toJson<DateTime>(fechaIngreso),
-      'horaIngreso': serializer.toJson<TimeOfDay>(horaIngreso),
-      'fechaSalida': serializer.toJson<DateTime>(fechaSalida),
-      'horaSalida': serializer.toJson<TimeOfDay>(horaSalida),
-      'ingresoSincronizado': serializer.toJson<bool>(ingresoSincronizado),
-      'salidaSincronizada': serializer.toJson<bool>(salidaSincronizada),
-    };
-  }
-
-  RegistroDiarioData copyWith({
-    int? id,
-    String? equipoId,
-    String? registroBiometricoId,
-    DateTime? fechaIngreso,
-    TimeOfDay? horaIngreso,
-    DateTime? fechaSalida,
-    TimeOfDay? horaSalida,
-    bool? ingresoSincronizado,
-    bool? salidaSincronizada,
-  }) => RegistroDiarioData(
-    id: id ?? this.id,
-    equipoId: equipoId ?? this.equipoId,
-    registroBiometricoId: registroBiometricoId ?? this.registroBiometricoId,
-    fechaIngreso: fechaIngreso ?? this.fechaIngreso,
-    horaIngreso: horaIngreso ?? this.horaIngreso,
-    fechaSalida: fechaSalida ?? this.fechaSalida,
-    horaSalida: horaSalida ?? this.horaSalida,
-    ingresoSincronizado: ingresoSincronizado ?? this.ingresoSincronizado,
-    salidaSincronizada: salidaSincronizada ?? this.salidaSincronizada,
-  );
-  RegistroDiarioData copyWithCompanion(RegistroDiarioCompanion data) {
-    return RegistroDiarioData(
-      id: data.id.present ? data.id.value : this.id,
-      equipoId: data.equipoId.present ? data.equipoId.value : this.equipoId,
-      registroBiometricoId:
-          data.registroBiometricoId.present
-              ? data.registroBiometricoId.value
-              : this.registroBiometricoId,
-      fechaIngreso:
-          data.fechaIngreso.present
-              ? data.fechaIngreso.value
-              : this.fechaIngreso,
-      horaIngreso:
-          data.horaIngreso.present ? data.horaIngreso.value : this.horaIngreso,
-      fechaSalida:
-          data.fechaSalida.present ? data.fechaSalida.value : this.fechaSalida,
-      horaSalida:
-          data.horaSalida.present ? data.horaSalida.value : this.horaSalida,
-      ingresoSincronizado:
-          data.ingresoSincronizado.present
-              ? data.ingresoSincronizado.value
-              : this.ingresoSincronizado,
-      salidaSincronizada:
-          data.salidaSincronizada.present
-              ? data.salidaSincronizada.value
-              : this.salidaSincronizada,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('RegistroDiarioData(')
-          ..write('id: $id, ')
-          ..write('equipoId: $equipoId, ')
-          ..write('registroBiometricoId: $registroBiometricoId, ')
-          ..write('fechaIngreso: $fechaIngreso, ')
-          ..write('horaIngreso: $horaIngreso, ')
-          ..write('fechaSalida: $fechaSalida, ')
-          ..write('horaSalida: $horaSalida, ')
-          ..write('ingresoSincronizado: $ingresoSincronizado, ')
-          ..write('salidaSincronizada: $salidaSincronizada')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    equipoId,
-    registroBiometricoId,
-    fechaIngreso,
-    horaIngreso,
-    fechaSalida,
-    horaSalida,
-    ingresoSincronizado,
-    salidaSincronizada,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is RegistroDiarioData &&
-          other.id == this.id &&
-          other.equipoId == this.equipoId &&
-          other.registroBiometricoId == this.registroBiometricoId &&
-          other.fechaIngreso == this.fechaIngreso &&
-          other.horaIngreso == this.horaIngreso &&
-          other.fechaSalida == this.fechaSalida &&
-          other.horaSalida == this.horaSalida &&
-          other.ingresoSincronizado == this.ingresoSincronizado &&
-          other.salidaSincronizada == this.salidaSincronizada);
-}
-
-class RegistroDiarioCompanion extends UpdateCompanion<RegistroDiarioData> {
-  final Value<int> id;
-  final Value<String> equipoId;
-  final Value<String> registroBiometricoId;
-  final Value<DateTime> fechaIngreso;
-  final Value<TimeOfDay> horaIngreso;
-  final Value<DateTime> fechaSalida;
-  final Value<TimeOfDay> horaSalida;
-  final Value<bool> ingresoSincronizado;
-  final Value<bool> salidaSincronizada;
-  const RegistroDiarioCompanion({
-    this.id = const Value.absent(),
-    this.equipoId = const Value.absent(),
-    this.registroBiometricoId = const Value.absent(),
-    this.fechaIngreso = const Value.absent(),
-    this.horaIngreso = const Value.absent(),
-    this.fechaSalida = const Value.absent(),
-    this.horaSalida = const Value.absent(),
-    this.ingresoSincronizado = const Value.absent(),
-    this.salidaSincronizada = const Value.absent(),
-  });
-  RegistroDiarioCompanion.insert({
-    this.id = const Value.absent(),
-    required String equipoId,
-    required String registroBiometricoId,
-    required DateTime fechaIngreso,
-    required TimeOfDay horaIngreso,
-    required DateTime fechaSalida,
-    required TimeOfDay horaSalida,
-    required bool ingresoSincronizado,
-    required bool salidaSincronizada,
-  }) : equipoId = Value(equipoId),
-       registroBiometricoId = Value(registroBiometricoId),
-       fechaIngreso = Value(fechaIngreso),
-       horaIngreso = Value(horaIngreso),
-       fechaSalida = Value(fechaSalida),
-       horaSalida = Value(horaSalida),
-       ingresoSincronizado = Value(ingresoSincronizado),
-       salidaSincronizada = Value(salidaSincronizada);
-  static Insertable<RegistroDiarioData> custom({
-    Expression<int>? id,
-    Expression<String>? equipoId,
-    Expression<String>? registroBiometricoId,
-    Expression<String>? fechaIngreso,
-    Expression<String>? horaIngreso,
-    Expression<String>? fechaSalida,
-    Expression<String>? horaSalida,
-    Expression<bool>? ingresoSincronizado,
-    Expression<bool>? salidaSincronizada,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (equipoId != null) 'equipo_id': equipoId,
-      if (registroBiometricoId != null)
-        'registro_biometrico_id': registroBiometricoId,
-      if (fechaIngreso != null) 'fecha_ingreso': fechaIngreso,
-      if (horaIngreso != null) 'hora_ingreso': horaIngreso,
-      if (fechaSalida != null) 'fecha_salida': fechaSalida,
-      if (horaSalida != null) 'hora_salida': horaSalida,
-      if (ingresoSincronizado != null)
-        'ingreso_sincronizado': ingresoSincronizado,
-      if (salidaSincronizada != null) 'salida_sincronizada': salidaSincronizada,
-    });
-  }
-
-  RegistroDiarioCompanion copyWith({
-    Value<int>? id,
-    Value<String>? equipoId,
-    Value<String>? registroBiometricoId,
-    Value<DateTime>? fechaIngreso,
-    Value<TimeOfDay>? horaIngreso,
-    Value<DateTime>? fechaSalida,
-    Value<TimeOfDay>? horaSalida,
-    Value<bool>? ingresoSincronizado,
-    Value<bool>? salidaSincronizada,
-  }) {
-    return RegistroDiarioCompanion(
-      id: id ?? this.id,
-      equipoId: equipoId ?? this.equipoId,
-      registroBiometricoId: registroBiometricoId ?? this.registroBiometricoId,
-      fechaIngreso: fechaIngreso ?? this.fechaIngreso,
-      horaIngreso: horaIngreso ?? this.horaIngreso,
-      fechaSalida: fechaSalida ?? this.fechaSalida,
-      horaSalida: horaSalida ?? this.horaSalida,
-      ingresoSincronizado: ingresoSincronizado ?? this.ingresoSincronizado,
-      salidaSincronizada: salidaSincronizada ?? this.salidaSincronizada,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (equipoId.present) {
-      map['equipo_id'] = Variable<String>(equipoId.value);
-    }
-    if (registroBiometricoId.present) {
-      map['registro_biometrico_id'] = Variable<String>(
-        registroBiometricoId.value,
-      );
-    }
-    if (fechaIngreso.present) {
-      map['fecha_ingreso'] = Variable<String>(
-        $RegistroDiarioTable.$converterfechaIngreso.toSql(fechaIngreso.value),
-      );
-    }
-    if (horaIngreso.present) {
-      map['hora_ingreso'] = Variable<String>(
-        $RegistroDiarioTable.$converterhoraIngreso.toSql(horaIngreso.value),
-      );
-    }
-    if (fechaSalida.present) {
-      map['fecha_salida'] = Variable<String>(
-        $RegistroDiarioTable.$converterfechaSalida.toSql(fechaSalida.value),
-      );
-    }
-    if (horaSalida.present) {
-      map['hora_salida'] = Variable<String>(
-        $RegistroDiarioTable.$converterhoraSalida.toSql(horaSalida.value),
-      );
-    }
-    if (ingresoSincronizado.present) {
-      map['ingreso_sincronizado'] = Variable<bool>(ingresoSincronizado.value);
-    }
-    if (salidaSincronizada.present) {
-      map['salida_sincronizada'] = Variable<bool>(salidaSincronizada.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('RegistroDiarioCompanion(')
-          ..write('id: $id, ')
-          ..write('equipoId: $equipoId, ')
-          ..write('registroBiometricoId: $registroBiometricoId, ')
-          ..write('fechaIngreso: $fechaIngreso, ')
-          ..write('horaIngreso: $horaIngreso, ')
-          ..write('fechaSalida: $fechaSalida, ')
-          ..write('horaSalida: $horaSalida, ')
-          ..write('ingresoSincronizado: $ingresoSincronizado, ')
-          ..write('salidaSincronizada: $salidaSincronizada')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $SyncEntitysTable extends SyncEntitys
-    with TableInfo<$SyncEntitysTable, SyncEntity> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $SyncEntitysTable(this.attachedDatabase, [this._alias]);
+  $SyncsEntitysTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -3435,6 +1526,30 @@ class $SyncEntitysTable extends SyncEntitys
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
+  data = GeneratedColumn<String>(
+    'data',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<Map<String, dynamic>>($SyncsEntitysTable.$converterdata);
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3442,15 +1557,17 @@ class $SyncEntitysTable extends SyncEntitys
     action,
     registerId,
     timestamp,
+    isSynced,
+    data,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'sync_entitys';
+  static const String $name = 'syncs_entitys';
   @override
   VerificationContext validateIntegrity(
-    Insertable<SyncEntity> instance, {
+    Insertable<SyncsEntity> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -3491,15 +1608,21 @@ class $SyncEntitysTable extends SyncEntitys
         timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
       );
     }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
     return context;
   }
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  SyncEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+  SyncsEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return SyncEntity(
+    return SyncsEntity(
       id:
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
@@ -3525,27 +1648,45 @@ class $SyncEntitysTable extends SyncEntitys
             DriftSqlType.dateTime,
             data['${effectivePrefix}timestamp'],
           )!,
+      isSynced:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_synced'],
+          )!,
+      data: $SyncsEntitysTable.$converterdata.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}data'],
+        )!,
+      ),
     );
   }
 
   @override
-  $SyncEntitysTable createAlias(String alias) {
-    return $SyncEntitysTable(attachedDatabase, alias);
+  $SyncsEntitysTable createAlias(String alias) {
+    return $SyncsEntitysTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<Map<String, dynamic>, String> $converterdata =
+      const JsonConverter();
 }
 
-class SyncEntity extends DataClass implements Insertable<SyncEntity> {
+class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
   final int id;
   final String entityTableNameToSync;
   final String action;
   final String registerId;
   final DateTime timestamp;
-  const SyncEntity({
+  final bool isSynced;
+  final Map<String, dynamic> data;
+  const SyncsEntity({
     required this.id,
     required this.entityTableNameToSync,
     required this.action,
     required this.registerId,
     required this.timestamp,
+    required this.isSynced,
+    required this.data,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3555,25 +1696,33 @@ class SyncEntity extends DataClass implements Insertable<SyncEntity> {
     map['action'] = Variable<String>(action);
     map['register_id'] = Variable<String>(registerId);
     map['timestamp'] = Variable<DateTime>(timestamp);
+    map['is_synced'] = Variable<bool>(isSynced);
+    {
+      map['data'] = Variable<String>(
+        $SyncsEntitysTable.$converterdata.toSql(data),
+      );
+    }
     return map;
   }
 
-  SyncEntitysCompanion toCompanion(bool nullToAbsent) {
-    return SyncEntitysCompanion(
+  SyncsEntitysCompanion toCompanion(bool nullToAbsent) {
+    return SyncsEntitysCompanion(
       id: Value(id),
       entityTableNameToSync: Value(entityTableNameToSync),
       action: Value(action),
       registerId: Value(registerId),
       timestamp: Value(timestamp),
+      isSynced: Value(isSynced),
+      data: Value(data),
     );
   }
 
-  factory SyncEntity.fromJson(
+  factory SyncsEntity.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return SyncEntity(
+    return SyncsEntity(
       id: serializer.fromJson<int>(json['id']),
       entityTableNameToSync: serializer.fromJson<String>(
         json['entityTableNameToSync'],
@@ -3581,6 +1730,8 @@ class SyncEntity extends DataClass implements Insertable<SyncEntity> {
       action: serializer.fromJson<String>(json['action']),
       registerId: serializer.fromJson<String>(json['registerId']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
+      data: serializer.fromJson<Map<String, dynamic>>(json['data']),
     );
   }
   @override
@@ -3592,24 +1743,30 @@ class SyncEntity extends DataClass implements Insertable<SyncEntity> {
       'action': serializer.toJson<String>(action),
       'registerId': serializer.toJson<String>(registerId),
       'timestamp': serializer.toJson<DateTime>(timestamp),
+      'isSynced': serializer.toJson<bool>(isSynced),
+      'data': serializer.toJson<Map<String, dynamic>>(data),
     };
   }
 
-  SyncEntity copyWith({
+  SyncsEntity copyWith({
     int? id,
     String? entityTableNameToSync,
     String? action,
     String? registerId,
     DateTime? timestamp,
-  }) => SyncEntity(
+    bool? isSynced,
+    Map<String, dynamic>? data,
+  }) => SyncsEntity(
     id: id ?? this.id,
     entityTableNameToSync: entityTableNameToSync ?? this.entityTableNameToSync,
     action: action ?? this.action,
     registerId: registerId ?? this.registerId,
     timestamp: timestamp ?? this.timestamp,
+    isSynced: isSynced ?? this.isSynced,
+    data: data ?? this.data,
   );
-  SyncEntity copyWithCompanion(SyncEntitysCompanion data) {
-    return SyncEntity(
+  SyncsEntity copyWithCompanion(SyncsEntitysCompanion data) {
+    return SyncsEntity(
       id: data.id.present ? data.id.value : this.id,
       entityTableNameToSync:
           data.entityTableNameToSync.present
@@ -3619,63 +1776,85 @@ class SyncEntity extends DataClass implements Insertable<SyncEntity> {
       registerId:
           data.registerId.present ? data.registerId.value : this.registerId,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      data: data.data.present ? data.data.value : this.data,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('SyncEntity(')
+    return (StringBuffer('SyncsEntity(')
           ..write('id: $id, ')
           ..write('entityTableNameToSync: $entityTableNameToSync, ')
           ..write('action: $action, ')
           ..write('registerId: $registerId, ')
-          ..write('timestamp: $timestamp')
+          ..write('timestamp: $timestamp, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('data: $data')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, entityTableNameToSync, action, registerId, timestamp);
+  int get hashCode => Object.hash(
+    id,
+    entityTableNameToSync,
+    action,
+    registerId,
+    timestamp,
+    isSynced,
+    data,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is SyncEntity &&
+      (other is SyncsEntity &&
           other.id == this.id &&
           other.entityTableNameToSync == this.entityTableNameToSync &&
           other.action == this.action &&
           other.registerId == this.registerId &&
-          other.timestamp == this.timestamp);
+          other.timestamp == this.timestamp &&
+          other.isSynced == this.isSynced &&
+          other.data == this.data);
 }
 
-class SyncEntitysCompanion extends UpdateCompanion<SyncEntity> {
+class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
   final Value<int> id;
   final Value<String> entityTableNameToSync;
   final Value<String> action;
   final Value<String> registerId;
   final Value<DateTime> timestamp;
-  const SyncEntitysCompanion({
+  final Value<bool> isSynced;
+  final Value<Map<String, dynamic>> data;
+  const SyncsEntitysCompanion({
     this.id = const Value.absent(),
     this.entityTableNameToSync = const Value.absent(),
     this.action = const Value.absent(),
     this.registerId = const Value.absent(),
     this.timestamp = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.data = const Value.absent(),
   });
-  SyncEntitysCompanion.insert({
+  SyncsEntitysCompanion.insert({
     this.id = const Value.absent(),
     required String entityTableNameToSync,
     required String action,
     required String registerId,
     this.timestamp = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    required Map<String, dynamic> data,
   }) : entityTableNameToSync = Value(entityTableNameToSync),
        action = Value(action),
-       registerId = Value(registerId);
-  static Insertable<SyncEntity> custom({
+       registerId = Value(registerId),
+       data = Value(data);
+  static Insertable<SyncsEntity> custom({
     Expression<int>? id,
     Expression<String>? entityTableNameToSync,
     Expression<String>? action,
     Expression<String>? registerId,
     Expression<DateTime>? timestamp,
+    Expression<bool>? isSynced,
+    Expression<String>? data,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3684,23 +1863,29 @@ class SyncEntitysCompanion extends UpdateCompanion<SyncEntity> {
       if (action != null) 'action': action,
       if (registerId != null) 'register_id': registerId,
       if (timestamp != null) 'timestamp': timestamp,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (data != null) 'data': data,
     });
   }
 
-  SyncEntitysCompanion copyWith({
+  SyncsEntitysCompanion copyWith({
     Value<int>? id,
     Value<String>? entityTableNameToSync,
     Value<String>? action,
     Value<String>? registerId,
     Value<DateTime>? timestamp,
+    Value<bool>? isSynced,
+    Value<Map<String, dynamic>>? data,
   }) {
-    return SyncEntitysCompanion(
+    return SyncsEntitysCompanion(
       id: id ?? this.id,
       entityTableNameToSync:
           entityTableNameToSync ?? this.entityTableNameToSync,
       action: action ?? this.action,
       registerId: registerId ?? this.registerId,
       timestamp: timestamp ?? this.timestamp,
+      isSynced: isSynced ?? this.isSynced,
+      data: data ?? this.data,
     );
   }
 
@@ -3724,17 +1909,27 @@ class SyncEntitysCompanion extends UpdateCompanion<SyncEntity> {
     if (timestamp.present) {
       map['timestamp'] = Variable<DateTime>(timestamp.value);
     }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<String>(
+        $SyncsEntitysTable.$converterdata.toSql(data.value),
+      );
+    }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('SyncEntitysCompanion(')
+    return (StringBuffer('SyncsEntitysCompanion(')
           ..write('id: $id, ')
           ..write('entityTableNameToSync: $entityTableNameToSync, ')
           ..write('action: $action, ')
           ..write('registerId: $registerId, ')
-          ..write('timestamp: $timestamp')
+          ..write('timestamp: $timestamp, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('data: $data')
           ..write(')'))
         .toString();
   }
@@ -3744,37 +1939,21 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $TrabajadoresTable trabajadores = $TrabajadoresTable(this);
-  late final $GrupoUbicacionesTable grupoUbicaciones = $GrupoUbicacionesTable(
-    this,
-  );
+  late final $GruposUbicacionesTable gruposUbicaciones =
+      $GruposUbicacionesTable(this);
   late final $UbicacionesTable ubicaciones = $UbicacionesTable(this);
   late final $HorariosTable horarios = $HorariosTable(this);
-  late final $RegistroBiometricoTable registroBiometrico =
-      $RegistroBiometricoTable(this);
-  late final $CargosLiderazgoTable cargosLiderazgo = $CargosLiderazgoTable(
-    this,
-  );
-  late final $LiderUbicacionesTable liderUbicaciones = $LiderUbicacionesTable(
-    this,
-  );
-  late final $EquipoTable equipo = $EquipoTable(this);
-  late final $RegistroDiarioTable registroDiario = $RegistroDiarioTable(this);
-  late final $SyncEntitysTable syncEntitys = $SyncEntitysTable(this);
+  late final $SyncsEntitysTable syncsEntitys = $SyncsEntitysTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     trabajadores,
-    grupoUbicaciones,
+    gruposUbicaciones,
     ubicaciones,
     horarios,
-    registroBiometrico,
-    cargosLiderazgo,
-    liderUbicaciones,
-    equipo,
-    registroDiario,
-    syncEntitys,
+    syncsEntitys,
   ];
 }
 
@@ -3782,19 +1961,19 @@ typedef $$TrabajadoresTableCreateCompanionBuilder =
     TrabajadoresCompanion Function({
       Value<int> id,
       required String nombre,
-      required String apellido,
-      required String cedula,
-      Value<bool> activo,
-      Value<DateTime?> ultimaActualizacion,
+      required String primerApellido,
+      required String segundoApellido,
+      required int equipoId,
+      Value<bool> estado,
     });
 typedef $$TrabajadoresTableUpdateCompanionBuilder =
     TrabajadoresCompanion Function({
       Value<int> id,
       Value<String> nombre,
-      Value<String> apellido,
-      Value<String> cedula,
-      Value<bool> activo,
-      Value<DateTime?> ultimaActualizacion,
+      Value<String> primerApellido,
+      Value<String> segundoApellido,
+      Value<int> equipoId,
+      Value<bool> estado,
     });
 
 class $$TrabajadoresTableFilterComposer
@@ -3816,23 +1995,23 @@ class $$TrabajadoresTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get apellido => $composableBuilder(
-    column: $table.apellido,
+  ColumnFilters<String> get primerApellido => $composableBuilder(
+    column: $table.primerApellido,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get cedula => $composableBuilder(
-    column: $table.cedula,
+  ColumnFilters<String> get segundoApellido => $composableBuilder(
+    column: $table.segundoApellido,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get activo => $composableBuilder(
-    column: $table.activo,
+  ColumnFilters<int> get equipoId => $composableBuilder(
+    column: $table.equipoId,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get ultimaActualizacion => $composableBuilder(
-    column: $table.ultimaActualizacion,
+  ColumnFilters<bool> get estado => $composableBuilder(
+    column: $table.estado,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3856,23 +2035,23 @@ class $$TrabajadoresTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get apellido => $composableBuilder(
-    column: $table.apellido,
+  ColumnOrderings<String> get primerApellido => $composableBuilder(
+    column: $table.primerApellido,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get cedula => $composableBuilder(
-    column: $table.cedula,
+  ColumnOrderings<String> get segundoApellido => $composableBuilder(
+    column: $table.segundoApellido,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get activo => $composableBuilder(
-    column: $table.activo,
+  ColumnOrderings<int> get equipoId => $composableBuilder(
+    column: $table.equipoId,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get ultimaActualizacion => $composableBuilder(
-    column: $table.ultimaActualizacion,
+  ColumnOrderings<bool> get estado => $composableBuilder(
+    column: $table.estado,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -3892,19 +2071,21 @@ class $$TrabajadoresTableAnnotationComposer
   GeneratedColumn<String> get nombre =>
       $composableBuilder(column: $table.nombre, builder: (column) => column);
 
-  GeneratedColumn<String> get apellido =>
-      $composableBuilder(column: $table.apellido, builder: (column) => column);
-
-  GeneratedColumn<String> get cedula =>
-      $composableBuilder(column: $table.cedula, builder: (column) => column);
-
-  GeneratedColumn<bool> get activo =>
-      $composableBuilder(column: $table.activo, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get ultimaActualizacion => $composableBuilder(
-    column: $table.ultimaActualizacion,
+  GeneratedColumn<String> get primerApellido => $composableBuilder(
+    column: $table.primerApellido,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get segundoApellido => $composableBuilder(
+    column: $table.segundoApellido,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get equipoId =>
+      $composableBuilder(column: $table.equipoId, builder: (column) => column);
+
+  GeneratedColumn<bool> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
 }
 
 class $$TrabajadoresTableTableManager
@@ -3941,33 +2122,33 @@ class $$TrabajadoresTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> nombre = const Value.absent(),
-                Value<String> apellido = const Value.absent(),
-                Value<String> cedula = const Value.absent(),
-                Value<bool> activo = const Value.absent(),
-                Value<DateTime?> ultimaActualizacion = const Value.absent(),
+                Value<String> primerApellido = const Value.absent(),
+                Value<String> segundoApellido = const Value.absent(),
+                Value<int> equipoId = const Value.absent(),
+                Value<bool> estado = const Value.absent(),
               }) => TrabajadoresCompanion(
                 id: id,
                 nombre: nombre,
-                apellido: apellido,
-                cedula: cedula,
-                activo: activo,
-                ultimaActualizacion: ultimaActualizacion,
+                primerApellido: primerApellido,
+                segundoApellido: segundoApellido,
+                equipoId: equipoId,
+                estado: estado,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String nombre,
-                required String apellido,
-                required String cedula,
-                Value<bool> activo = const Value.absent(),
-                Value<DateTime?> ultimaActualizacion = const Value.absent(),
+                required String primerApellido,
+                required String segundoApellido,
+                required int equipoId,
+                Value<bool> estado = const Value.absent(),
               }) => TrabajadoresCompanion.insert(
                 id: id,
                 nombre: nombre,
-                apellido: apellido,
-                cedula: cedula,
-                activo: activo,
-                ultimaActualizacion: ultimaActualizacion,
+                primerApellido: primerApellido,
+                segundoApellido: segundoApellido,
+                equipoId: equipoId,
+                estado: estado,
               ),
           withReferenceMapper:
               (p0) =>
@@ -4001,14 +2182,22 @@ typedef $$TrabajadoresTableProcessedTableManager =
       Trabajadore,
       PrefetchHooks Function()
     >;
-typedef $$GrupoUbicacionesTableCreateCompanionBuilder =
-    GrupoUbicacionesCompanion Function({Value<int> id, required String nombre});
-typedef $$GrupoUbicacionesTableUpdateCompanionBuilder =
-    GrupoUbicacionesCompanion Function({Value<int> id, Value<String> nombre});
+typedef $$GruposUbicacionesTableCreateCompanionBuilder =
+    GruposUbicacionesCompanion Function({
+      Value<int> id,
+      required String nombre,
+      Value<bool> estado,
+    });
+typedef $$GruposUbicacionesTableUpdateCompanionBuilder =
+    GruposUbicacionesCompanion Function({
+      Value<int> id,
+      Value<String> nombre,
+      Value<bool> estado,
+    });
 
-class $$GrupoUbicacionesTableFilterComposer
-    extends Composer<_$AppDatabase, $GrupoUbicacionesTable> {
-  $$GrupoUbicacionesTableFilterComposer({
+class $$GruposUbicacionesTableFilterComposer
+    extends Composer<_$AppDatabase, $GruposUbicacionesTable> {
+  $$GruposUbicacionesTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4024,11 +2213,16 @@ class $$GrupoUbicacionesTableFilterComposer
     column: $table.nombre,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<bool> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
-class $$GrupoUbicacionesTableOrderingComposer
-    extends Composer<_$AppDatabase, $GrupoUbicacionesTable> {
-  $$GrupoUbicacionesTableOrderingComposer({
+class $$GruposUbicacionesTableOrderingComposer
+    extends Composer<_$AppDatabase, $GruposUbicacionesTable> {
+  $$GruposUbicacionesTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4044,11 +2238,16 @@ class $$GrupoUbicacionesTableOrderingComposer
     column: $table.nombre,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
-class $$GrupoUbicacionesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $GrupoUbicacionesTable> {
-  $$GrupoUbicacionesTableAnnotationComposer({
+class $$GruposUbicacionesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GruposUbicacionesTable> {
+  $$GruposUbicacionesTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4060,47 +2259,52 @@ class $$GrupoUbicacionesTableAnnotationComposer
 
   GeneratedColumn<String> get nombre =>
       $composableBuilder(column: $table.nombre, builder: (column) => column);
+
+  GeneratedColumn<bool> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
 }
 
-class $$GrupoUbicacionesTableTableManager
+class $$GruposUbicacionesTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $GrupoUbicacionesTable,
-          GrupoUbicacione,
-          $$GrupoUbicacionesTableFilterComposer,
-          $$GrupoUbicacionesTableOrderingComposer,
-          $$GrupoUbicacionesTableAnnotationComposer,
-          $$GrupoUbicacionesTableCreateCompanionBuilder,
-          $$GrupoUbicacionesTableUpdateCompanionBuilder,
+          $GruposUbicacionesTable,
+          GruposUbicacione,
+          $$GruposUbicacionesTableFilterComposer,
+          $$GruposUbicacionesTableOrderingComposer,
+          $$GruposUbicacionesTableAnnotationComposer,
+          $$GruposUbicacionesTableCreateCompanionBuilder,
+          $$GruposUbicacionesTableUpdateCompanionBuilder,
           (
-            GrupoUbicacione,
+            GruposUbicacione,
             BaseReferences<
               _$AppDatabase,
-              $GrupoUbicacionesTable,
-              GrupoUbicacione
+              $GruposUbicacionesTable,
+              GruposUbicacione
             >,
           ),
-          GrupoUbicacione,
+          GruposUbicacione,
           PrefetchHooks Function()
         > {
-  $$GrupoUbicacionesTableTableManager(
+  $$GruposUbicacionesTableTableManager(
     _$AppDatabase db,
-    $GrupoUbicacionesTable table,
+    $GruposUbicacionesTable table,
   ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer:
-              () =>
-                  $$GrupoUbicacionesTableFilterComposer($db: db, $table: table),
+              () => $$GruposUbicacionesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
           createOrderingComposer:
-              () => $$GrupoUbicacionesTableOrderingComposer(
+              () => $$GruposUbicacionesTableOrderingComposer(
                 $db: db,
                 $table: table,
               ),
           createComputedFieldComposer:
-              () => $$GrupoUbicacionesTableAnnotationComposer(
+              () => $$GruposUbicacionesTableAnnotationComposer(
                 $db: db,
                 $table: table,
               ),
@@ -4108,12 +2312,22 @@ class $$GrupoUbicacionesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> nombre = const Value.absent(),
-              }) => GrupoUbicacionesCompanion(id: id, nombre: nombre),
+                Value<bool> estado = const Value.absent(),
+              }) => GruposUbicacionesCompanion(
+                id: id,
+                nombre: nombre,
+                estado: estado,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String nombre,
-              }) => GrupoUbicacionesCompanion.insert(id: id, nombre: nombre),
+                Value<bool> estado = const Value.absent(),
+              }) => GruposUbicacionesCompanion.insert(
+                id: id,
+                nombre: nombre,
+                estado: estado,
+              ),
           withReferenceMapper:
               (p0) =>
                   p0
@@ -4129,37 +2343,73 @@ class $$GrupoUbicacionesTableTableManager
       );
 }
 
-typedef $$GrupoUbicacionesTableProcessedTableManager =
+typedef $$GruposUbicacionesTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $GrupoUbicacionesTable,
-      GrupoUbicacione,
-      $$GrupoUbicacionesTableFilterComposer,
-      $$GrupoUbicacionesTableOrderingComposer,
-      $$GrupoUbicacionesTableAnnotationComposer,
-      $$GrupoUbicacionesTableCreateCompanionBuilder,
-      $$GrupoUbicacionesTableUpdateCompanionBuilder,
+      $GruposUbicacionesTable,
+      GruposUbicacione,
+      $$GruposUbicacionesTableFilterComposer,
+      $$GruposUbicacionesTableOrderingComposer,
+      $$GruposUbicacionesTableAnnotationComposer,
+      $$GruposUbicacionesTableCreateCompanionBuilder,
+      $$GruposUbicacionesTableUpdateCompanionBuilder,
       (
-        GrupoUbicacione,
-        BaseReferences<_$AppDatabase, $GrupoUbicacionesTable, GrupoUbicacione>,
+        GruposUbicacione,
+        BaseReferences<
+          _$AppDatabase,
+          $GruposUbicacionesTable,
+          GruposUbicacione
+        >,
       ),
-      GrupoUbicacione,
+      GruposUbicacione,
       PrefetchHooks Function()
     >;
 typedef $$UbicacionesTableCreateCompanionBuilder =
     UbicacionesCompanion Function({
-      Value<int> id,
+      required String id,
       required String nombre,
-      required Map<String, dynamic> disponibilidad,
+      required int ubicacionId,
       required String grupoId,
+      Value<bool> estado,
+      Value<int> rowid,
     });
 typedef $$UbicacionesTableUpdateCompanionBuilder =
     UbicacionesCompanion Function({
-      Value<int> id,
+      Value<String> id,
       Value<String> nombre,
-      Value<Map<String, dynamic>> disponibilidad,
+      Value<int> ubicacionId,
       Value<String> grupoId,
+      Value<bool> estado,
+      Value<int> rowid,
     });
+
+final class $$UbicacionesTableReferences
+    extends BaseReferences<_$AppDatabase, $UbicacionesTable, Ubicacione> {
+  $$UbicacionesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$HorariosTable, List<Horario>> _horariosRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.horarios,
+    aliasName: $_aliasNameGenerator(
+      db.ubicaciones.ubicacionId,
+      db.horarios.ubicacionId,
+    ),
+  );
+
+  $$HorariosTableProcessedTableManager get horariosRefs {
+    final manager = $$HorariosTableTableManager($_db, $_db.horarios).filter(
+      (f) => f.ubicacionId.ubicacionId.sqlEquals(
+        $_itemColumn<int>('ubicacion_id')!,
+      ),
+    );
+
+    final cache = $_typedResult.readTableOrNull(_horariosRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$UbicacionesTableFilterComposer
     extends Composer<_$AppDatabase, $UbicacionesTable> {
@@ -4170,7 +2420,7 @@ class $$UbicacionesTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
@@ -4180,15 +2430,40 @@ class $$UbicacionesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>,
-    Map<String, dynamic>,
-    String
-  >
-  get disponibilidad => $composableBuilder(
-    column: $table.disponibilidad,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
+  ColumnFilters<int> get ubicacionId => $composableBuilder(
+    column: $table.ubicacionId,
+    builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<bool> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> horariosRefs(
+    Expression<bool> Function($$HorariosTableFilterComposer f) f,
+  ) {
+    final $$HorariosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ubicacionId,
+      referencedTable: $db.horarios,
+      getReferencedColumn: (t) => t.ubicacionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HorariosTableFilterComposer(
+            $db: $db,
+            $table: $db.horarios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UbicacionesTableOrderingComposer
@@ -4200,7 +2475,7 @@ class $$UbicacionesTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
   );
@@ -4210,8 +2485,13 @@ class $$UbicacionesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get disponibilidad => $composableBuilder(
-    column: $table.disponibilidad,
+  ColumnOrderings<int> get ubicacionId => $composableBuilder(
+    column: $table.ubicacionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get estado => $composableBuilder(
+    column: $table.estado,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -4225,17 +2505,44 @@ class $$UbicacionesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get nombre =>
       $composableBuilder(column: $table.nombre, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
-  get disponibilidad => $composableBuilder(
-    column: $table.disponibilidad,
+  GeneratedColumn<int> get ubicacionId => $composableBuilder(
+    column: $table.ubicacionId,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  Expression<T> horariosRefs<T extends Object>(
+    Expression<T> Function($$HorariosTableAnnotationComposer a) f,
+  ) {
+    final $$HorariosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ubicacionId,
+      referencedTable: $db.horarios,
+      getReferencedColumn: (t) => t.ubicacionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HorariosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.horarios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UbicacionesTableTableManager
@@ -4249,12 +2556,9 @@ class $$UbicacionesTableTableManager
           $$UbicacionesTableAnnotationComposer,
           $$UbicacionesTableCreateCompanionBuilder,
           $$UbicacionesTableUpdateCompanionBuilder,
-          (
-            Ubicacione,
-            BaseReferences<_$AppDatabase, $UbicacionesTable, Ubicacione>,
-          ),
+          (Ubicacione, $$UbicacionesTableReferences),
           Ubicacione,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool horariosRefs})
         > {
   $$UbicacionesTableTableManager(_$AppDatabase db, $UbicacionesTable table)
     : super(
@@ -4270,28 +2574,35 @@ class $$UbicacionesTableTableManager
                   $$UbicacionesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
+                Value<String> id = const Value.absent(),
                 Value<String> nombre = const Value.absent(),
-                Value<Map<String, dynamic>> disponibilidad =
-                    const Value.absent(),
+                Value<int> ubicacionId = const Value.absent(),
                 Value<String> grupoId = const Value.absent(),
+                Value<bool> estado = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => UbicacionesCompanion(
                 id: id,
                 nombre: nombre,
-                disponibilidad: disponibilidad,
+                ubicacionId: ubicacionId,
                 grupoId: grupoId,
+                estado: estado,
+                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
+                required String id,
                 required String nombre,
-                required Map<String, dynamic> disponibilidad,
+                required int ubicacionId,
                 required String grupoId,
+                Value<bool> estado = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => UbicacionesCompanion.insert(
                 id: id,
                 nombre: nombre,
-                disponibilidad: disponibilidad,
+                ubicacionId: ubicacionId,
                 grupoId: grupoId,
+                estado: estado,
+                rowid: rowid,
               ),
           withReferenceMapper:
               (p0) =>
@@ -4299,11 +2610,43 @@ class $$UbicacionesTableTableManager
                       .map(
                         (e) => (
                           e.readTable(table),
-                          BaseReferences(db, table, e),
+                          $$UbicacionesTableReferences(db, table, e),
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({horariosRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (horariosRefs) db.horarios],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (horariosRefs)
+                    await $_getPrefetchedData<
+                      Ubicacione,
+                      $UbicacionesTable,
+                      Horario
+                    >(
+                      currentTable: table,
+                      referencedTable: $$UbicacionesTableReferences
+                          ._horariosRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$UbicacionesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).horariosRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.ubicacionId == item.ubicacionId,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -4318,31 +2661,63 @@ typedef $$UbicacionesTableProcessedTableManager =
       $$UbicacionesTableAnnotationComposer,
       $$UbicacionesTableCreateCompanionBuilder,
       $$UbicacionesTableUpdateCompanionBuilder,
-      (
-        Ubicacione,
-        BaseReferences<_$AppDatabase, $UbicacionesTable, Ubicacione>,
-      ),
+      (Ubicacione, $$UbicacionesTableReferences),
       Ubicacione,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool horariosRefs})
     >;
 typedef $$HorariosTableCreateCompanionBuilder =
     HorariosCompanion Function({
       Value<int> id,
-      required String ubicacionId,
+      required int ubicacionId,
       required DateTime fechaInicio,
       required DateTime fechaFin,
       required TimeOfDay horaInicio,
       required TimeOfDay horaFin,
+      Value<bool> estado,
+      Value<bool> pagaAlmuerzo,
+      required TimeOfDay inicioDescanso,
+      required TimeOfDay finDescanso,
     });
 typedef $$HorariosTableUpdateCompanionBuilder =
     HorariosCompanion Function({
       Value<int> id,
-      Value<String> ubicacionId,
+      Value<int> ubicacionId,
       Value<DateTime> fechaInicio,
       Value<DateTime> fechaFin,
       Value<TimeOfDay> horaInicio,
       Value<TimeOfDay> horaFin,
+      Value<bool> estado,
+      Value<bool> pagaAlmuerzo,
+      Value<TimeOfDay> inicioDescanso,
+      Value<TimeOfDay> finDescanso,
     });
+
+final class $$HorariosTableReferences
+    extends BaseReferences<_$AppDatabase, $HorariosTable, Horario> {
+  $$HorariosTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UbicacionesTable _ubicacionIdTable(_$AppDatabase db) =>
+      db.ubicaciones.createAlias(
+        $_aliasNameGenerator(
+          db.horarios.ubicacionId,
+          db.ubicaciones.ubicacionId,
+        ),
+      );
+
+  $$UbicacionesTableProcessedTableManager get ubicacionId {
+    final $_column = $_itemColumn<int>('ubicacion_id')!;
+
+    final manager = $$UbicacionesTableTableManager(
+      $_db,
+      $_db.ubicaciones,
+    ).filter((f) => f.ubicacionId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ubicacionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
 
 class $$HorariosTableFilterComposer
     extends Composer<_$AppDatabase, $HorariosTable> {
@@ -4381,6 +2756,51 @@ class $$HorariosTableFilterComposer
         column: $table.horaFin,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
+
+  ColumnFilters<bool> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pagaAlmuerzo => $composableBuilder(
+    column: $table.pagaAlmuerzo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<TimeOfDay, TimeOfDay, String>
+  get inicioDescanso => $composableBuilder(
+    column: $table.inicioDescanso,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<TimeOfDay, TimeOfDay, String>
+  get finDescanso => $composableBuilder(
+    column: $table.finDescanso,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  $$UbicacionesTableFilterComposer get ubicacionId {
+    final $$UbicacionesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ubicacionId,
+      referencedTable: $db.ubicaciones,
+      getReferencedColumn: (t) => t.ubicacionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UbicacionesTableFilterComposer(
+            $db: $db,
+            $table: $db.ubicaciones,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$HorariosTableOrderingComposer
@@ -4416,6 +2836,49 @@ class $$HorariosTableOrderingComposer
     column: $table.horaFin,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get pagaAlmuerzo => $composableBuilder(
+    column: $table.pagaAlmuerzo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get inicioDescanso => $composableBuilder(
+    column: $table.inicioDescanso,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get finDescanso => $composableBuilder(
+    column: $table.finDescanso,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UbicacionesTableOrderingComposer get ubicacionId {
+    final $$UbicacionesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ubicacionId,
+      referencedTable: $db.ubicaciones,
+      getReferencedColumn: (t) => t.ubicacionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UbicacionesTableOrderingComposer(
+            $db: $db,
+            $table: $db.ubicaciones,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$HorariosTableAnnotationComposer
@@ -4447,6 +2910,49 @@ class $$HorariosTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<TimeOfDay, String> get horaFin =>
       $composableBuilder(column: $table.horaFin, builder: (column) => column);
+
+  GeneratedColumn<bool> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<bool> get pagaAlmuerzo => $composableBuilder(
+    column: $table.pagaAlmuerzo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<TimeOfDay, String> get inicioDescanso =>
+      $composableBuilder(
+        column: $table.inicioDescanso,
+        builder: (column) => column,
+      );
+
+  GeneratedColumnWithTypeConverter<TimeOfDay, String> get finDescanso =>
+      $composableBuilder(
+        column: $table.finDescanso,
+        builder: (column) => column,
+      );
+
+  $$UbicacionesTableAnnotationComposer get ubicacionId {
+    final $$UbicacionesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ubicacionId,
+      referencedTable: $db.ubicaciones,
+      getReferencedColumn: (t) => t.ubicacionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UbicacionesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.ubicaciones,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$HorariosTableTableManager
@@ -4460,9 +2966,9 @@ class $$HorariosTableTableManager
           $$HorariosTableAnnotationComposer,
           $$HorariosTableCreateCompanionBuilder,
           $$HorariosTableUpdateCompanionBuilder,
-          (Horario, BaseReferences<_$AppDatabase, $HorariosTable, Horario>),
+          (Horario, $$HorariosTableReferences),
           Horario,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool ubicacionId})
         > {
   $$HorariosTableTableManager(_$AppDatabase db, $HorariosTable table)
     : super(
@@ -4478,11 +2984,15 @@ class $$HorariosTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> ubicacionId = const Value.absent(),
+                Value<int> ubicacionId = const Value.absent(),
                 Value<DateTime> fechaInicio = const Value.absent(),
                 Value<DateTime> fechaFin = const Value.absent(),
                 Value<TimeOfDay> horaInicio = const Value.absent(),
                 Value<TimeOfDay> horaFin = const Value.absent(),
+                Value<bool> estado = const Value.absent(),
+                Value<bool> pagaAlmuerzo = const Value.absent(),
+                Value<TimeOfDay> inicioDescanso = const Value.absent(),
+                Value<TimeOfDay> finDescanso = const Value.absent(),
               }) => HorariosCompanion(
                 id: id,
                 ubicacionId: ubicacionId,
@@ -4490,15 +3000,23 @@ class $$HorariosTableTableManager
                 fechaFin: fechaFin,
                 horaInicio: horaInicio,
                 horaFin: horaFin,
+                estado: estado,
+                pagaAlmuerzo: pagaAlmuerzo,
+                inicioDescanso: inicioDescanso,
+                finDescanso: finDescanso,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required String ubicacionId,
+                required int ubicacionId,
                 required DateTime fechaInicio,
                 required DateTime fechaFin,
                 required TimeOfDay horaInicio,
                 required TimeOfDay horaFin,
+                Value<bool> estado = const Value.absent(),
+                Value<bool> pagaAlmuerzo = const Value.absent(),
+                required TimeOfDay inicioDescanso,
+                required TimeOfDay finDescanso,
               }) => HorariosCompanion.insert(
                 id: id,
                 ubicacionId: ubicacionId,
@@ -4506,6 +3024,10 @@ class $$HorariosTableTableManager
                 fechaFin: fechaFin,
                 horaInicio: horaInicio,
                 horaFin: horaFin,
+                estado: estado,
+                pagaAlmuerzo: pagaAlmuerzo,
+                inicioDescanso: inicioDescanso,
+                finDescanso: finDescanso,
               ),
           withReferenceMapper:
               (p0) =>
@@ -4513,11 +3035,51 @@ class $$HorariosTableTableManager
                       .map(
                         (e) => (
                           e.readTable(table),
-                          BaseReferences(db, table, e),
+                          $$HorariosTableReferences(db, table, e),
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({ubicacionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (ubicacionId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.ubicacionId,
+                            referencedTable: $$HorariosTableReferences
+                                ._ubicacionIdTable(db),
+                            referencedColumn:
+                                $$HorariosTableReferences
+                                    ._ubicacionIdTable(db)
+                                    .ubicacionId,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -4532,1101 +3094,34 @@ typedef $$HorariosTableProcessedTableManager =
       $$HorariosTableAnnotationComposer,
       $$HorariosTableCreateCompanionBuilder,
       $$HorariosTableUpdateCompanionBuilder,
-      (Horario, BaseReferences<_$AppDatabase, $HorariosTable, Horario>),
+      (Horario, $$HorariosTableReferences),
       Horario,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool ubicacionId})
     >;
-typedef $$RegistroBiometricoTableCreateCompanionBuilder =
-    RegistroBiometricoCompanion Function({
-      Value<int> id,
-      required String trabajadorId,
-      required String foto,
-      required Map<String, dynamic> datosBiometricos,
-      required bool pruebaVidaExitosa,
-      required MetodoPruebaVida metodoPruebaVida,
-      required double puntajeConfianza,
-    });
-typedef $$RegistroBiometricoTableUpdateCompanionBuilder =
-    RegistroBiometricoCompanion Function({
-      Value<int> id,
-      Value<String> trabajadorId,
-      Value<String> foto,
-      Value<Map<String, dynamic>> datosBiometricos,
-      Value<bool> pruebaVidaExitosa,
-      Value<MetodoPruebaVida> metodoPruebaVida,
-      Value<double> puntajeConfianza,
-    });
-
-class $$RegistroBiometricoTableFilterComposer
-    extends Composer<_$AppDatabase, $RegistroBiometricoTable> {
-  $$RegistroBiometricoTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get foto => $composableBuilder(
-    column: $table.foto,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>,
-    Map<String, dynamic>,
-    String
-  >
-  get datosBiometricos => $composableBuilder(
-    column: $table.datosBiometricos,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnFilters<bool> get pruebaVidaExitosa => $composableBuilder(
-    column: $table.pruebaVidaExitosa,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<MetodoPruebaVida, MetodoPruebaVida, String>
-  get metodoPruebaVida => $composableBuilder(
-    column: $table.metodoPruebaVida,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnFilters<double> get puntajeConfianza => $composableBuilder(
-    column: $table.puntajeConfianza,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$RegistroBiometricoTableOrderingComposer
-    extends Composer<_$AppDatabase, $RegistroBiometricoTable> {
-  $$RegistroBiometricoTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get foto => $composableBuilder(
-    column: $table.foto,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get datosBiometricos => $composableBuilder(
-    column: $table.datosBiometricos,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get pruebaVidaExitosa => $composableBuilder(
-    column: $table.pruebaVidaExitosa,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get metodoPruebaVida => $composableBuilder(
-    column: $table.metodoPruebaVida,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get puntajeConfianza => $composableBuilder(
-    column: $table.puntajeConfianza,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$RegistroBiometricoTableAnnotationComposer
-    extends Composer<_$AppDatabase, $RegistroBiometricoTable> {
-  $$RegistroBiometricoTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get foto =>
-      $composableBuilder(column: $table.foto, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
-  get datosBiometricos => $composableBuilder(
-    column: $table.datosBiometricos,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get pruebaVidaExitosa => $composableBuilder(
-    column: $table.pruebaVidaExitosa,
-    builder: (column) => column,
-  );
-
-  GeneratedColumnWithTypeConverter<MetodoPruebaVida, String>
-  get metodoPruebaVida => $composableBuilder(
-    column: $table.metodoPruebaVida,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get puntajeConfianza => $composableBuilder(
-    column: $table.puntajeConfianza,
-    builder: (column) => column,
-  );
-}
-
-class $$RegistroBiometricoTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $RegistroBiometricoTable,
-          RegistroBiometricoData,
-          $$RegistroBiometricoTableFilterComposer,
-          $$RegistroBiometricoTableOrderingComposer,
-          $$RegistroBiometricoTableAnnotationComposer,
-          $$RegistroBiometricoTableCreateCompanionBuilder,
-          $$RegistroBiometricoTableUpdateCompanionBuilder,
-          (
-            RegistroBiometricoData,
-            BaseReferences<
-              _$AppDatabase,
-              $RegistroBiometricoTable,
-              RegistroBiometricoData
-            >,
-          ),
-          RegistroBiometricoData,
-          PrefetchHooks Function()
-        > {
-  $$RegistroBiometricoTableTableManager(
-    _$AppDatabase db,
-    $RegistroBiometricoTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer:
-              () => $$RegistroBiometricoTableFilterComposer(
-                $db: db,
-                $table: table,
-              ),
-          createOrderingComposer:
-              () => $$RegistroBiometricoTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer:
-              () => $$RegistroBiometricoTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> trabajadorId = const Value.absent(),
-                Value<String> foto = const Value.absent(),
-                Value<Map<String, dynamic>> datosBiometricos =
-                    const Value.absent(),
-                Value<bool> pruebaVidaExitosa = const Value.absent(),
-                Value<MetodoPruebaVida> metodoPruebaVida = const Value.absent(),
-                Value<double> puntajeConfianza = const Value.absent(),
-              }) => RegistroBiometricoCompanion(
-                id: id,
-                trabajadorId: trabajadorId,
-                foto: foto,
-                datosBiometricos: datosBiometricos,
-                pruebaVidaExitosa: pruebaVidaExitosa,
-                metodoPruebaVida: metodoPruebaVida,
-                puntajeConfianza: puntajeConfianza,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String trabajadorId,
-                required String foto,
-                required Map<String, dynamic> datosBiometricos,
-                required bool pruebaVidaExitosa,
-                required MetodoPruebaVida metodoPruebaVida,
-                required double puntajeConfianza,
-              }) => RegistroBiometricoCompanion.insert(
-                id: id,
-                trabajadorId: trabajadorId,
-                foto: foto,
-                datosBiometricos: datosBiometricos,
-                pruebaVidaExitosa: pruebaVidaExitosa,
-                metodoPruebaVida: metodoPruebaVida,
-                puntajeConfianza: puntajeConfianza,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$RegistroBiometricoTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $RegistroBiometricoTable,
-      RegistroBiometricoData,
-      $$RegistroBiometricoTableFilterComposer,
-      $$RegistroBiometricoTableOrderingComposer,
-      $$RegistroBiometricoTableAnnotationComposer,
-      $$RegistroBiometricoTableCreateCompanionBuilder,
-      $$RegistroBiometricoTableUpdateCompanionBuilder,
-      (
-        RegistroBiometricoData,
-        BaseReferences<
-          _$AppDatabase,
-          $RegistroBiometricoTable,
-          RegistroBiometricoData
-        >,
-      ),
-      RegistroBiometricoData,
-      PrefetchHooks Function()
-    >;
-typedef $$CargosLiderazgoTableCreateCompanionBuilder =
-    CargosLiderazgoCompanion Function({
-      Value<int> id,
-      required String nombre,
-      Value<String?> observacion,
-      Value<bool> estado,
-    });
-typedef $$CargosLiderazgoTableUpdateCompanionBuilder =
-    CargosLiderazgoCompanion Function({
-      Value<int> id,
-      Value<String> nombre,
-      Value<String?> observacion,
-      Value<bool> estado,
-    });
-
-class $$CargosLiderazgoTableFilterComposer
-    extends Composer<_$AppDatabase, $CargosLiderazgoTable> {
-  $$CargosLiderazgoTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get nombre => $composableBuilder(
-    column: $table.nombre,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get observacion => $composableBuilder(
-    column: $table.observacion,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get estado => $composableBuilder(
-    column: $table.estado,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$CargosLiderazgoTableOrderingComposer
-    extends Composer<_$AppDatabase, $CargosLiderazgoTable> {
-  $$CargosLiderazgoTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get nombre => $composableBuilder(
-    column: $table.nombre,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get observacion => $composableBuilder(
-    column: $table.observacion,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get estado => $composableBuilder(
-    column: $table.estado,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$CargosLiderazgoTableAnnotationComposer
-    extends Composer<_$AppDatabase, $CargosLiderazgoTable> {
-  $$CargosLiderazgoTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get nombre =>
-      $composableBuilder(column: $table.nombre, builder: (column) => column);
-
-  GeneratedColumn<String> get observacion => $composableBuilder(
-    column: $table.observacion,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get estado =>
-      $composableBuilder(column: $table.estado, builder: (column) => column);
-}
-
-class $$CargosLiderazgoTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $CargosLiderazgoTable,
-          CargoLiderazgo,
-          $$CargosLiderazgoTableFilterComposer,
-          $$CargosLiderazgoTableOrderingComposer,
-          $$CargosLiderazgoTableAnnotationComposer,
-          $$CargosLiderazgoTableCreateCompanionBuilder,
-          $$CargosLiderazgoTableUpdateCompanionBuilder,
-          (
-            CargoLiderazgo,
-            BaseReferences<
-              _$AppDatabase,
-              $CargosLiderazgoTable,
-              CargoLiderazgo
-            >,
-          ),
-          CargoLiderazgo,
-          PrefetchHooks Function()
-        > {
-  $$CargosLiderazgoTableTableManager(
-    _$AppDatabase db,
-    $CargosLiderazgoTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer:
-              () =>
-                  $$CargosLiderazgoTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$CargosLiderazgoTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer:
-              () => $$CargosLiderazgoTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> nombre = const Value.absent(),
-                Value<String?> observacion = const Value.absent(),
-                Value<bool> estado = const Value.absent(),
-              }) => CargosLiderazgoCompanion(
-                id: id,
-                nombre: nombre,
-                observacion: observacion,
-                estado: estado,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String nombre,
-                Value<String?> observacion = const Value.absent(),
-                Value<bool> estado = const Value.absent(),
-              }) => CargosLiderazgoCompanion.insert(
-                id: id,
-                nombre: nombre,
-                observacion: observacion,
-                estado: estado,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$CargosLiderazgoTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $CargosLiderazgoTable,
-      CargoLiderazgo,
-      $$CargosLiderazgoTableFilterComposer,
-      $$CargosLiderazgoTableOrderingComposer,
-      $$CargosLiderazgoTableAnnotationComposer,
-      $$CargosLiderazgoTableCreateCompanionBuilder,
-      $$CargosLiderazgoTableUpdateCompanionBuilder,
-      (
-        CargoLiderazgo,
-        BaseReferences<_$AppDatabase, $CargosLiderazgoTable, CargoLiderazgo>,
-      ),
-      CargoLiderazgo,
-      PrefetchHooks Function()
-    >;
-typedef $$LiderUbicacionesTableCreateCompanionBuilder =
-    LiderUbicacionesCompanion Function({
-      Value<int> id,
-      required String ubicacionId,
-      required String liderId,
-      Value<bool> estado,
-      required String cargoLiderazgoId,
-    });
-typedef $$LiderUbicacionesTableUpdateCompanionBuilder =
-    LiderUbicacionesCompanion Function({
-      Value<int> id,
-      Value<String> ubicacionId,
-      Value<String> liderId,
-      Value<bool> estado,
-      Value<String> cargoLiderazgoId,
-    });
-
-class $$LiderUbicacionesTableFilterComposer
-    extends Composer<_$AppDatabase, $LiderUbicacionesTable> {
-  $$LiderUbicacionesTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get estado => $composableBuilder(
-    column: $table.estado,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$LiderUbicacionesTableOrderingComposer
-    extends Composer<_$AppDatabase, $LiderUbicacionesTable> {
-  $$LiderUbicacionesTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get estado => $composableBuilder(
-    column: $table.estado,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$LiderUbicacionesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $LiderUbicacionesTable> {
-  $$LiderUbicacionesTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<bool> get estado =>
-      $composableBuilder(column: $table.estado, builder: (column) => column);
-}
-
-class $$LiderUbicacionesTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $LiderUbicacionesTable,
-          LiderUbicacion,
-          $$LiderUbicacionesTableFilterComposer,
-          $$LiderUbicacionesTableOrderingComposer,
-          $$LiderUbicacionesTableAnnotationComposer,
-          $$LiderUbicacionesTableCreateCompanionBuilder,
-          $$LiderUbicacionesTableUpdateCompanionBuilder,
-          (
-            LiderUbicacion,
-            BaseReferences<
-              _$AppDatabase,
-              $LiderUbicacionesTable,
-              LiderUbicacion
-            >,
-          ),
-          LiderUbicacion,
-          PrefetchHooks Function()
-        > {
-  $$LiderUbicacionesTableTableManager(
-    _$AppDatabase db,
-    $LiderUbicacionesTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer:
-              () =>
-                  $$LiderUbicacionesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$LiderUbicacionesTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer:
-              () => $$LiderUbicacionesTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> ubicacionId = const Value.absent(),
-                Value<String> liderId = const Value.absent(),
-                Value<bool> estado = const Value.absent(),
-                Value<String> cargoLiderazgoId = const Value.absent(),
-              }) => LiderUbicacionesCompanion(
-                id: id,
-                ubicacionId: ubicacionId,
-                liderId: liderId,
-                estado: estado,
-                cargoLiderazgoId: cargoLiderazgoId,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String ubicacionId,
-                required String liderId,
-                Value<bool> estado = const Value.absent(),
-                required String cargoLiderazgoId,
-              }) => LiderUbicacionesCompanion.insert(
-                id: id,
-                ubicacionId: ubicacionId,
-                liderId: liderId,
-                estado: estado,
-                cargoLiderazgoId: cargoLiderazgoId,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$LiderUbicacionesTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $LiderUbicacionesTable,
-      LiderUbicacion,
-      $$LiderUbicacionesTableFilterComposer,
-      $$LiderUbicacionesTableOrderingComposer,
-      $$LiderUbicacionesTableAnnotationComposer,
-      $$LiderUbicacionesTableCreateCompanionBuilder,
-      $$LiderUbicacionesTableUpdateCompanionBuilder,
-      (
-        LiderUbicacion,
-        BaseReferences<_$AppDatabase, $LiderUbicacionesTable, LiderUbicacion>,
-      ),
-      LiderUbicacion,
-      PrefetchHooks Function()
-    >;
-typedef $$EquipoTableCreateCompanionBuilder =
-    EquipoCompanion Function({
-      Value<int> id,
-      required String liderUbicacionId,
-      required String trabajadorId,
-      required String idRegistro,
-      Value<bool> estado,
-    });
-typedef $$EquipoTableUpdateCompanionBuilder =
-    EquipoCompanion Function({
-      Value<int> id,
-      Value<String> liderUbicacionId,
-      Value<String> trabajadorId,
-      Value<String> idRegistro,
-      Value<bool> estado,
-    });
-
-class $$EquipoTableFilterComposer
-    extends Composer<_$AppDatabase, $EquipoTable> {
-  $$EquipoTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get estado => $composableBuilder(
-    column: $table.estado,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$EquipoTableOrderingComposer
-    extends Composer<_$AppDatabase, $EquipoTable> {
-  $$EquipoTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get estado => $composableBuilder(
-    column: $table.estado,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$EquipoTableAnnotationComposer
-    extends Composer<_$AppDatabase, $EquipoTable> {
-  $$EquipoTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<bool> get estado =>
-      $composableBuilder(column: $table.estado, builder: (column) => column);
-}
-
-class $$EquipoTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $EquipoTable,
-          EquipoData,
-          $$EquipoTableFilterComposer,
-          $$EquipoTableOrderingComposer,
-          $$EquipoTableAnnotationComposer,
-          $$EquipoTableCreateCompanionBuilder,
-          $$EquipoTableUpdateCompanionBuilder,
-          (EquipoData, BaseReferences<_$AppDatabase, $EquipoTable, EquipoData>),
-          EquipoData,
-          PrefetchHooks Function()
-        > {
-  $$EquipoTableTableManager(_$AppDatabase db, $EquipoTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer:
-              () => $$EquipoTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$EquipoTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$EquipoTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> liderUbicacionId = const Value.absent(),
-                Value<String> trabajadorId = const Value.absent(),
-                Value<String> idRegistro = const Value.absent(),
-                Value<bool> estado = const Value.absent(),
-              }) => EquipoCompanion(
-                id: id,
-                liderUbicacionId: liderUbicacionId,
-                trabajadorId: trabajadorId,
-                idRegistro: idRegistro,
-                estado: estado,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String liderUbicacionId,
-                required String trabajadorId,
-                required String idRegistro,
-                Value<bool> estado = const Value.absent(),
-              }) => EquipoCompanion.insert(
-                id: id,
-                liderUbicacionId: liderUbicacionId,
-                trabajadorId: trabajadorId,
-                idRegistro: idRegistro,
-                estado: estado,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$EquipoTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $EquipoTable,
-      EquipoData,
-      $$EquipoTableFilterComposer,
-      $$EquipoTableOrderingComposer,
-      $$EquipoTableAnnotationComposer,
-      $$EquipoTableCreateCompanionBuilder,
-      $$EquipoTableUpdateCompanionBuilder,
-      (EquipoData, BaseReferences<_$AppDatabase, $EquipoTable, EquipoData>),
-      EquipoData,
-      PrefetchHooks Function()
-    >;
-typedef $$RegistroDiarioTableCreateCompanionBuilder =
-    RegistroDiarioCompanion Function({
-      Value<int> id,
-      required String equipoId,
-      required String registroBiometricoId,
-      required DateTime fechaIngreso,
-      required TimeOfDay horaIngreso,
-      required DateTime fechaSalida,
-      required TimeOfDay horaSalida,
-      required bool ingresoSincronizado,
-      required bool salidaSincronizada,
-    });
-typedef $$RegistroDiarioTableUpdateCompanionBuilder =
-    RegistroDiarioCompanion Function({
-      Value<int> id,
-      Value<String> equipoId,
-      Value<String> registroBiometricoId,
-      Value<DateTime> fechaIngreso,
-      Value<TimeOfDay> horaIngreso,
-      Value<DateTime> fechaSalida,
-      Value<TimeOfDay> horaSalida,
-      Value<bool> ingresoSincronizado,
-      Value<bool> salidaSincronizada,
-    });
-
-class $$RegistroDiarioTableFilterComposer
-    extends Composer<_$AppDatabase, $RegistroDiarioTable> {
-  $$RegistroDiarioTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<DateTime, DateTime, String> get fechaIngreso =>
-      $composableBuilder(
-        column: $table.fechaIngreso,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
-  ColumnWithTypeConverterFilters<TimeOfDay, TimeOfDay, String>
-  get horaIngreso => $composableBuilder(
-    column: $table.horaIngreso,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<DateTime, DateTime, String> get fechaSalida =>
-      $composableBuilder(
-        column: $table.fechaSalida,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
-  ColumnWithTypeConverterFilters<TimeOfDay, TimeOfDay, String> get horaSalida =>
-      $composableBuilder(
-        column: $table.horaSalida,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
-  ColumnFilters<bool> get ingresoSincronizado => $composableBuilder(
-    column: $table.ingresoSincronizado,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get salidaSincronizada => $composableBuilder(
-    column: $table.salidaSincronizada,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$RegistroDiarioTableOrderingComposer
-    extends Composer<_$AppDatabase, $RegistroDiarioTable> {
-  $$RegistroDiarioTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get fechaIngreso => $composableBuilder(
-    column: $table.fechaIngreso,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get horaIngreso => $composableBuilder(
-    column: $table.horaIngreso,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get fechaSalida => $composableBuilder(
-    column: $table.fechaSalida,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get horaSalida => $composableBuilder(
-    column: $table.horaSalida,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get ingresoSincronizado => $composableBuilder(
-    column: $table.ingresoSincronizado,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get salidaSincronizada => $composableBuilder(
-    column: $table.salidaSincronizada,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$RegistroDiarioTableAnnotationComposer
-    extends Composer<_$AppDatabase, $RegistroDiarioTable> {
-  $$RegistroDiarioTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<DateTime, String> get fechaIngreso =>
-      $composableBuilder(
-        column: $table.fechaIngreso,
-        builder: (column) => column,
-      );
-
-  GeneratedColumnWithTypeConverter<TimeOfDay, String> get horaIngreso =>
-      $composableBuilder(
-        column: $table.horaIngreso,
-        builder: (column) => column,
-      );
-
-  GeneratedColumnWithTypeConverter<DateTime, String> get fechaSalida =>
-      $composableBuilder(
-        column: $table.fechaSalida,
-        builder: (column) => column,
-      );
-
-  GeneratedColumnWithTypeConverter<TimeOfDay, String> get horaSalida =>
-      $composableBuilder(
-        column: $table.horaSalida,
-        builder: (column) => column,
-      );
-
-  GeneratedColumn<bool> get ingresoSincronizado => $composableBuilder(
-    column: $table.ingresoSincronizado,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get salidaSincronizada => $composableBuilder(
-    column: $table.salidaSincronizada,
-    builder: (column) => column,
-  );
-}
-
-class $$RegistroDiarioTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $RegistroDiarioTable,
-          RegistroDiarioData,
-          $$RegistroDiarioTableFilterComposer,
-          $$RegistroDiarioTableOrderingComposer,
-          $$RegistroDiarioTableAnnotationComposer,
-          $$RegistroDiarioTableCreateCompanionBuilder,
-          $$RegistroDiarioTableUpdateCompanionBuilder,
-          (
-            RegistroDiarioData,
-            BaseReferences<
-              _$AppDatabase,
-              $RegistroDiarioTable,
-              RegistroDiarioData
-            >,
-          ),
-          RegistroDiarioData,
-          PrefetchHooks Function()
-        > {
-  $$RegistroDiarioTableTableManager(
-    _$AppDatabase db,
-    $RegistroDiarioTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer:
-              () => $$RegistroDiarioTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () =>
-                  $$RegistroDiarioTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$RegistroDiarioTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> equipoId = const Value.absent(),
-                Value<String> registroBiometricoId = const Value.absent(),
-                Value<DateTime> fechaIngreso = const Value.absent(),
-                Value<TimeOfDay> horaIngreso = const Value.absent(),
-                Value<DateTime> fechaSalida = const Value.absent(),
-                Value<TimeOfDay> horaSalida = const Value.absent(),
-                Value<bool> ingresoSincronizado = const Value.absent(),
-                Value<bool> salidaSincronizada = const Value.absent(),
-              }) => RegistroDiarioCompanion(
-                id: id,
-                equipoId: equipoId,
-                registroBiometricoId: registroBiometricoId,
-                fechaIngreso: fechaIngreso,
-                horaIngreso: horaIngreso,
-                fechaSalida: fechaSalida,
-                horaSalida: horaSalida,
-                ingresoSincronizado: ingresoSincronizado,
-                salidaSincronizada: salidaSincronizada,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String equipoId,
-                required String registroBiometricoId,
-                required DateTime fechaIngreso,
-                required TimeOfDay horaIngreso,
-                required DateTime fechaSalida,
-                required TimeOfDay horaSalida,
-                required bool ingresoSincronizado,
-                required bool salidaSincronizada,
-              }) => RegistroDiarioCompanion.insert(
-                id: id,
-                equipoId: equipoId,
-                registroBiometricoId: registroBiometricoId,
-                fechaIngreso: fechaIngreso,
-                horaIngreso: horaIngreso,
-                fechaSalida: fechaSalida,
-                horaSalida: horaSalida,
-                ingresoSincronizado: ingresoSincronizado,
-                salidaSincronizada: salidaSincronizada,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$RegistroDiarioTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $RegistroDiarioTable,
-      RegistroDiarioData,
-      $$RegistroDiarioTableFilterComposer,
-      $$RegistroDiarioTableOrderingComposer,
-      $$RegistroDiarioTableAnnotationComposer,
-      $$RegistroDiarioTableCreateCompanionBuilder,
-      $$RegistroDiarioTableUpdateCompanionBuilder,
-      (
-        RegistroDiarioData,
-        BaseReferences<_$AppDatabase, $RegistroDiarioTable, RegistroDiarioData>,
-      ),
-      RegistroDiarioData,
-      PrefetchHooks Function()
-    >;
-typedef $$SyncEntitysTableCreateCompanionBuilder =
-    SyncEntitysCompanion Function({
+typedef $$SyncsEntitysTableCreateCompanionBuilder =
+    SyncsEntitysCompanion Function({
       Value<int> id,
       required String entityTableNameToSync,
       required String action,
       required String registerId,
       Value<DateTime> timestamp,
+      Value<bool> isSynced,
+      required Map<String, dynamic> data,
     });
-typedef $$SyncEntitysTableUpdateCompanionBuilder =
-    SyncEntitysCompanion Function({
+typedef $$SyncsEntitysTableUpdateCompanionBuilder =
+    SyncsEntitysCompanion Function({
       Value<int> id,
       Value<String> entityTableNameToSync,
       Value<String> action,
       Value<String> registerId,
       Value<DateTime> timestamp,
+      Value<bool> isSynced,
+      Value<Map<String, dynamic>> data,
     });
 
-class $$SyncEntitysTableFilterComposer
-    extends Composer<_$AppDatabase, $SyncEntitysTable> {
-  $$SyncEntitysTableFilterComposer({
+class $$SyncsEntitysTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncsEntitysTable> {
+  $$SyncsEntitysTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -5657,11 +3152,26 @@ class $$SyncEntitysTableFilterComposer
     column: $table.timestamp,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    Map<String, dynamic>,
+    Map<String, dynamic>,
+    String
+  >
+  get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 }
 
-class $$SyncEntitysTableOrderingComposer
-    extends Composer<_$AppDatabase, $SyncEntitysTable> {
-  $$SyncEntitysTableOrderingComposer({
+class $$SyncsEntitysTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncsEntitysTable> {
+  $$SyncsEntitysTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -5692,11 +3202,21 @@ class $$SyncEntitysTableOrderingComposer
     column: $table.timestamp,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
-class $$SyncEntitysTableAnnotationComposer
-    extends Composer<_$AppDatabase, $SyncEntitysTable> {
-  $$SyncEntitysTableAnnotationComposer({
+class $$SyncsEntitysTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncsEntitysTable> {
+  $$SyncsEntitysTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -5721,38 +3241,44 @@ class $$SyncEntitysTableAnnotationComposer
 
   GeneratedColumn<DateTime> get timestamp =>
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
 }
 
-class $$SyncEntitysTableTableManager
+class $$SyncsEntitysTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $SyncEntitysTable,
-          SyncEntity,
-          $$SyncEntitysTableFilterComposer,
-          $$SyncEntitysTableOrderingComposer,
-          $$SyncEntitysTableAnnotationComposer,
-          $$SyncEntitysTableCreateCompanionBuilder,
-          $$SyncEntitysTableUpdateCompanionBuilder,
+          $SyncsEntitysTable,
+          SyncsEntity,
+          $$SyncsEntitysTableFilterComposer,
+          $$SyncsEntitysTableOrderingComposer,
+          $$SyncsEntitysTableAnnotationComposer,
+          $$SyncsEntitysTableCreateCompanionBuilder,
+          $$SyncsEntitysTableUpdateCompanionBuilder,
           (
-            SyncEntity,
-            BaseReferences<_$AppDatabase, $SyncEntitysTable, SyncEntity>,
+            SyncsEntity,
+            BaseReferences<_$AppDatabase, $SyncsEntitysTable, SyncsEntity>,
           ),
-          SyncEntity,
+          SyncsEntity,
           PrefetchHooks Function()
         > {
-  $$SyncEntitysTableTableManager(_$AppDatabase db, $SyncEntitysTable table)
+  $$SyncsEntitysTableTableManager(_$AppDatabase db, $SyncsEntitysTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer:
-              () => $$SyncEntitysTableFilterComposer($db: db, $table: table),
+              () => $$SyncsEntitysTableFilterComposer($db: db, $table: table),
           createOrderingComposer:
-              () => $$SyncEntitysTableOrderingComposer($db: db, $table: table),
+              () => $$SyncsEntitysTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer:
               () =>
-                  $$SyncEntitysTableAnnotationComposer($db: db, $table: table),
+                  $$SyncsEntitysTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -5760,12 +3286,16 @@ class $$SyncEntitysTableTableManager
                 Value<String> action = const Value.absent(),
                 Value<String> registerId = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
-              }) => SyncEntitysCompanion(
+                Value<bool> isSynced = const Value.absent(),
+                Value<Map<String, dynamic>> data = const Value.absent(),
+              }) => SyncsEntitysCompanion(
                 id: id,
                 entityTableNameToSync: entityTableNameToSync,
                 action: action,
                 registerId: registerId,
                 timestamp: timestamp,
+                isSynced: isSynced,
+                data: data,
               ),
           createCompanionCallback:
               ({
@@ -5774,12 +3304,16 @@ class $$SyncEntitysTableTableManager
                 required String action,
                 required String registerId,
                 Value<DateTime> timestamp = const Value.absent(),
-              }) => SyncEntitysCompanion.insert(
+                Value<bool> isSynced = const Value.absent(),
+                required Map<String, dynamic> data,
+              }) => SyncsEntitysCompanion.insert(
                 id: id,
                 entityTableNameToSync: entityTableNameToSync,
                 action: action,
                 registerId: registerId,
                 timestamp: timestamp,
+                isSynced: isSynced,
+                data: data,
               ),
           withReferenceMapper:
               (p0) =>
@@ -5796,21 +3330,21 @@ class $$SyncEntitysTableTableManager
       );
 }
 
-typedef $$SyncEntitysTableProcessedTableManager =
+typedef $$SyncsEntitysTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $SyncEntitysTable,
-      SyncEntity,
-      $$SyncEntitysTableFilterComposer,
-      $$SyncEntitysTableOrderingComposer,
-      $$SyncEntitysTableAnnotationComposer,
-      $$SyncEntitysTableCreateCompanionBuilder,
-      $$SyncEntitysTableUpdateCompanionBuilder,
+      $SyncsEntitysTable,
+      SyncsEntity,
+      $$SyncsEntitysTableFilterComposer,
+      $$SyncsEntitysTableOrderingComposer,
+      $$SyncsEntitysTableAnnotationComposer,
+      $$SyncsEntitysTableCreateCompanionBuilder,
+      $$SyncsEntitysTableUpdateCompanionBuilder,
       (
-        SyncEntity,
-        BaseReferences<_$AppDatabase, $SyncEntitysTable, SyncEntity>,
+        SyncsEntity,
+        BaseReferences<_$AppDatabase, $SyncsEntitysTable, SyncsEntity>,
       ),
-      SyncEntity,
+      SyncsEntity,
       PrefetchHooks Function()
     >;
 
@@ -5819,22 +3353,12 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$TrabajadoresTableTableManager get trabajadores =>
       $$TrabajadoresTableTableManager(_db, _db.trabajadores);
-  $$GrupoUbicacionesTableTableManager get grupoUbicaciones =>
-      $$GrupoUbicacionesTableTableManager(_db, _db.grupoUbicaciones);
+  $$GruposUbicacionesTableTableManager get gruposUbicaciones =>
+      $$GruposUbicacionesTableTableManager(_db, _db.gruposUbicaciones);
   $$UbicacionesTableTableManager get ubicaciones =>
       $$UbicacionesTableTableManager(_db, _db.ubicaciones);
   $$HorariosTableTableManager get horarios =>
       $$HorariosTableTableManager(_db, _db.horarios);
-  $$RegistroBiometricoTableTableManager get registroBiometrico =>
-      $$RegistroBiometricoTableTableManager(_db, _db.registroBiometrico);
-  $$CargosLiderazgoTableTableManager get cargosLiderazgo =>
-      $$CargosLiderazgoTableTableManager(_db, _db.cargosLiderazgo);
-  $$LiderUbicacionesTableTableManager get liderUbicaciones =>
-      $$LiderUbicacionesTableTableManager(_db, _db.liderUbicaciones);
-  $$EquipoTableTableManager get equipo =>
-      $$EquipoTableTableManager(_db, _db.equipo);
-  $$RegistroDiarioTableTableManager get registroDiario =>
-      $$RegistroDiarioTableTableManager(_db, _db.registroDiario);
-  $$SyncEntitysTableTableManager get syncEntitys =>
-      $$SyncEntitysTableTableManager(_db, _db.syncEntitys);
+  $$SyncsEntitysTableTableManager get syncsEntitys =>
+      $$SyncsEntitysTableTableManager(_db, _db.syncsEntitys);
 }

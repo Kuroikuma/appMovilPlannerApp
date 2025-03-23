@@ -1,33 +1,45 @@
 import 'package:drift/drift.dart';
+import 'package:flutter_application_1/core/error/exceptions.dart';
 import 'package:flutter_application_1/data/database.dart';
 import 'package:flutter_application_1/data/mappers/trabajador_mappers.dart';
 import 'package:flutter_application_1/domain/entities.dart';
 
-class TrabajadorLocalDataSource {
+import '../../domain/repositories.dart';
+import 'local/trabajador_local.dart';
+import 'remote/api_client.dart';
+import 'remote/trabajador_remote.dart';
+
+class SyncEntityLocalDataSource implements ISyncEntityRepository {
   final AppDatabase _db;
+  final TrabajadorRemoteDataSource trabajadorRemoteDataSource;
+  final TrabajadorLocalDataSource trabajadorLocalDataSource;
+  final ApiClient _client;
 
-  TrabajadorLocalDataSource(this._db);
+  SyncEntityLocalDataSource(
+    this._db,
+    this.trabajadorRemoteDataSource,
+    this.trabajadorLocalDataSource,
+    this._client,
+  );
 
-  Future<void> insertOrUpdateTrabajador(SyncEntity syncEntitys) async {
+  @override
+  Future<void> insertSyncEntity(SyncEntity syncEntity) async {
     await _db
-        .into(_db.syncEntitys)
+        .into(_db.syncsEntitys)
         .insertOnConflictUpdate(
-          SyncEntitysCompanion(
-            entityTableNameToSync: Value(syncEntitys.entityTableNameToSync),
-            action: Value(syncEntitys.action),
-            registerId: Value(syncEntitys.registerId),
-            timestamp: Value(syncEntitys.timestamp),
-            isSynced: Value(syncEntitys.isSynced),
+          SyncsEntitysCompanion(
+            entityTableNameToSync: Value(syncEntity.entityTableNameToSync),
+            action: Value(syncEntity.action),
+            registerId: Value(syncEntity.registerId),
+            timestamp: Value(syncEntity.timestamp),
+            isSynced: Value(syncEntity.isSynced),
+            data: Value(syncEntity.data),
           ),
         );
   }
 
-  Future<List<Trabajador>> getAllTrabajadores() async {
-    final result = await _db.select(_db.trabajadores).get();
-    return result.map(TrabajadorMapper.fromDataModel).toList();
-  }
-
-  Future<void> syncTrabajadores(List<Trabajador> trabajadores) async {
+  @override
+  Future<void> syncEntitys(List<Trabajador> trabajadores) async {
     await _db.batch((batch) {
       batch.deleteAll(_db.trabajadores);
       batch.insertAll(
@@ -37,53 +49,174 @@ class TrabajadorLocalDataSource {
     });
   }
 
-  Future<Trabajador> insertOfflineTrabajador(Trabajador trabajador) async {
-    final companion = TrabajadoresCompanion.insert(
-      nombre: trabajador.nombre,
-      apellido: trabajador.apellido,
-      cedula: trabajador.cedula,
-      activo: Value(trabajador.activo),
-      ultimaActualizacion: Value(trabajador.ultimaActualizacion),
-    );
+  @override
+  Future<void> syncRemoteWithLocalData() async {
+    final pendingOperations = await getPendingLocalSyncOperations();
 
-    final id = await _db.into(_db.trabajadores).insert(companion);
-    return trabajador.copyWith(id: id);
+    // Agrupar operaciones por acción y entidad
+    final Map<String, List<SyncEntity>> groupedOps = {};
+    for (final op in pendingOperations) {
+      final key = "${op.action}_${op.entityTableNameToSync}";
+      groupedOps.putIfAbsent(key, () => []).add(op);
+    }
+
+    // Procesar cada grupo
+    for (final entry in groupedOps.entries) {
+      final parts = entry.key.split('_');
+      final action = parts[0];
+      final entity = parts[1];
+
+      try {
+        switch (action) {
+          case 'CREATE':
+            if (entity == 'trabajador') {
+              // Obtener todos los datos del grupo
+              final datos =
+                  entry.value
+                      .map((op) => TrabajadorMapper.fromApiJson(op.data))
+                      .toList();
+              await trabajadorRemoteDataSource.createTrabajadores(datos);
+              await markMultipleAsSynced(
+                entry.value,
+              ); // Marcar todo el grupo como sincronizado
+            }
+            break;
+          case 'UPDATE':
+            if (entity == 'trabajador') {
+              final updates =
+                  entry.value
+                      .map((op) => TrabajadorMapper.fromApiJson(op.data))
+                      .toList();
+              await trabajadorRemoteDataSource.updateTrabajadoresBatch(updates);
+              await markMultipleAsSynced(entry.value);
+            }
+            break;
+          case 'DELETE':
+            if (entity == 'trabajador') {
+              final deletes =
+                  entry.value
+                      .map((op) => TrabajadorMapper.fromApiJson(op.data))
+                      .toList();
+              await trabajadorRemoteDataSource.deleteTrabajadoresBatch(deletes);
+              await markMultipleAsSynced(entry.value);
+            }
+            break;
+        }
+      } catch (e) {
+        // Manejar error para todo el grupo
+      }
+    }
   }
 
-  Future<Trabajador?> getTrabajadorByCedula(String cedula) async {
-    final result =
-        await (_db.select(_db.trabajadores)
-          ..where((t) => t.cedula.equals(cedula))).getSingleOrNull();
+  @override
+  Future<void> syncLocalWithRemoteData() async {
+    final pendingOperations = await getPendingRemoteSyncOperations();
 
-    return result != null ? TrabajadorMapper.fromDataModel(result) : null;
+    // Agrupar operaciones por acción y entidad
+    final Map<String, List<SyncEntity>> groupedOps = {};
+    for (final op in pendingOperations) {
+      final key = "${op.action}_${op.entityTableNameToSync}";
+      groupedOps.putIfAbsent(key, () => []).add(op);
+    }
+
+    // Procesar cada grupo
+    for (final entry in groupedOps.entries) {
+      final parts = entry.key.split('_');
+      final action = parts[0];
+      final entity = parts[1];
+
+      try {
+        switch (action) {
+          case 'create':
+            if (entity == 'trabajador') {
+              // Obtener todos los datos del grupo
+              final datos =
+                  entry.value
+                      .map((op) => TrabajadorMapper.fromApiJson(op.data))
+                      .toList();
+              await trabajadorLocalDataSource.createTrabajadores(datos);
+              await markMultipleAsSynced(
+                entry.value,
+              ); // Marcar todo el grupo como sincronizado
+            }
+            break;
+          case 'update':
+            if (entity == 'trabajador') {
+              final updates =
+                  entry.value
+                      .map((op) => TrabajadorMapper.fromApiJson(op.data))
+                      .toList();
+              await trabajadorLocalDataSource.updateTrabajadoresBatch(updates);
+              await markMultipleAsSynced(entry.value);
+            }
+            break;
+          case 'delete':
+            if (entity == 'trabajador') {
+              final deletes =
+                  entry.value
+                      .map((op) => TrabajadorMapper.fromApiJson(op.data))
+                      .toList();
+              await trabajadorLocalDataSource.deleteTrabajadoresBatch(deletes);
+              await markMultipleAsSynced(entry.value);
+            }
+            break;
+        }
+      } catch (e) {
+        // Manejar error para todo el grupo
+      }
+    }
   }
 
-  // Future<List<SyncEntityD>> getPendingSyncOperations() async {
-  //   final operations =
-  //       await _db
-  //           .select(_db.syncEntitys)
-  //           .where((op) => op.synced.equals(false))
-  //           .get();
-  //   return operations
-  //       .map(
-  //         (op) => SyncOperation(
-  //           id: op.id,
-  //           type: op.type,
-  //           data: Trabajador(
-  //             id: op.entityId,
-  //             nombre: op.data['nombre'],
-  //             apellido: op.data['apellido'],
-  //             cedula: op.data['cedula'],
-  //             activo: op.data['activo'],
-  //           ),
-  //         ),
-  //       )
-  //       .toList();
-  // }
+  @override
+  Future<List<SyncEntity>> getPendingLocalSyncOperations() async {
+    final operations =
+        await (_db.select(_db.syncsEntitys)
+          ..where((op) => op.isSynced.equals(false))).get();
 
-  // Future<void> markOperationAsSynced(String operationId) async {
-  //   await (_db.update(_db.syncOperations)..where(
-  //     (op) => op.id.equals(operationId),
-  //   )).write(const SyncOperationsCompanion(synced: Value(true)));
-  // }
+    return operations
+        .map(
+          (op) => SyncEntity(
+            id: op.id,
+            entityTableNameToSync: op.entityTableNameToSync,
+            action: op.action,
+            registerId: op.registerId,
+            timestamp: op.timestamp,
+            isSynced: op.isSynced,
+            data: op.data,
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<SyncEntity>> getPendingRemoteSyncOperations() async {
+    final operations = await _client.get('/sync-entities');
+
+    if (operations.data is List) {
+      return operations.data
+          .map(
+            (op) => SyncEntity(
+              id: op['id'],
+              entityTableNameToSync: op['entityTableNameToSync'],
+              action: op['action'],
+              registerId: op['registerId'],
+              timestamp: DateTime.parse(op['timestamp']),
+              isSynced: op['isSynced'],
+              data: op['data'],
+            ),
+          )
+          .toList();
+    } else {
+      print('Unexpected response data type: ${operations.data.runtimeType}');
+      throw ApiException();
+    }
+  }
+
+  @override
+  Future<void> markMultipleAsSynced(List<SyncEntity> operations) async {
+    final ids = operations.map((op) => op.id).toList();
+    await (_db.update(_db.syncsEntitys)..where(
+      (op) => op.id.isIn(ids),
+    )).write(const SyncsEntitysCompanion(isSynced: Value(true)));
+  }
 }

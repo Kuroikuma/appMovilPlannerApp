@@ -14,10 +14,10 @@ class TrabajadorLocalDataSource {
         .insertOnConflictUpdate(
           TrabajadoresCompanion(
             nombre: Value(trabajador.nombre),
-            apellido: Value(trabajador.apellido),
-            cedula: Value(trabajador.cedula),
-            activo: Value(trabajador.activo),
-            ultimaActualizacion: Value(DateTime.now()),
+            primerApellido: Value(trabajador.primerApellido),
+            segundoApellido: Value(trabajador.segundoApellido),
+            equipoId: Value(trabajador.equipoId),
+            estado: Value(trabajador.estado),
           ),
         );
   }
@@ -40,58 +40,48 @@ class TrabajadorLocalDataSource {
   Future<Trabajador> insertOfflineTrabajador(Trabajador trabajador) async {
     final companion = TrabajadoresCompanion.insert(
       nombre: trabajador.nombre,
-      apellido: trabajador.apellido,
-      cedula: trabajador.cedula,
-      activo: Value(trabajador.activo),
-      ultimaActualizacion: Value(trabajador.ultimaActualizacion),
+      primerApellido: trabajador.primerApellido,
+      segundoApellido: trabajador.segundoApellido,
+      equipoId: trabajador.equipoId,
+      estado: Value(trabajador.estado),
     );
 
     final id = await _db.into(_db.trabajadores).insert(companion);
     return trabajador.copyWith(id: id);
   }
 
-  Future<Trabajador?> getTrabajadorByCedula(String cedula) async {
-    final result =
-        await (_db.select(_db.trabajadores)
-          ..where((t) => t.cedula.equals(cedula))).getSingleOrNull();
-
-    return result != null ? TrabajadorMapper.fromDataModel(result) : null;
+  Future<void> createTrabajadores(List<Trabajador> trabajadores) async {
+    await _db.batch((batch) {
+      batch.insertAllOnConflictUpdate(
+        _db.trabajadores,
+        trabajadores.map(TrabajadorMapper.toDataModel).toList(),
+      );
+    });
   }
 
-  // Future<List<SyncEntityD>> getPendingSyncOperations() async {
-  //   final operations =
-  //       await _db
-  //           .select(_db.syncEntitys)
-  //           .where((op) => op.synced.equals(false))
-  //           .get();
-  //   return operations
-  //       .map(
-  //         (op) => SyncOperation(
-  //           id: op.id,
-  //           type: op.type,
-  //           data: Trabajador(
-  //             id: op.entityId,
-  //             nombre: op.data['nombre'],
-  //             apellido: op.data['apellido'],
-  //             cedula: op.data['cedula'],
-  //             activo: op.data['activo'],
-  //           ),
-  //         ),
-  //       )
-  //       .toList();
-  // }
+  Future<void> updateTrabajadoresBatch(List<Trabajador> trabajadores) async {
+    await _db.batch((batch) {
+      for (final trabajador in trabajadores) {
+        batch.update(
+          _db.trabajadores,
+          TrabajadorMapper.toDataModel(trabajador),
+          where:
+              (tbl) => tbl.id.equals(
+                trabajador.id,
+              ), // Asegura que uses la clave primaria
+        );
+      }
+    });
+  }
 
-  // Future<void> markOperationAsSynced(String operationId) async {
-  //   await (_db.update(_db.syncOperations)..where(
-  //     (op) => op.id.equals(operationId),
-  //   )).write(const SyncOperationsCompanion(synced: Value(true)));
-  // }
-}
-
-class SyncOperation {
-  final String id;
-  final String type;
-  final Trabajador data;
-
-  SyncOperation({required this.id, required this.type, required this.data});
+  Future<void> deleteTrabajadoresBatch(List<Trabajador> trabajadores) async {
+    await _db.batch((batch) {
+      for (final trabajador in trabajadores) {
+        batch.deleteWhere(
+          _db.trabajadores,
+          (tbl) => tbl.id.equals(trabajador.id),
+        );
+      }
+    });
+  }
 }

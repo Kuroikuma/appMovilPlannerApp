@@ -7,10 +7,10 @@ class TrabajadorMapper {
     return Trabajador(
       id: data.id,
       nombre: data.nombre,
-      apellido: data.apellido,
-      cedula: data.cedula,
-      activo: data.activo,
-      ultimaActualizacion: data.ultimaActualizacion,
+      primerApellido: data.primerApellido,
+      segundoApellido: data.segundoApellido,
+      equipoId: data.equipoId,
+      estado: data.estado,
     );
   }
 
@@ -18,10 +18,10 @@ class TrabajadorMapper {
     return TrabajadoresCompanion(
       id: Value(entity.id),
       nombre: Value(entity.nombre),
-      apellido: Value(entity.apellido),
-      cedula: Value(entity.cedula),
-      activo: Value(entity.activo),
-      ultimaActualizacion: Value(entity.ultimaActualizacion),
+      primerApellido: Value(entity.primerApellido),
+      segundoApellido: Value(entity.segundoApellido),
+      equipoId: Value(entity.equipoId),
+      estado: Value(entity.estado),
     );
   }
 
@@ -31,13 +31,10 @@ class TrabajadorMapper {
       return Trabajador(
         id: json['id'] ?? 0,
         nombre: json['nombre']?.toString() ?? '',
-        apellido: json['apellido']?.toString() ?? '',
-        cedula: json['cedula']?.toString() ?? '',
-        activo: json['activo'] ?? false,
-        ultimaActualizacion:
-            json['ultima_actualizacion'] != null
-                ? DateTime.parse(json['ultima_actualizacion'])
-                : DateTime.now(),
+        primerApellido: json['primerApellido']?.toString() ?? '',
+        segundoApellido: json['segundoApellido']?.toString() ?? '',
+        equipoId: json['equipoId'] ?? 0,
+        estado: json['activo'] ?? false,
       );
     } catch (e) {
       print('Error mapeando JSON: $e');
@@ -49,9 +46,10 @@ class TrabajadorMapper {
   static Map<String, dynamic> toApiJson(Trabajador entity) {
     return {
       'nombre': entity.nombre,
-      'apellido': entity.apellido,
-      'cedula': entity.cedula,
-      'activo': entity.activo,
+      'primerApellido': entity.primerApellido,
+      'segundoApellido': entity.segundoApellido,
+      'equipoId': entity.equipoId,
+      'activo': entity.estado,
     };
   }
 }

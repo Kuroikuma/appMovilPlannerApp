@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/injection_container.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'presentation/widget/configurar_ubicacion.dart';
 import 'presentation/widget/trabajadores_list_widget.dart';
 
 void main() async {
@@ -44,7 +45,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const TrabajadoresList(),
+      home: const UbicacionScreen(),
     );
   }
 }

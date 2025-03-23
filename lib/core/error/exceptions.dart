@@ -29,3 +29,13 @@ class NoInternetException implements Exception {
   @override
   String toString() => "NoInternetException: $message";
 }
+
+class NoInternetUbicacionException implements Exception {
+  final String message;
+  NoInternetUbicacionException([
+    this.message = "No hay conexión a Internet para configurar la ubicación",
+  ]);
+
+  @override
+  String toString() => "NoInternetUbicacionException: $message";
+}

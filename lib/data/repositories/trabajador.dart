@@ -14,11 +14,13 @@ class TrabajadorRepository
   final TrabajadorLocalDataSource localDataSource;
   final TrabajadorRemoteDataSource remoteDataSource;
   final NetworkInfo networkInfo;
+  final ISyncEntityRepository syncEntityRepository;
 
   TrabajadorRepository({
     required this.localDataSource,
     required this.remoteDataSource,
     required this.networkInfo,
+    required this.syncEntityRepository,
   });
 
   @override
@@ -33,6 +35,17 @@ class TrabajadorRepository
         final localTrabajador = await localDataSource.insertOfflineTrabajador(
           trabajador,
         );
+        // syncEntityRepository.insertSyncEntity(
+        //   SyncEntity(
+        //     id: localTrabajador.id,
+        //     entityTableNameToSync: 'trabajador',
+        //     action: 'CREATE',
+        //     registerId: "{$localTrabajador.id}",
+        //     timestamp: DateTime.now(),
+        //     isSynced: false,
+        //     data: TrabajadorMapper.toApiJson(localTrabajador),
+        //   ),
+        // );
         return localTrabajador.copyWith(id: localTrabajador.id);
       }
     } on SocketException {
@@ -60,13 +73,6 @@ class TrabajadorRepository
     } else {
       return localData.isNotEmpty ? localData : throw NoInternetException();
     }
-  }
-
-  @override
-  Future<Trabajador?> obtenerTrabajadorPorCedula(String cedula) async {
-    final localData = await localDataSource.getTrabajadorByCedula(cedula);
-    if (localData != null) return localData;
-    return remoteDataSource.getTrabajadorByCedula(cedula);
   }
 
   @override
