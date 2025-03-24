@@ -20,7 +20,7 @@ class UbicacionScreen extends ConsumerWidget {
             onPressed: () {
               ref
                   .read(ubicacionNotifierProvider.notifier)
-                  .verificarUbicacionConfigurada();
+                  .verificarUbicacionConfiguradaLocal();
             },
             tooltip: 'Configurar App biométrica',
           ),
@@ -52,7 +52,8 @@ class UbicacionScreen extends ConsumerWidget {
                     const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: () async {
-                        await ubicacionNotifier.verificarUbicacionConfigurada();
+                        await ubicacionNotifier
+                            .verificarUbicacionConfiguradaLocal();
                       },
                       child: const Text("Verificar Ubicación"),
                     ),

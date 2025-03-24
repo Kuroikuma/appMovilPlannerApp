@@ -36,7 +36,9 @@ Future<void> setupDependencies() async {
   );
 
   getIt.registerLazySingleton<ApiClient>(
-    () => ApiClient('https://plannerapptest.com'), // Usando IP local
+    () => ApiClient(
+      'https://plannerapptest.com/IntegracionExternaHoras',
+    ), // Usando IP local
   );
 
   // Remotos

@@ -6,10 +6,13 @@ abstract class IUbicacionRepository {
   Future<Ubicacione> obtenerUbicacionConfigurada();
   Future<Ubicacione> configurarUbicacion(
     String codigoUbicacion,
+    String ubicacionNombre,
     String ubicacionId,
   );
-  Future<bool> verificarUbicacionConfigurada();
+  Future<bool> verificarUbicacionConfiguradaLocal();
   Future<bool> verificarUbicacionConfiguradaRemota(String ubicacionId);
-  Future<String> obtenerUbicacionId(String codigoUbicacion);
-  Future<void> eliminarUbicacion();
+  Future<Map<String, dynamic>> getUbicacionByCodigoUbicacion(
+    String codigoUbicacion,
+  );
+  Future<void> eliminarUbicacion(int ubicacionId);
 }

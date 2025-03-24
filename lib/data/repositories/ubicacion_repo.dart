@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/i_ubicacion_repository.dart';
@@ -17,7 +18,7 @@ class UbicacionRepo implements IUbicacionRepository {
   }
 
   @override
-  Future<bool> verificarUbicacionConfigurada() async {
+  Future<bool> verificarUbicacionConfiguradaLocal() async {
     final result = await _db.select(_db.ubicaciones).get();
     return result.isNotEmpty;
   }
@@ -25,7 +26,7 @@ class UbicacionRepo implements IUbicacionRepository {
   @override
   Future<bool> verificarUbicacionConfiguradaRemota(String ubicacionId) async {
     final config = await _client.get(
-      '/IntegracionExternaHoras/GetIntegracionUbicacionApp?ubicacionId=$ubicacionId',
+      '/GetIntegracionUbicacionApp?ubicacionId=$ubicacionId',
     );
 
     final configData = config.data;
@@ -50,6 +51,7 @@ class UbicacionRepo implements IUbicacionRepository {
   @override
   Future<Ubicacione> configurarUbicacion(
     String codigoUbicacion,
+    String ubicacionNombre,
     String ubicacionId,
   ) async {
     final uuid = const Uuid();
@@ -57,68 +59,79 @@ class UbicacionRepo implements IUbicacionRepository {
 
     final config = Ubicacione(
       id: codigoUbicacionLocal,
-      nombre: codigoUbicacion,
-      grupoId: '',
+      nombre: ubicacionNombre,
       ubicacionId: int.parse(ubicacionId),
       estado: true,
     );
 
     await configurarUbicacionRemota(codigoUbicacion, codigoUbicacionLocal);
-
     await configurarUbicacionLocal(config);
 
     return config;
   }
 
   @override
-  Future<String> obtenerUbicacionId(String codigoUbicacion) async {
+  Future<Map<String, dynamic>> getUbicacionByCodigoUbicacion(
+    String codigoUbicacion,
+  ) async {
     final config = await _client.get(
-      '/IntegracionExternaHoras/GetUbicacionIdByCodigoUbicacion?codigoUbicacion=$codigoUbicacion',
+      '/GetUbicacionByCodigoUbicacion?codigoUbicacion=$codigoUbicacion',
     );
 
-    final configData = config.data;
+    final ubicacionId = config.data['ubicacionId'].toString();
+    final ubicacionNombre = config.data['ubicacion'];
 
-    return configData.toString();
+    return {'ubicacionId': ubicacionId, 'ubicacionNombre': ubicacionNombre};
   }
 
-  Future<Ubicacione> configurarUbicacionRemota(
+  Future<bool> configurarUbicacionRemota(
     String codigoUbicacion,
     String codigoUbicacionLocal,
   ) async {
-    print('codigoUbicacion: $codigoUbicacion');
-    print('codigoUbicacionLocal: $codigoUbicacionLocal');
-    final config = await _client.post(
-      '/IntegracionExternaHoras/PostSaveIntegracionUbicacionApp',
-      data: {
-        'codigoUbicacion': codigoUbicacion,
-        'codigoUbicacionLocal': codigoUbicacionLocal,
-      },
-    );
-
-    final configData = config.data;
-
-    if (configData['success']) {
-      return Ubicacione(
-        id: configData['id'],
-        nombre: configData['nombre'],
-        grupoId: configData['grupoId'],
-        ubicacionId: configData['ubicacionId'],
-        estado: configData['estado'],
+    try {
+      await _client.post(
+        '/PostSaveIntegracionUbicacionApp',
+        data: {
+          'codigoUbicacion': codigoUbicacion,
+          'codigoUbicacionLocal': codigoUbicacionLocal,
+        },
       );
-    } else {
-      throw Exception('Error al configurar ubicación');
+
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
   Future<void> configurarUbicacionLocal(Ubicacione ubicacion) async {
-    final result = await _db.into(_db.ubicaciones).insert(ubicacion);
-    if (result > 0) {
-      return;
+    try {
+      final result = await _db
+          .into(_db.ubicaciones)
+          .insert(
+            UbicacionesCompanion.insert(
+              id: ubicacion.id,
+              nombre: ubicacion.nombre,
+              ubicacionId: ubicacion.ubicacionId,
+              estado: Value(ubicacion.estado),
+            ),
+          );
+
+      if (result > 0) {
+        return;
+      }
+    } catch (e) {
+      print('Error al configurar ubicación local: $e');
     }
   }
 
   @override
-  Future<void> eliminarUbicacion() async {
-    await _db.delete(_db.ubicaciones);
+  Future<void> eliminarUbicacion(int ubicacionId) async {
+    await _client.delete(
+      '/DeleteIntegracionUbicacionApp?ubicacionId=$ubicacionId',
+    );
+
+    await _db.batch((batch) {
+      batch.deleteAll(_db.ubicaciones);
+    });
   }
 }

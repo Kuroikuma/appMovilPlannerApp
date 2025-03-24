@@ -78,8 +78,8 @@ class GruposUbicaciones extends Table {
 class Ubicaciones extends Table {
   TextColumn get id => text().unique()();
   TextColumn get nombre => text()();
-  IntColumn get ubicacionId => integer().unique()();
-  TextColumn get grupoId => text().references(GruposUbicaciones, #id)();
+  IntColumn get ubicacionId => integer().unique().named('ubicacion_id')();
+  // TextColumn get grupoId => text().references(GruposUbicaciones, #id)();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
 }
 

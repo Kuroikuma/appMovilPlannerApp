@@ -714,20 +714,6 @@ class $UbicacionesTable extends Ubicaciones
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
-  static const VerificationMeta _grupoIdMeta = const VerificationMeta(
-    'grupoId',
-  );
-  @override
-  late final GeneratedColumn<String> grupoId = GeneratedColumn<String>(
-    'grupo_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES grupos_ubicaciones (id)',
-    ),
-  );
   static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
   @override
   late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
@@ -742,13 +728,7 @@ class $UbicacionesTable extends Ubicaciones
     defaultValue: const Constant(true),
   );
   @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    nombre,
-    ubicacionId,
-    grupoId,
-    estado,
-  ];
+  List<GeneratedColumn> get $columns => [id, nombre, ubicacionId, estado];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -785,14 +765,6 @@ class $UbicacionesTable extends Ubicaciones
     } else if (isInserting) {
       context.missing(_ubicacionIdMeta);
     }
-    if (data.containsKey('grupo_id')) {
-      context.handle(
-        _grupoIdMeta,
-        grupoId.isAcceptableOrUnknown(data['grupo_id']!, _grupoIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_grupoIdMeta);
-    }
     if (data.containsKey('estado')) {
       context.handle(
         _estadoMeta,
@@ -823,11 +795,6 @@ class $UbicacionesTable extends Ubicaciones
             DriftSqlType.int,
             data['${effectivePrefix}ubicacion_id'],
           )!,
-      grupoId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}grupo_id'],
-          )!,
       estado:
           attachedDatabase.typeMapping.read(
             DriftSqlType.bool,
@@ -846,13 +813,11 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
   final String id;
   final String nombre;
   final int ubicacionId;
-  final String grupoId;
   final bool estado;
   const Ubicacione({
     required this.id,
     required this.nombre,
     required this.ubicacionId,
-    required this.grupoId,
     required this.estado,
   });
   @override
@@ -861,7 +826,6 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
     map['id'] = Variable<String>(id);
     map['nombre'] = Variable<String>(nombre);
     map['ubicacion_id'] = Variable<int>(ubicacionId);
-    map['grupo_id'] = Variable<String>(grupoId);
     map['estado'] = Variable<bool>(estado);
     return map;
   }
@@ -871,7 +835,6 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
       id: Value(id),
       nombre: Value(nombre),
       ubicacionId: Value(ubicacionId),
-      grupoId: Value(grupoId),
       estado: Value(estado),
     );
   }
@@ -885,7 +848,6 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
       id: serializer.fromJson<String>(json['id']),
       nombre: serializer.fromJson<String>(json['nombre']),
       ubicacionId: serializer.fromJson<int>(json['ubicacionId']),
-      grupoId: serializer.fromJson<String>(json['grupoId']),
       estado: serializer.fromJson<bool>(json['estado']),
     );
   }
@@ -896,7 +858,6 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
       'id': serializer.toJson<String>(id),
       'nombre': serializer.toJson<String>(nombre),
       'ubicacionId': serializer.toJson<int>(ubicacionId),
-      'grupoId': serializer.toJson<String>(grupoId),
       'estado': serializer.toJson<bool>(estado),
     };
   }
@@ -905,13 +866,11 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
     String? id,
     String? nombre,
     int? ubicacionId,
-    String? grupoId,
     bool? estado,
   }) => Ubicacione(
     id: id ?? this.id,
     nombre: nombre ?? this.nombre,
     ubicacionId: ubicacionId ?? this.ubicacionId,
-    grupoId: grupoId ?? this.grupoId,
     estado: estado ?? this.estado,
   );
   Ubicacione copyWithCompanion(UbicacionesCompanion data) {
@@ -920,7 +879,6 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
       nombre: data.nombre.present ? data.nombre.value : this.nombre,
       ubicacionId:
           data.ubicacionId.present ? data.ubicacionId.value : this.ubicacionId,
-      grupoId: data.grupoId.present ? data.grupoId.value : this.grupoId,
       estado: data.estado.present ? data.estado.value : this.estado,
     );
   }
@@ -931,14 +889,13 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
           ..write('ubicacionId: $ubicacionId, ')
-          ..write('grupoId: $grupoId, ')
           ..write('estado: $estado')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, nombre, ubicacionId, grupoId, estado);
+  int get hashCode => Object.hash(id, nombre, ubicacionId, estado);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -946,7 +903,6 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
           other.id == this.id &&
           other.nombre == this.nombre &&
           other.ubicacionId == this.ubicacionId &&
-          other.grupoId == this.grupoId &&
           other.estado == this.estado);
 }
 
@@ -954,14 +910,12 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
   final Value<String> id;
   final Value<String> nombre;
   final Value<int> ubicacionId;
-  final Value<String> grupoId;
   final Value<bool> estado;
   final Value<int> rowid;
   const UbicacionesCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
     this.ubicacionId = const Value.absent(),
-    this.grupoId = const Value.absent(),
     this.estado = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -969,18 +923,15 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
     required String id,
     required String nombre,
     required int ubicacionId,
-    required String grupoId,
     this.estado = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nombre = Value(nombre),
-       ubicacionId = Value(ubicacionId),
-       grupoId = Value(grupoId);
+       ubicacionId = Value(ubicacionId);
   static Insertable<Ubicacione> custom({
     Expression<String>? id,
     Expression<String>? nombre,
     Expression<int>? ubicacionId,
-    Expression<String>? grupoId,
     Expression<bool>? estado,
     Expression<int>? rowid,
   }) {
@@ -988,7 +939,6 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
       if (id != null) 'id': id,
       if (nombre != null) 'nombre': nombre,
       if (ubicacionId != null) 'ubicacion_id': ubicacionId,
-      if (grupoId != null) 'grupo_id': grupoId,
       if (estado != null) 'estado': estado,
       if (rowid != null) 'rowid': rowid,
     });
@@ -998,7 +948,6 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
     Value<String>? id,
     Value<String>? nombre,
     Value<int>? ubicacionId,
-    Value<String>? grupoId,
     Value<bool>? estado,
     Value<int>? rowid,
   }) {
@@ -1006,7 +955,6 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
       id: id ?? this.id,
       nombre: nombre ?? this.nombre,
       ubicacionId: ubicacionId ?? this.ubicacionId,
-      grupoId: grupoId ?? this.grupoId,
       estado: estado ?? this.estado,
       rowid: rowid ?? this.rowid,
     );
@@ -1024,9 +972,6 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
     if (ubicacionId.present) {
       map['ubicacion_id'] = Variable<int>(ubicacionId.value);
     }
-    if (grupoId.present) {
-      map['grupo_id'] = Variable<String>(grupoId.value);
-    }
     if (estado.present) {
       map['estado'] = Variable<bool>(estado.value);
     }
@@ -1042,7 +987,6 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
           ..write('ubicacionId: $ubicacionId, ')
-          ..write('grupoId: $grupoId, ')
           ..write('estado: $estado, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -2369,7 +2313,6 @@ typedef $$UbicacionesTableCreateCompanionBuilder =
       required String id,
       required String nombre,
       required int ubicacionId,
-      required String grupoId,
       Value<bool> estado,
       Value<int> rowid,
     });
@@ -2378,7 +2321,6 @@ typedef $$UbicacionesTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> nombre,
       Value<int> ubicacionId,
-      Value<String> grupoId,
       Value<bool> estado,
       Value<int> rowid,
     });
@@ -2577,14 +2519,12 @@ class $$UbicacionesTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> nombre = const Value.absent(),
                 Value<int> ubicacionId = const Value.absent(),
-                Value<String> grupoId = const Value.absent(),
                 Value<bool> estado = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UbicacionesCompanion(
                 id: id,
                 nombre: nombre,
                 ubicacionId: ubicacionId,
-                grupoId: grupoId,
                 estado: estado,
                 rowid: rowid,
               ),
@@ -2593,14 +2533,12 @@ class $$UbicacionesTableTableManager
                 required String id,
                 required String nombre,
                 required int ubicacionId,
-                required String grupoId,
                 Value<bool> estado = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UbicacionesCompanion.insert(
                 id: id,
                 nombre: nombre,
                 ubicacionId: ubicacionId,
-                grupoId: grupoId,
                 estado: estado,
                 rowid: rowid,
               ),

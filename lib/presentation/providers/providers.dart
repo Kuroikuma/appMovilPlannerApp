@@ -35,7 +35,9 @@ LazyDatabase _openDatabase() {
 }
 
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient('https://plannerapptest.com'); // Usando IP local
+  return ApiClient(
+    'https://plannerapptest.com/IntegracionExternaHoras',
+  ); // Usando IP local
 });
 
 final networkInfoProvider = Provider<NetworkInfo>((ref) {

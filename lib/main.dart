@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/injection_container.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'presentation/widget/configurar_ubicacion.dart';
-import 'presentation/widget/trabajadores_list_widget.dart';
+import 'presentation/screens/ubicacion_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
