@@ -2,7 +2,7 @@ import 'package:flutter_application_1/domain/entities.dart';
 
 abstract class ITrabajadorRepository {
   Future<Trabajador> crearTrabajador(Trabajador trabajador);
-  Future<List<Trabajador>> obtenerTodosTrabajadores();
+  Future<List<Trabajador>> obtenerTrabajadoresPorUbicacion(String ubicacionId);
 }
 
 abstract class ISyncEntityRepository {

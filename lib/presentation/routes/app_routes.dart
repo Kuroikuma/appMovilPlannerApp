@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../screens/configurar_ubicacion_screen.dart';
 import '../screens/main_screen.dart';
+import '../screens/trabajador_screen.dart';
 import '../screens/ubicacion_screen.dart';
-// import '../screens/trabajadores_screen.dart';
 
 class AppRoutes {
   static const String ubicacion = '/ubicacion';
@@ -14,7 +14,7 @@ class AppRoutes {
     return {
       main: (context) => const MainScreen(),
       ubicacion: (context) => const UbicacionScreen(),
-      // trabajadores: (context) => const TrabajadoresScreen(),
+      trabajadores: (context) => const TrabajadoresScreen(),
       configurarUbicacion: (context) => const ConfigurarUbicacionScreen(),
     };
   }

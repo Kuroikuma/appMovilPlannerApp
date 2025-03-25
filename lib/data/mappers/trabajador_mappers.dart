@@ -29,12 +29,12 @@ class TrabajadorMapper {
     print('Mapeando JSON: $json');
     try {
       return Trabajador(
-        id: json['id'] ?? 0,
+        id: json['trabajadorId'] ?? 0,
         nombre: json['nombre']?.toString() ?? '',
         primerApellido: json['primerApellido']?.toString() ?? '',
         segundoApellido: json['segundoApellido']?.toString() ?? '',
         equipoId: json['equipoId'] ?? 0,
-        estado: json['activo'] ?? false,
+        estado: json['faceSync'] ?? false,
       );
     } catch (e) {
       print('Error mapeando JSON: $e');

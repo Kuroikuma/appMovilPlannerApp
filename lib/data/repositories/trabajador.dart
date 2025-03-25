@@ -54,28 +54,6 @@ class TrabajadorRepository
   }
 
   @override
-  Future<List<Trabajador>> obtenerTodosTrabajadores() async {
-    final localData = await localDataSource.getAllTrabajadores();
-    final isConnected = await networkInfo.isConnected;
-    print('isConnected: $isConnected');
-    if (isConnected) {
-      try {
-        print('Fetching remote data...');
-        final remoteData = await remoteDataSource.getAllTrabajadores();
-        print('Remote data');
-        await localDataSource.syncTrabajadores(remoteData);
-        return remoteData;
-      } catch (e, stackTrace) {
-        print('Error inesperado: $e');
-        print(stackTrace);
-        return localData.isNotEmpty ? localData : throw CacheException();
-      }
-    } else {
-      return localData.isNotEmpty ? localData : throw NoInternetException();
-    }
-  }
-
-  @override
   Future<void> handleOfflineOperations() {
     // TODO: implement handleOfflineOperations
     throw UnimplementedError();
@@ -89,6 +67,28 @@ class TrabajadorRepository
   Future<void> syncLocalWithRemote() {
     // TODO: implement syncLocalWithRemote
     throw UnimplementedError();
+  }
+
+  @override
+  Future<List<Trabajador>> obtenerTrabajadoresPorUbicacion(
+    String ubicacionId,
+  ) async {
+    final localData = await localDataSource.getAllTrabajadores();
+    final isConnected = await networkInfo.isConnected;
+    if (isConnected) {
+      try {
+        final remoteData = await remoteDataSource.getAllTrabajadores(
+          int.parse(ubicacionId),
+        );
+        print('Remote data: $remoteData');
+        await localDataSource.syncTrabajadores(remoteData);
+        return remoteData;
+      } catch (e) {
+        return localData.isNotEmpty ? localData : throw CacheException();
+      }
+    } else {
+      return localData.isNotEmpty ? localData : throw NoInternetException();
+    }
   }
 
   // @override
