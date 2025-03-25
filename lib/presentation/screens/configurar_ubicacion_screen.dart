@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../configurar_ubicacion_form.dart';
+import '../widget/configurar_ubicacion_form.dart';
 
-class NoUbicacionScreen extends ConsumerWidget {
-  const NoUbicacionScreen({Key? key}) : super(key: key);
+class ConfigurarUbicacionScreen extends ConsumerWidget {
+  const ConfigurarUbicacionScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

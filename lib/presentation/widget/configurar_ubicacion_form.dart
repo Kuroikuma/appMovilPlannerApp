@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/use_case/ubicacion.dart';
+import '../routes/app_routes.dart';
 import '../utils/notification_utils.dart';
 
 class ConfiurarUbicacionFormScreen extends ConsumerStatefulWidget {
@@ -225,14 +226,22 @@ class _ConfiurarUbicacionFormScreenState
               _codigoUbicacionController.text,
             );
 
+        print('Ubicación configurada correctamente');
         // Mostrar notificación de éxito
         if (mounted) {
+          print('Mostrando notificación de éxito');
           NotificationUtils.showSnackBar(
             context: context,
             message: 'Ubicación configurada correctamente',
             isError: false,
             icon: Icons.check_circle,
           );
+
+          Navigator.of(context).pushNamed(AppRoutes.ubicacion);
+        } else {
+          print('La pantalla no está montada');
+          // Manejar el caso en el que la pantalla no esté montada
+          // Puedes mostrar un mensaje de error o realizar alguna acción adicional
         }
       } catch (e) {
         // El error ya se maneja en el provider y se muestra en el build
