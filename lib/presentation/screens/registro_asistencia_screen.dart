@@ -898,22 +898,21 @@ class _RegistroAsistenciaScreenState
   Future<void> _selectDateRange(BuildContext context) async {
     DateTime now = DateTime.now();
     DateTime firstDate = DateTime(2020);
-    DateTime lastDate = DateTime(2025, 1, 1); // Última fecha permitida
+    DateTime lastDate = now; // <-- Fecha máxima = fecha actual
 
-    // Si _fechaInicio o _fechaFin están fuera del rango, ajustarlas
+    // Ajustar fechas iniciales para que no excedan la fecha actual
     DateTime startDate = _fechaInicio ?? now.subtract(const Duration(days: 7));
     DateTime endDate = _fechaFin ?? now;
 
-    if (startDate.isAfter(lastDate)) startDate = lastDate;
-    if (endDate.isAfter(lastDate)) endDate = lastDate;
-    if (startDate.isAfter(endDate))
-      startDate = endDate; // Evita errores en el rango
+    // Forzar a que las fechas no sean posteriores a "now"
+    startDate = startDate.isAfter(now) ? now : startDate;
+    endDate = endDate.isAfter(now) ? now : endDate;
 
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       initialDateRange: DateTimeRange(start: startDate, end: endDate),
       firstDate: firstDate,
-      lastDate: lastDate,
+      lastDate: lastDate, // <-- Fecha máxima bloqueada a "now"
       locale: const Locale('es', 'ES'),
       builder: (context, child) {
         return Theme(
@@ -929,8 +928,9 @@ class _RegistroAsistenciaScreenState
 
     if (picked != null) {
       setState(() {
-        _fechaInicio = picked.start;
-        _fechaFin = picked.end;
+        // Asegurar que las fechas seleccionadas no sean futuras
+        _fechaInicio = picked.start.isAfter(now) ? now : picked.start;
+        _fechaFin = picked.end.isAfter(now) ? now : picked.end;
       });
 
       final ubicacionState = ref.read(ubicacionNotifierProvider);
