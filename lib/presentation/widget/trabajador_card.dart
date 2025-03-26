@@ -57,29 +57,25 @@ class TrabajadorCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        _buildStatusBadge(context),
+                        // _buildStatusBadge(context),
                       ],
                     ),
-                    if (trabajador.primerApellido != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        '${trabajador.primerApellido} ${trabajador.segundoApellido}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    if (trabajador.segundoApellido != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        trabajador.segundoApellido!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                    const SizedBox(height: 4),
+                    Text(
+                      '${trabajador.primerApellido} ${trabajador.segundoApellido}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'ID: ${trabajador.id}',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
@@ -89,16 +85,15 @@ class TrabajadorCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.info_outline),
+                    icon:
+                        trabajador.faceSync
+                            ? const Icon(Icons.face, color: Colors.green)
+                            : const Icon(
+                              Icons.face_retouching_off,
+                              color: Colors.red,
+                            ),
                     onPressed: onTap,
-                    tooltip: 'Ver detalles',
                   ),
-                  if (onChangeStatus != null)
-                    Switch(
-                      value: trabajador.faceSync,
-                      onChanged: onChangeStatus,
-                      activeColor: Colors.green,
-                    ),
                 ],
               ),
             ],

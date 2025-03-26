@@ -30,7 +30,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 0, 63, 125),
+        ),
       ),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -44,6 +46,9 @@ class MyApp extends StatelessWidget {
       locale: const Locale('es', 'ES'), // Default locale
       initialRoute: AppRoutes.main, // Ruta inicial
       routes: AppRoutes.getRoutes(), // Registrar rutas
+      builder: (context, child) {
+        return ScaffoldMessenger(child: child ?? Container());
+      },
     );
   }
 }

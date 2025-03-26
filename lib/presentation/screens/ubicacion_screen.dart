@@ -19,151 +19,156 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
     final ubicacionNotifier = ref.read(ubicacionNotifierProvider.notifier);
     final theme = Theme.of(context);
 
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Encabezado con estado de verificación
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.7),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.verified_user,
-                    color: Colors.green[700],
-                    size: 28,
+    return Scaffold(
+      body: Center(
+        child: Card(
+          elevation: 4,
+          margin: const EdgeInsets.only(top: 40),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Encabezado con estado de verificación
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.green[100],
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.green, width: 1),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.check_circle,
-                                  color: Colors.green[700],
-                                  size: 14,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Verificada',
-                                  style: TextStyle(
-                                    color: Colors.green[700],
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        ubicacion.nombre ?? 'Sin nombre',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                      child: Icon(
+                        Icons.verified_user,
+                        color: Colors.green[700],
+                        size: 28,
                       ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Detalles de la ubicación
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Detalles de la ubicación',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Información de la ubicación
-                _buildInfoCard(context, [
-                  _buildInfoRow(
-                    context,
-                    'ID',
-                    ubicacion.id?.toString() ?? 'N/A',
-                  ),
-                  if (ubicacion.ubicacionId != null)
-                    _buildInfoRow(
-                      context,
-                      'Ubicación',
-                      ubicacion.ubicacionId.toString(),
                     ),
-                  if (ubicacion.nombre != null)
-                    _buildInfoRow(context, 'Nombre', ubicacion.nombre!),
-                ]),
-
-                const SizedBox(height: 24),
-
-                // Sección "¿Qué puedes hacer ahora?"
-                Text(
-                  '¿Qué puedes hacer ahora?',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.green[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.green,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle,
+                                      color: Colors.green[700],
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Verificada',
+                                      style: TextStyle(
+                                        color: Colors.green[700],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            ubicacion.nombre ?? 'Sin nombre',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
+              ),
 
-                // Tarjetas de funcionalidades
-                _buildFunctionalityCards(context),
+              // Detalles de la ubicación
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Detalles de la ubicación',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
 
-                const SizedBox(height: 24),
+                    // Información de la ubicación
+                    _buildInfoCard(context, [
+                      if (ubicacion.ubicacionId != null)
+                        _buildInfoRow(
+                          context,
+                          'Ubicación',
+                          ubicacion.ubicacionId.toString(),
+                        ),
+                      if (ubicacion.nombre != null)
+                        _buildInfoRow(context, 'Nombre', ubicacion.nombre!),
+                    ]),
 
-                // Botones de acción
-                _buildActionButtons(context, ubicacionNotifier),
-              ],
-            ),
+                    const SizedBox(height: 24),
+
+                    // Sección "¿Qué puedes hacer ahora?"
+                    Text(
+                      '¿Qué puedes hacer ahora?',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Tarjetas de funcionalidades
+                    _buildFunctionalityCards(context),
+
+                    const SizedBox(height: 24),
+
+                    // Botones de acción
+                    _buildActionButtons(context, ubicacionNotifier),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -215,6 +220,139 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
   Widget _buildFunctionalityCards(BuildContext context) {
     return Column(
       children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Card(
+            elevation: 0,
+            color: Theme.of(
+              context,
+            ).colorScheme.primaryContainer.withOpacity(0.7),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
+            ),
+            child: InkWell(
+              onTap: () {
+                NotificationUtils.showSnackBar(
+                  context: context,
+                  message: 'Función de escaneo próximamente',
+                  isError: false,
+                  icon: Icons.qr_code_scanner,
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.qr_code_scanner,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 28, // Icono más grande
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Escanear asistencia',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  'Principal',
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Registra la asistencia de trabajadores mediante código QR',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // const SizedBox(height: 12),
+        // _buildFeatureCard(
+        //   context,
+        //   icon: Icons.qr_code_scanner,
+        //   title: 'Escanear asistencia',
+        //   description:
+        //       'Registra la asistencia de trabajadores mediante código QR',
+        //   onTap: () {
+        //     // Implementar funcionalidad de escaneo
+        //     NotificationUtils.showSnackBar(
+        //       context: context,
+        //       message: 'Función de escaneo próximamente',
+        //       isError: false,
+        //       icon: Icons.qr_code_scanner,
+        //     );
+        //   },
+        // ),
+        const SizedBox(height: 12),
         _buildFeatureCard(
           context,
           icon: Icons.people,
@@ -223,23 +361,6 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
               'Accede a la lista de trabajadores asignados a esta ubicación',
           onTap: () {
             Navigator.of(context).pushNamed(AppRoutes.trabajadores);
-          },
-        ),
-        const SizedBox(height: 12),
-        _buildFeatureCard(
-          context,
-          icon: Icons.qr_code_scanner,
-          title: 'Escanear asistencia',
-          description:
-              'Registra la asistencia de trabajadores mediante código QR',
-          onTap: () {
-            // Implementar funcionalidad de escaneo
-            NotificationUtils.showSnackBar(
-              context: context,
-              message: 'Función de escaneo próximamente',
-              isError: false,
-              icon: Icons.qr_code_scanner,
-            );
           },
         ),
         const SizedBox(height: 12),
@@ -280,12 +401,12 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
-                  color: Theme.of(context).colorScheme.secondary,
+                  color: Theme.of(context).colorScheme.onPrimary,
                   size: 24,
                 ),
               ),
