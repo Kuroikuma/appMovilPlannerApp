@@ -5,10 +5,11 @@ import '../providers/use_case/registro_diario.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../providers/use_case/trabajador.dart';
 import '../widget/registro_diario_card.dart';
+import '../widget/resumen_asistencia_card.dart';
 import '../utils/notification_utils.dart';
 
 class RegistroAsistenciaScreen extends ConsumerStatefulWidget {
-  const RegistroAsistenciaScreen({Key? key}) : super(key: key);
+  const RegistroAsistenciaScreen({super.key});
 
   @override
   ConsumerState<RegistroAsistenciaScreen> createState() =>
@@ -20,6 +21,9 @@ class _RegistroAsistenciaScreenState
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   DateTime _fechaSeleccionada = DateTime.now();
+  DateTime? _fechaInicio;
+  DateTime? _fechaFin;
+  bool _modoRangoFechas = false;
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
 
@@ -45,12 +49,22 @@ class _RegistroAsistenciaScreenState
     final ubicacionState = ref.read(ubicacionNotifierProvider);
     if (ubicacionState.ubicacion != null &&
         ubicacionState.ubicacion!.id != null) {
-      ref
-          .read(registroDiarioNotifierProvider.notifier)
-          .cargarRegistros(
-            ubicacionState.ubicacion!.id.toString(),
-            fecha: _fechaSeleccionada,
-          );
+      if (_modoRangoFechas) {
+        ref
+            .read(registroDiarioNotifierProvider.notifier)
+            .cargarRegistrosPorRango(
+              ubicacionState.ubicacion!.id.toString(),
+              fechaInicio: _fechaInicio,
+              fechaFin: _fechaFin,
+            );
+      } else {
+        ref
+            .read(registroDiarioNotifierProvider.notifier)
+            .cargarRegistros(
+              ubicacionState.ubicacion!.id.toString(),
+              fecha: _fechaSeleccionada,
+            );
+      }
     } else {
       NotificationUtils.showSnackBar(
         context: context,
@@ -199,49 +213,103 @@ class _RegistroAsistenciaScreenState
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios, size: 18),
-            onPressed: () {
-              setState(() {
-                _fechaSeleccionada = _fechaSeleccionada.subtract(
-                  const Duration(days: 1),
-                );
-              });
-              _cargarRegistros();
-            },
-          ),
-          GestureDetector(
-            onTap: () => _selectDate(context),
-            child: Row(
-              children: [
-                const Icon(Icons.calendar_today, size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  DateFormat(
-                    'EEEE, d MMMM yyyy',
-                    'es',
-                  ).format(_fechaSeleccionada),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios, size: 18),
+                onPressed:
+                    _modoRangoFechas
+                        ? null
+                        : () {
+                          setState(() {
+                            _fechaSeleccionada = _fechaSeleccionada.subtract(
+                              const Duration(days: 1),
+                            );
+                          });
+                          _cargarRegistros();
+                        },
+              ),
+              GestureDetector(
+                onTap:
+                    () =>
+                        _modoRangoFechas
+                            ? _selectDateRange(context)
+                            : _selectDate(context),
+                child: Row(
+                  children: [
+                    Icon(
+                      _modoRangoFechas
+                          ? Icons.date_range
+                          : Icons.calendar_today,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _modoRangoFechas
+                          ? _formatDateRange()
+                          : DateFormat(
+                            'EEEE, d MMMM yyyy',
+                            'es',
+                          ).format(_fechaSeleccionada),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.arrow_forward_ios, size: 18),
+                onPressed:
+                    _modoRangoFechas
+                        ? null
+                        : () {
+                          setState(() {
+                            _fechaSeleccionada = _fechaSeleccionada.add(
+                              const Duration(days: 1),
+                            );
+                          });
+                          _cargarRegistros();
+                        },
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, size: 18),
-            onPressed: () {
-              setState(() {
-                _fechaSeleccionada = _fechaSeleccionada.add(
-                  const Duration(days: 1),
-                );
-              });
-              _cargarRegistros();
-            },
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ChoiceChip(
+                label: const Text('Día específico'),
+                selected: !_modoRangoFechas,
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() {
+                      _modoRangoFechas = false;
+                      _fechaInicio = null;
+                      _fechaFin = null;
+                    });
+                    _cargarRegistros();
+                  }
+                },
+              ),
+              const SizedBox(width: 8),
+              ChoiceChip(
+                label: const Text('Rango de fechas'),
+                selected: _modoRangoFechas,
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() {
+                      _modoRangoFechas = true;
+                    });
+                    _selectDateRange(context);
+                  }
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -265,22 +333,51 @@ class _RegistroAsistenciaScreenState
       onRefresh: () async {
         _cargarRegistros();
       },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: state.registrosFiltrados.length,
-        itemBuilder: (context, index) {
-          final registro = state.registrosFiltrados[index];
-          return RegistroDiarioCard(
-            registro: registro,
-            onTap: () => _mostrarDetallesRegistro(registro.id!),
-            onRegistrarSalida:
-                registro.tieneSalida
-                    ? null
-                    : () => _registrarSalida(registro.id!),
-            onCambiarEstado:
-                (value) => _cambiarEstadoRegistro(registro.id!, value),
-          );
-        },
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: 16),
+        children: [
+          // Mostrar resumen solo en modo rango de fechas o cuando hay múltiples registros
+          if (_modoRangoFechas || state.registrosFiltrados.length > 1)
+            ResumenAsistenciaCard(
+              registros: state.registrosFiltrados,
+              fechaInicio: _fechaInicio,
+              fechaFin: _fechaFin,
+            ),
+
+          // Lista de registros
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'Registros de Asistencia',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ...state.registrosFiltrados
+                    .map(
+                      (registro) => RegistroDiarioCard(
+                        registro: registro,
+                        onTap: () => _mostrarDetallesRegistro(registro.id!),
+                        onRegistrarSalida:
+                            registro.tieneSalida
+                                ? null
+                                : () => _registrarSalida(registro.id!),
+                        onCambiarEstado:
+                            (value) =>
+                                _cambiarEstadoRegistro(registro.id!, value),
+                      ),
+                    )
+                    .toList(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -341,9 +438,7 @@ class _RegistroAsistenciaScreenState
                         IconButton(
                           icon: const Icon(Icons.login, color: Colors.blue),
                           onPressed:
-                              () => _registrarEntrada(
-                                trabajador.equipoId.toString(),
-                              ),
+                              () => _registrarEntrada(trabajador.id.toString()),
                           tooltip: 'Registrar entrada',
                         ),
                         IconButton(
@@ -352,7 +447,7 @@ class _RegistroAsistenciaScreenState
                             color: Colors.green,
                           ),
                           onPressed:
-                              () => _escanearQR(trabajador.equipoId.toString()),
+                              () => _escanearQR(trabajador.id.toString()),
                           tooltip: 'Escanear QR',
                         ),
                       ],
@@ -386,7 +481,9 @@ class _RegistroAsistenciaScreenState
           Icon(Icons.event_busy, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            'No hay registros para esta fecha',
+            _modoRangoFechas
+                ? 'No hay registros en el rango seleccionado'
+                : 'No hay registros para esta fecha',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -395,7 +492,9 @@ class _RegistroAsistenciaScreenState
           ),
           const SizedBox(height: 8),
           Text(
-            'Intenta cambiar la fecha o registrar una nueva asistencia',
+            _modoRangoFechas
+                ? 'Intenta seleccionar otro rango de fechas o registrar una nueva asistencia'
+                : 'Intenta cambiar la fecha o registrar una nueva asistencia',
             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
@@ -778,5 +877,73 @@ class _RegistroAsistenciaScreenState
       selectedColor: Theme.of(context).colorScheme.primaryContainer,
       checkmarkColor: Theme.of(context).colorScheme.primary,
     );
+  }
+
+  String _formatDateRange() {
+    if (_fechaInicio == null && _fechaFin == null) {
+      return 'Seleccionar rango';
+    }
+
+    if (_fechaInicio != null && _fechaFin == null) {
+      return 'Desde ${DateFormat('dd/MM/yyyy').format(_fechaInicio!)}';
+    }
+
+    if (_fechaInicio == null && _fechaFin != null) {
+      return 'Hasta ${DateFormat('dd/MM/yyyy').format(_fechaFin!)}';
+    }
+
+    return '${DateFormat('dd/MM/yyyy').format(_fechaInicio!)} - ${DateFormat('dd/MM/yyyy').format(_fechaFin!)}';
+  }
+
+  Future<void> _selectDateRange(BuildContext context) async {
+    DateTime now = DateTime.now();
+    DateTime firstDate = DateTime(2020);
+    DateTime lastDate = DateTime(2025, 1, 1); // Última fecha permitida
+
+    // Si _fechaInicio o _fechaFin están fuera del rango, ajustarlas
+    DateTime startDate = _fechaInicio ?? now.subtract(const Duration(days: 7));
+    DateTime endDate = _fechaFin ?? now;
+
+    if (startDate.isAfter(lastDate)) startDate = lastDate;
+    if (endDate.isAfter(lastDate)) endDate = lastDate;
+    if (startDate.isAfter(endDate))
+      startDate = endDate; // Evita errores en el rango
+
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      initialDateRange: DateTimeRange(start: startDate, end: endDate),
+      firstDate: firstDate,
+      lastDate: lastDate,
+      locale: const Locale('es', 'ES'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _fechaInicio = picked.start;
+        _fechaFin = picked.end;
+      });
+
+      final ubicacionState = ref.read(ubicacionNotifierProvider);
+      if (ubicacionState.ubicacion != null &&
+          ubicacionState.ubicacion!.id != null) {
+        ref
+            .read(registroDiarioNotifierProvider.notifier)
+            .cargarRegistrosPorRango(
+              ubicacionState.ubicacion!.id.toString(),
+              fechaInicio: _fechaInicio,
+              fechaFin: _fechaFin,
+            );
+      }
+    }
   }
 }

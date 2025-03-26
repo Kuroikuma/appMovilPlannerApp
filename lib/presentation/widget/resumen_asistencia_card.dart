@@ -91,7 +91,7 @@ class ResumenAsistenciaCard extends StatelessWidget {
             // Estadísticas
             Row(
               children: [
-                Expanded(
+                Flexible(
                   child: _buildStatCard(
                     context,
                     'Total Registros',
@@ -101,7 +101,7 @@ class ResumenAsistenciaCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Expanded(
+                Flexible(
                   child: _buildStatCard(
                     context,
                     'Completos',
@@ -111,7 +111,7 @@ class ResumenAsistenciaCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Expanded(
+                Flexible(
                   child: _buildStatCard(
                     context,
                     'Pendientes',
@@ -165,12 +165,16 @@ class ResumenAsistenciaCard extends StatelessWidget {
             children: [
               Icon(icon, color: color, size: 16),
               const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: color,
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: color,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
             ],
