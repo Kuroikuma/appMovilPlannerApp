@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/injection_container.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'presentation/routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupDependencies(); // 👈 Inicializa las dependencias
+  await initializeDateFormatting('es_ES', null);
 
   // Configuración adicional si es necesaria
   // getIt<SyncManager>().startSyncInterval(Duration(minutes: 15));

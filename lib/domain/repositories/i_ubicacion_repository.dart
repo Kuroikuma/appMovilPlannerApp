@@ -1,4 +1,4 @@
-import '../data/database.dart';
+import '../../data/database.dart';
 
 abstract class IUbicacionRepository {
   Future<List<Ubicacione>> obtenerUbicacionesPorGrupo(String grupoId);

@@ -23,7 +23,7 @@ class TrabajadorCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
           color:
-              trabajador.estado
+              trabajador.faceSync
                   ? Colors.green.withOpacity(0.3)
                   : Colors.red.withOpacity(0.3),
           width: 1,
@@ -95,7 +95,7 @@ class TrabajadorCard extends StatelessWidget {
                   ),
                   if (onChangeStatus != null)
                     Switch(
-                      value: trabajador.estado,
+                      value: trabajador.faceSync,
                       onChanged: onChangeStatus,
                       activeColor: Colors.green,
                     ),
@@ -129,19 +129,19 @@ class TrabajadorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: trabajador.estado ? Colors.green[50] : Colors.red[50],
+        color: trabajador.faceSync ? Colors.green[50] : Colors.red[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: trabajador.estado ? Colors.green : Colors.red,
+          color: trabajador.faceSync ? Colors.green : Colors.red,
           width: 1,
         ),
       ),
       child: Text(
-        trabajador.estado ? 'Activo' : 'Inactivo',
+        trabajador.faceSync ? 'Activo' : 'Inactivo',
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: trabajador.estado ? Colors.green[700] : Colors.red[700],
+          color: trabajador.faceSync ? Colors.green[700] : Colors.red[700],
         ),
       ),
     );

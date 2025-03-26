@@ -107,9 +107,9 @@ class TrabajadorNotifier extends StateNotifier<TrabajadorState> {
 
     // Filtrar por estado (activo/inactivo)
     if (state.filterType == TrabajadorFilterType.activos) {
-      filtrados = filtrados.where((t) => t.estado == true).toList();
+      filtrados = filtrados.where((t) => t.faceSync == true).toList();
     } else if (state.filterType == TrabajadorFilterType.inactivos) {
-      filtrados = filtrados.where((t) => t.estado == false).toList();
+      filtrados = filtrados.where((t) => t.faceSync == false).toList();
     }
 
     // Filtrar por búsqueda

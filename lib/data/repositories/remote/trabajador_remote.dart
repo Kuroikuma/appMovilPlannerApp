@@ -16,6 +16,8 @@ class TrabajadorRemoteDataSource {
         '/GetListTrabajadorByUbicacionId?ubicacionId=$ubicacionId',
       );
 
+      print('response: ${response.data}');
+
       List<dynamic> jsonList;
       if (response.data is String) {
         try {

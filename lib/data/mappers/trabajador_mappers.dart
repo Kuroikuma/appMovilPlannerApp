@@ -10,7 +10,7 @@ class TrabajadorMapper {
       primerApellido: data.primerApellido,
       segundoApellido: data.segundoApellido,
       equipoId: data.equipoId,
-      estado: data.estado,
+      faceSync: data.estado,
     );
   }
 
@@ -21,12 +21,11 @@ class TrabajadorMapper {
       primerApellido: Value(entity.primerApellido),
       segundoApellido: Value(entity.segundoApellido),
       equipoId: Value(entity.equipoId),
-      estado: Value(entity.estado),
+      estado: Value(entity.faceSync),
     );
   }
 
   static Trabajador fromApiJson(Map<String, dynamic> json) {
-    print('Mapeando JSON: $json');
     try {
       return Trabajador(
         id: json['trabajadorId'] ?? 0,
@@ -34,7 +33,8 @@ class TrabajadorMapper {
         primerApellido: json['primerApellido']?.toString() ?? '',
         segundoApellido: json['segundoApellido']?.toString() ?? '',
         equipoId: json['equipoId'] ?? 0,
-        estado: json['faceSync'] ?? false,
+        faceSync: json['faceSync'] ?? false,
+        estado: json['estado'] ?? false,
       );
     } catch (e) {
       print('Error mapeando JSON: $e');
@@ -49,7 +49,8 @@ class TrabajadorMapper {
       'primerApellido': entity.primerApellido,
       'segundoApellido': entity.segundoApellido,
       'equipoId': entity.equipoId,
-      'activo': entity.estado,
+      'faceSync': entity.faceSync,
+      'estado': entity.estado,
     };
   }
 }

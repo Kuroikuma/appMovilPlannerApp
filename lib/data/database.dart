@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:flutter_application_1/domain/entities.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart' show TimeOfDay;
 import 'converters/json_converter.dart';
@@ -17,8 +16,8 @@ Uuid uuid = const Uuid();
     GruposUbicaciones,
     Ubicaciones,
     Horarios,
-    RegistroBiometrico,
-    RegistroDiario,
+    RegistrosBiometricos,
+    RegistrosDiarios,
     SyncsEntitys,
   ],
 )
@@ -65,6 +64,7 @@ class Trabajadores extends Table {
   TextColumn get segundoApellido => text()();
   IntColumn get equipoId => integer().unique()();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
+  BoolColumn get faceSync => boolean().withDefault(const Constant(false))();
 }
 
 // Tabla: GrupoUbicaciones
@@ -143,13 +143,11 @@ class RegistrosDiarios extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get equipoId => integer().references(Trabajadores, #equipoId)();
   TextColumn get registroBiometricoId =>
-      text().references(RegistrosBiometricos, #id)();
+      text().nullable().references(RegistrosBiometricos, #id)();
   TextColumn get fechaIngreso => text().map(const DateConverter())();
   TextColumn get horaIngreso => text().map(const TimeOfDayConverter())();
   TextColumn get fechaSalida => text().map(const DateConverter())();
   TextColumn get horaSalida => text().map(const TimeOfDayConverter())();
-  BoolColumn get ingresoSincronizado => boolean()();
-  BoolColumn get salidaSincronizada => boolean()();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
 }
 

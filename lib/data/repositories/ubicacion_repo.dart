@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../domain/i_ubicacion_repository.dart';
+import '../../domain/repositories/i_ubicacion_repository.dart';
 import '../database.dart';
 import 'remote/api_client.dart';
 
@@ -132,6 +132,12 @@ class UbicacionRepo implements IUbicacionRepository {
 
     await _db.batch((batch) {
       batch.deleteAll(_db.ubicaciones);
+      batch.deleteAll(_db.gruposUbicaciones);
+      batch.deleteAll(_db.trabajadores);
+      batch.deleteAll(_db.horarios);
+      batch.deleteAll(_db.syncsEntitys);
+      batch.deleteAll(_db.registrosBiometricos);
+      batch.deleteAll(_db.registrosDiarios);
     });
   }
 }

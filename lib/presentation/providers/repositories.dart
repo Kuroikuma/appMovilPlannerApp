@@ -1,9 +1,11 @@
 import 'package:riverpod/riverpod.dart';
 
+import '../../data/repositories/remote/registro_diario_repository_remote.dart';
 import '../../data/repositories/sync_entity_repo.dart';
 import '../../data/repositories/trabajador.dart';
 import '../../data/repositories/ubicacion_repo.dart';
-import '../../domain/i_ubicacion_repository.dart';
+import '../../domain/repositories/i_registro_diario_repository.dart';
+import '../../domain/repositories/i_ubicacion_repository.dart';
 import '../../domain/repositories.dart';
 import 'data_sources.dart';
 import 'providers.dart';
@@ -31,4 +33,10 @@ final ubicacionRepositoryProvider = Provider<IUbicacionRepository>((ref) {
     ref.watch(databaseProvider),
     ref.watch(apiClientProvider),
   );
+});
+
+final registroDiarioRepositoryProvider = Provider<IRegistroDiarioRepository>((
+  ref,
+) {
+  return RegistroDiarioRepository();
 });

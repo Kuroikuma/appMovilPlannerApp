@@ -245,17 +245,12 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
         const SizedBox(height: 12),
         _buildFeatureCard(
           context,
-          icon: Icons.assignment,
-          title: 'Gestionar tareas',
-          description: 'Administra las tareas asignadas a esta ubicación',
+          icon: Icons.fact_check,
+          title: 'Registro de asistencia',
+          description:
+              'Gestiona la asistencia de los trabajadores en esta ubicación',
           onTap: () {
-            // Implementar funcionalidad de tareas
-            NotificationUtils.showSnackBar(
-              context: context,
-              message: 'Función de tareas próximamente',
-              isError: false,
-              icon: Icons.assignment,
-            );
+            Navigator.of(context).pushNamed(AppRoutes.registroAsistencia);
           },
         ),
       ],

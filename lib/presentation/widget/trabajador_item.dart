@@ -15,8 +15,8 @@ class TrabajadorItem extends StatelessWidget {
         title: Text('${trabajador.nombre} ${trabajador.primerApellido}'),
         subtitle: Text(trabajador.id.toString()),
         trailing: Icon(
-          trabajador.estado ? Icons.check_circle : Icons.cancel,
-          color: trabajador.estado ? Colors.green : Colors.red,
+          trabajador.faceSync ? Icons.check_circle : Icons.cancel,
+          color: trabajador.faceSync ? Colors.green : Colors.red,
         ),
         onTap:
             () => Navigator.push(

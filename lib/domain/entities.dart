@@ -8,8 +8,9 @@ class Trabajador {
   final String nombre;
   final String primerApellido;
   final String segundoApellido;
-  final bool estado;
+  final bool faceSync;
   final int equipoId;
+  final bool estado;
 
   Trabajador({
     this.id = 0,
@@ -17,6 +18,7 @@ class Trabajador {
     required this.primerApellido,
     required this.segundoApellido,
     required this.equipoId,
+    this.faceSync = true,
     this.estado = true,
   });
 
@@ -25,8 +27,9 @@ class Trabajador {
     String? nombre,
     String? primerApellido,
     String? segundoApellido,
-    bool? estado,
+    bool? faceSync,
     int? equipoId,
+    bool? estado,
   }) {
     return Trabajador(
       id: id ?? this.id,
@@ -34,6 +37,7 @@ class Trabajador {
       primerApellido: primerApellido ?? this.primerApellido,
       segundoApellido: segundoApellido ?? this.segundoApellido,
       equipoId: equipoId ?? this.equipoId,
+      faceSync: faceSync ?? this.faceSync,
       estado: estado ?? this.estado,
     );
   }

@@ -73,8 +73,10 @@ class TrabajadorRepository
   Future<List<Trabajador>> obtenerTrabajadoresPorUbicacion(
     String ubicacionId,
   ) async {
+    print('obtenerTrabajadoresPorUbicacion');
     final localData = await localDataSource.getAllTrabajadores();
     final isConnected = await networkInfo.isConnected;
+    print('Local data: $localData');
     if (isConnected) {
       try {
         final remoteData = await remoteDataSource.getAllTrabajadores(

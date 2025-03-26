@@ -1,6 +1,6 @@
 import 'package:flutter_application_1/core/network/network_info.dart';
 
-import '../../../domain/i_ubicacion_repository.dart';
+import '../../../domain/repositories/i_ubicacion_repository.dart';
 import '../../../data/database.dart';
 import 'package:riverpod/riverpod.dart';
 

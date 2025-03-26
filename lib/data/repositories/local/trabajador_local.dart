@@ -17,7 +17,7 @@ class TrabajadorLocalDataSource {
             primerApellido: Value(trabajador.primerApellido),
             segundoApellido: Value(trabajador.segundoApellido),
             equipoId: Value(trabajador.equipoId),
-            estado: Value(trabajador.estado),
+            estado: Value(trabajador.faceSync),
           ),
         );
   }
@@ -43,7 +43,7 @@ class TrabajadorLocalDataSource {
       primerApellido: trabajador.primerApellido,
       segundoApellido: trabajador.segundoApellido,
       equipoId: trabajador.equipoId,
-      estado: Value(trabajador.estado),
+      estado: Value(trabajador.faceSync),
     );
 
     final id = await _db.into(_db.trabajadores).insert(companion);
