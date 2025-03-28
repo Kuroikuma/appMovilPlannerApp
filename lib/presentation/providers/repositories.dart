@@ -1,9 +1,11 @@
 import 'package:riverpod/riverpod.dart';
 
+import '../../data/repositories/remote/reconocimiento_facial_repository.dart';
 import '../../data/repositories/remote/registro_diario_repository_remote.dart';
 import '../../data/repositories/sync_entity_repo.dart';
 import '../../data/repositories/trabajador.dart';
 import '../../data/repositories/ubicacion_repo.dart';
+import '../../domain/repositories/i_reconocimiento_facial_repository.dart';
 import '../../domain/repositories/i_registro_diario_repository.dart';
 import '../../domain/repositories/i_ubicacion_repository.dart';
 import '../../domain/repositories.dart';
@@ -40,3 +42,10 @@ final registroDiarioRepositoryProvider = Provider<IRegistroDiarioRepository>((
 ) {
   return RegistroDiarioRepository();
 });
+
+final reconocimientoFacialRepositoryProvider =
+    Provider<IReconocimientoFacialRepository>((ref) {
+      return ReconocimientoFacialRepository(
+        ref.watch(registroDiarioRepositoryProvider),
+      );
+    });

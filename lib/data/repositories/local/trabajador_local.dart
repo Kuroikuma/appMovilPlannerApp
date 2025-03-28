@@ -44,6 +44,7 @@ class TrabajadorLocalDataSource {
       segundoApellido: trabajador.segundoApellido,
       equipoId: trabajador.equipoId,
       estado: Value(trabajador.faceSync),
+      fotoUrl: trabajador.fotoUrl,
     );
 
     final id = await _db.into(_db.trabajadores).insert(companion);

@@ -93,6 +93,17 @@ class $TrabajadoresTable extends Trabajadores
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _fotoUrlMeta = const VerificationMeta(
+    'fotoUrl',
+  );
+  @override
+  late final GeneratedColumn<String> fotoUrl = GeneratedColumn<String>(
+    'foto_url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -102,6 +113,7 @@ class $TrabajadoresTable extends Trabajadores
     equipoId,
     estado,
     faceSync,
+    fotoUrl,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -168,6 +180,14 @@ class $TrabajadoresTable extends Trabajadores
         faceSync.isAcceptableOrUnknown(data['face_sync']!, _faceSyncMeta),
       );
     }
+    if (data.containsKey('foto_url')) {
+      context.handle(
+        _fotoUrlMeta,
+        fotoUrl.isAcceptableOrUnknown(data['foto_url']!, _fotoUrlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fotoUrlMeta);
+    }
     return context;
   }
 
@@ -212,6 +232,11 @@ class $TrabajadoresTable extends Trabajadores
             DriftSqlType.bool,
             data['${effectivePrefix}face_sync'],
           )!,
+      fotoUrl:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}foto_url'],
+          )!,
     );
   }
 
@@ -229,6 +254,7 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
   final int equipoId;
   final bool estado;
   final bool faceSync;
+  final String fotoUrl;
   const Trabajadore({
     required this.id,
     required this.nombre,
@@ -237,6 +263,7 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     required this.equipoId,
     required this.estado,
     required this.faceSync,
+    required this.fotoUrl,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -248,6 +275,7 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     map['equipo_id'] = Variable<int>(equipoId);
     map['estado'] = Variable<bool>(estado);
     map['face_sync'] = Variable<bool>(faceSync);
+    map['foto_url'] = Variable<String>(fotoUrl);
     return map;
   }
 
@@ -260,6 +288,7 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
       equipoId: Value(equipoId),
       estado: Value(estado),
       faceSync: Value(faceSync),
+      fotoUrl: Value(fotoUrl),
     );
   }
 
@@ -276,6 +305,7 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
       equipoId: serializer.fromJson<int>(json['equipoId']),
       estado: serializer.fromJson<bool>(json['estado']),
       faceSync: serializer.fromJson<bool>(json['faceSync']),
+      fotoUrl: serializer.fromJson<String>(json['fotoUrl']),
     );
   }
   @override
@@ -289,6 +319,7 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
       'equipoId': serializer.toJson<int>(equipoId),
       'estado': serializer.toJson<bool>(estado),
       'faceSync': serializer.toJson<bool>(faceSync),
+      'fotoUrl': serializer.toJson<String>(fotoUrl),
     };
   }
 
@@ -300,6 +331,7 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     int? equipoId,
     bool? estado,
     bool? faceSync,
+    String? fotoUrl,
   }) => Trabajadore(
     id: id ?? this.id,
     nombre: nombre ?? this.nombre,
@@ -308,6 +340,7 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     equipoId: equipoId ?? this.equipoId,
     estado: estado ?? this.estado,
     faceSync: faceSync ?? this.faceSync,
+    fotoUrl: fotoUrl ?? this.fotoUrl,
   );
   Trabajadore copyWithCompanion(TrabajadoresCompanion data) {
     return Trabajadore(
@@ -324,6 +357,7 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
       equipoId: data.equipoId.present ? data.equipoId.value : this.equipoId,
       estado: data.estado.present ? data.estado.value : this.estado,
       faceSync: data.faceSync.present ? data.faceSync.value : this.faceSync,
+      fotoUrl: data.fotoUrl.present ? data.fotoUrl.value : this.fotoUrl,
     );
   }
 
@@ -336,7 +370,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
           ..write('segundoApellido: $segundoApellido, ')
           ..write('equipoId: $equipoId, ')
           ..write('estado: $estado, ')
-          ..write('faceSync: $faceSync')
+          ..write('faceSync: $faceSync, ')
+          ..write('fotoUrl: $fotoUrl')
           ..write(')'))
         .toString();
   }
@@ -350,6 +385,7 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     equipoId,
     estado,
     faceSync,
+    fotoUrl,
   );
   @override
   bool operator ==(Object other) =>
@@ -361,7 +397,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
           other.segundoApellido == this.segundoApellido &&
           other.equipoId == this.equipoId &&
           other.estado == this.estado &&
-          other.faceSync == this.faceSync);
+          other.faceSync == this.faceSync &&
+          other.fotoUrl == this.fotoUrl);
 }
 
 class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
@@ -372,6 +409,7 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
   final Value<int> equipoId;
   final Value<bool> estado;
   final Value<bool> faceSync;
+  final Value<String> fotoUrl;
   const TrabajadoresCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
@@ -380,6 +418,7 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     this.equipoId = const Value.absent(),
     this.estado = const Value.absent(),
     this.faceSync = const Value.absent(),
+    this.fotoUrl = const Value.absent(),
   });
   TrabajadoresCompanion.insert({
     this.id = const Value.absent(),
@@ -389,10 +428,12 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     required int equipoId,
     this.estado = const Value.absent(),
     this.faceSync = const Value.absent(),
+    required String fotoUrl,
   }) : nombre = Value(nombre),
        primerApellido = Value(primerApellido),
        segundoApellido = Value(segundoApellido),
-       equipoId = Value(equipoId);
+       equipoId = Value(equipoId),
+       fotoUrl = Value(fotoUrl);
   static Insertable<Trabajadore> custom({
     Expression<int>? id,
     Expression<String>? nombre,
@@ -401,6 +442,7 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     Expression<int>? equipoId,
     Expression<bool>? estado,
     Expression<bool>? faceSync,
+    Expression<String>? fotoUrl,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -410,6 +452,7 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
       if (equipoId != null) 'equipo_id': equipoId,
       if (estado != null) 'estado': estado,
       if (faceSync != null) 'face_sync': faceSync,
+      if (fotoUrl != null) 'foto_url': fotoUrl,
     });
   }
 
@@ -421,6 +464,7 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     Value<int>? equipoId,
     Value<bool>? estado,
     Value<bool>? faceSync,
+    Value<String>? fotoUrl,
   }) {
     return TrabajadoresCompanion(
       id: id ?? this.id,
@@ -430,6 +474,7 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
       equipoId: equipoId ?? this.equipoId,
       estado: estado ?? this.estado,
       faceSync: faceSync ?? this.faceSync,
+      fotoUrl: fotoUrl ?? this.fotoUrl,
     );
   }
 
@@ -457,6 +502,9 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     if (faceSync.present) {
       map['face_sync'] = Variable<bool>(faceSync.value);
     }
+    if (fotoUrl.present) {
+      map['foto_url'] = Variable<String>(fotoUrl.value);
+    }
     return map;
   }
 
@@ -469,7 +517,8 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
           ..write('segundoApellido: $segundoApellido, ')
           ..write('equipoId: $equipoId, ')
           ..write('estado: $estado, ')
-          ..write('faceSync: $faceSync')
+          ..write('faceSync: $faceSync, ')
+          ..write('fotoUrl: $fotoUrl')
           ..write(')'))
         .toString();
   }
@@ -3058,6 +3107,7 @@ typedef $$TrabajadoresTableCreateCompanionBuilder =
       required int equipoId,
       Value<bool> estado,
       Value<bool> faceSync,
+      required String fotoUrl,
     });
 typedef $$TrabajadoresTableUpdateCompanionBuilder =
     TrabajadoresCompanion Function({
@@ -3068,6 +3118,7 @@ typedef $$TrabajadoresTableUpdateCompanionBuilder =
       Value<int> equipoId,
       Value<bool> estado,
       Value<bool> faceSync,
+      Value<String> fotoUrl,
     });
 
 final class $$TrabajadoresTableReferences
@@ -3174,6 +3225,11 @@ class $$TrabajadoresTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get fotoUrl => $composableBuilder(
+    column: $table.fotoUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> registrosBiometricosRefs(
     Expression<bool> Function($$RegistrosBiometricosTableFilterComposer f) f,
   ) {
@@ -3268,6 +3324,11 @@ class $$TrabajadoresTableOrderingComposer
     column: $table.faceSync,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get fotoUrl => $composableBuilder(
+    column: $table.fotoUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TrabajadoresTableAnnotationComposer
@@ -3303,6 +3364,9 @@ class $$TrabajadoresTableAnnotationComposer
 
   GeneratedColumn<bool> get faceSync =>
       $composableBuilder(column: $table.faceSync, builder: (column) => column);
+
+  GeneratedColumn<String> get fotoUrl =>
+      $composableBuilder(column: $table.fotoUrl, builder: (column) => column);
 
   Expression<T> registrosBiometricosRefs<T extends Object>(
     Expression<T> Function($$RegistrosBiometricosTableAnnotationComposer a) f,
@@ -3395,6 +3459,7 @@ class $$TrabajadoresTableTableManager
                 Value<int> equipoId = const Value.absent(),
                 Value<bool> estado = const Value.absent(),
                 Value<bool> faceSync = const Value.absent(),
+                Value<String> fotoUrl = const Value.absent(),
               }) => TrabajadoresCompanion(
                 id: id,
                 nombre: nombre,
@@ -3403,6 +3468,7 @@ class $$TrabajadoresTableTableManager
                 equipoId: equipoId,
                 estado: estado,
                 faceSync: faceSync,
+                fotoUrl: fotoUrl,
               ),
           createCompanionCallback:
               ({
@@ -3413,6 +3479,7 @@ class $$TrabajadoresTableTableManager
                 required int equipoId,
                 Value<bool> estado = const Value.absent(),
                 Value<bool> faceSync = const Value.absent(),
+                required String fotoUrl,
               }) => TrabajadoresCompanion.insert(
                 id: id,
                 nombre: nombre,
@@ -3421,6 +3488,7 @@ class $$TrabajadoresTableTableManager
                 equipoId: equipoId,
                 estado: estado,
                 faceSync: faceSync,
+                fotoUrl: fotoUrl,
               ),
           withReferenceMapper:
               (p0) =>

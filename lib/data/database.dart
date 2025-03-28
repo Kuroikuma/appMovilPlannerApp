@@ -65,6 +65,7 @@ class Trabajadores extends Table {
   IntColumn get equipoId => integer().unique()();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
   BoolColumn get faceSync => boolean().withDefault(const Constant(false))();
+  TextColumn get fotoUrl => text()();
 }
 
 // Tabla: GrupoUbicaciones

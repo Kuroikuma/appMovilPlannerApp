@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../providers/use_case/registro_diario.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../providers/use_case/trabajador.dart';
+import '../routes/app_routes.dart';
 import '../widget/registro_diario_card.dart';
 import '../widget/resumen_asistencia_card.dart';
 import '../utils/notification_utils.dart';
@@ -461,11 +462,14 @@ class _RegistroAsistenciaScreenState
           // Botón para escanear QR
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: () => _escanearQRGeneral(),
-            icon: const Icon(Icons.qr_code_scanner),
-            label: const Text('Escanear QR para registrar asistencia'),
+            onPressed: () {
+              Navigator.of(context).pushNamed(AppRoutes.reconocimientoFacial);
+            },
+            icon: const Icon(Icons.face),
+            label: const Text('Registrar asistencia con reconocimiento facial'),
             style: FilledButton.styleFrom(
               minimumSize: const Size(double.infinity, 50),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
             ),
           ),
         ],

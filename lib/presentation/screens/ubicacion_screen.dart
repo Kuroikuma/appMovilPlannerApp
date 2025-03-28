@@ -245,12 +245,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
             ),
             child: InkWell(
               onTap: () {
-                NotificationUtils.showSnackBar(
-                  context: context,
-                  message: 'Función de escaneo próximamente',
-                  isError: false,
-                  icon: Icons.qr_code_scanner,
-                );
+                Navigator.of(context).pushNamed(AppRoutes.reconocimientoFacial);
               },
               borderRadius: BorderRadius.circular(12),
               child: Padding(
@@ -266,7 +261,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        Icons.qr_code_scanner,
+                        Icons.face,
                         color: Theme.of(context).colorScheme.primary,
                         size: 28, // Icono más grande
                       ),
@@ -311,7 +306,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Registra la asistencia de trabajadores mediante código QR',
+                            'Registrar asistencia con reconocimiento facial',
                             style: Theme.of(
                               context,
                             ).textTheme.bodySmall?.copyWith(

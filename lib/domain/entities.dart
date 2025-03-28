@@ -11,6 +11,7 @@ class Trabajador {
   final bool faceSync;
   final int equipoId;
   final bool estado;
+  final String fotoUrl;
 
   Trabajador({
     this.id = 0,
@@ -20,6 +21,7 @@ class Trabajador {
     required this.equipoId,
     this.faceSync = true,
     this.estado = true,
+    required this.fotoUrl,
   });
 
   Trabajador copyWith({
@@ -30,6 +32,7 @@ class Trabajador {
     bool? faceSync,
     int? equipoId,
     bool? estado,
+    String? fotoUrl,
   }) {
     return Trabajador(
       id: id ?? this.id,
@@ -39,6 +42,7 @@ class Trabajador {
       equipoId: equipoId ?? this.equipoId,
       faceSync: faceSync ?? this.faceSync,
       estado: estado ?? this.estado,
+      fotoUrl: fotoUrl ?? this.fotoUrl,
     );
   }
 }

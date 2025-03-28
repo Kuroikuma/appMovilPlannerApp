@@ -11,6 +11,8 @@ class TrabajadorMapper {
       segundoApellido: data.segundoApellido,
       equipoId: data.equipoId,
       faceSync: data.estado,
+      estado: data.estado,
+      fotoUrl: data.fotoUrl,
     );
   }
 
@@ -35,6 +37,7 @@ class TrabajadorMapper {
         equipoId: json['equipoId'] ?? 0,
         faceSync: json['faceSync'] ?? false,
         estado: json['estado'] ?? false,
+        fotoUrl: json['fotoUrl']?.toString() ?? '',
       );
     } catch (e) {
       print('Error mapeando JSON: $e');
