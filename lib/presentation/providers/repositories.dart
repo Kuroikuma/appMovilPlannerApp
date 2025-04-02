@@ -40,7 +40,7 @@ final ubicacionRepositoryProvider = Provider<IUbicacionRepository>((ref) {
 final registroDiarioRepositoryProvider = Provider<IRegistroDiarioRepository>((
   ref,
 ) {
-  return RegistroDiarioRepository();
+  return RegistroDiarioRepository(ref.watch(apiClientProvider));
 });
 
 final reconocimientoFacialRepositoryProvider =

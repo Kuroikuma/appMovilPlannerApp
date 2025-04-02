@@ -49,12 +49,12 @@ class _RegistroAsistenciaScreenState
   void _cargarRegistros() {
     final ubicacionState = ref.read(ubicacionNotifierProvider);
     if (ubicacionState.ubicacion != null &&
-        ubicacionState.ubicacion!.id != null) {
+        ubicacionState.ubicacion!.ubicacionId != null) {
       if (_modoRangoFechas) {
         ref
             .read(registroDiarioNotifierProvider.notifier)
             .cargarRegistrosPorRango(
-              ubicacionState.ubicacion!.id.toString(),
+              ubicacionState.ubicacion!.ubicacionId.toString(),
               fechaInicio: _fechaInicio,
               fechaFin: _fechaFin,
             );
@@ -62,7 +62,7 @@ class _RegistroAsistenciaScreenState
         ref
             .read(registroDiarioNotifierProvider.notifier)
             .cargarRegistros(
-              ubicacionState.ubicacion!.id.toString(),
+              ubicacionState.ubicacion!.ubicacionId.toString(),
               fecha: _fechaSeleccionada,
             );
       }
@@ -78,10 +78,10 @@ class _RegistroAsistenciaScreenState
   void _cargarTrabajadores() {
     final ubicacionState = ref.read(ubicacionNotifierProvider);
     if (ubicacionState.ubicacion != null &&
-        ubicacionState.ubicacion!.id != null) {
+        ubicacionState.ubicacion!.ubicacionId != null) {
       ref
           .read(trabajadorNotifierProvider.notifier)
-          .cargarTrabajadores(ubicacionState.ubicacion!.id.toString());
+          .cargarTrabajadores(ubicacionState.ubicacion!.ubicacionId.toString());
     }
   }
 
@@ -432,7 +432,7 @@ class _RegistroAsistenciaScreenState
                       child: Text(trabajador.nombre[0].toUpperCase()),
                     ),
                     title: Text(trabajador.nombre),
-                    subtitle: Text('Sin cargo'),
+                    subtitle: Text(trabajador.cargo),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -939,11 +939,11 @@ class _RegistroAsistenciaScreenState
 
       final ubicacionState = ref.read(ubicacionNotifierProvider);
       if (ubicacionState.ubicacion != null &&
-          ubicacionState.ubicacion!.id != null) {
+          ubicacionState.ubicacion!.ubicacionId != null) {
         ref
             .read(registroDiarioNotifierProvider.notifier)
             .cargarRegistrosPorRango(
-              ubicacionState.ubicacion!.id.toString(),
+              ubicacionState.ubicacion!.ubicacionId.toString(),
               fechaInicio: _fechaInicio,
               fechaFin: _fechaFin,
             );

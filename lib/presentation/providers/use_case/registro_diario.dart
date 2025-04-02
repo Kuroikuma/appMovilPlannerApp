@@ -152,8 +152,10 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
       }
 
       // Obtener todos los registros y filtrar por rango de fechas
-      final registros = await _repository.obtenerRegistrosPorUbicacion(
+      final registros = await _repository.obtenerRegistrosPorRangoFechas(
         ubicacionId,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
       );
 
       List<RegistroDiario> registrosFiltrados = registros;

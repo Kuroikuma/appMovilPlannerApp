@@ -13,6 +13,8 @@ class TrabajadorMapper {
       faceSync: data.estado,
       estado: data.estado,
       fotoUrl: data.fotoUrl,
+      cargo: data.cargo,
+      identificacion: data.identificacion,
     );
   }
 
@@ -24,6 +26,10 @@ class TrabajadorMapper {
       segundoApellido: Value(entity.segundoApellido),
       equipoId: Value(entity.equipoId),
       estado: Value(entity.faceSync),
+      faceSync: Value(entity.faceSync),
+      fotoUrl: Value(entity.fotoUrl),
+      cargo: Value(entity.cargo),
+      identificacion: Value(entity.identificacion),
     );
   }
 
@@ -37,7 +43,9 @@ class TrabajadorMapper {
         equipoId: json['equipoId'] ?? 0,
         faceSync: json['faceSync'] ?? false,
         estado: json['estado'] ?? false,
-        fotoUrl: json['fotoUrl']?.toString() ?? '',
+        fotoUrl: json['stringImagen']?.toString() ?? '',
+        cargo: json['puestoNombre']?.toString() ?? '',
+        identificacion: json['identificacion']?.toString() ?? '',
       );
     } catch (e) {
       print('Error mapeando JSON: $e');
@@ -54,6 +62,8 @@ class TrabajadorMapper {
       'equipoId': entity.equipoId,
       'faceSync': entity.faceSync,
       'estado': entity.estado,
+      'fotoUrl': entity.fotoUrl,
+      'cargo': entity.cargo,
     };
   }
 }

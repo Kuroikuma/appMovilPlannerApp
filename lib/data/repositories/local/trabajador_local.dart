@@ -28,13 +28,17 @@ class TrabajadorLocalDataSource {
   }
 
   Future<void> syncTrabajadores(List<Trabajador> trabajadores) async {
-    await _db.batch((batch) {
-      batch.deleteAll(_db.trabajadores);
-      batch.insertAll(
-        _db.trabajadores,
-        trabajadores.map(TrabajadorMapper.toDataModel).toList(),
-      );
-    });
+    try {
+      await _db.batch((batch) {
+        batch.deleteAll(_db.trabajadores);
+        batch.insertAll(
+          _db.trabajadores,
+          trabajadores.map(TrabajadorMapper.toDataModel).toList(),
+        );
+      });
+    } catch (e) {
+      print('Error al sincronizar trabajadores: $e');
+    }
   }
 
   Future<Trabajador> insertOfflineTrabajador(Trabajador trabajador) async {
@@ -45,6 +49,8 @@ class TrabajadorLocalDataSource {
       equipoId: trabajador.equipoId,
       estado: Value(trabajador.faceSync),
       fotoUrl: trabajador.fotoUrl,
+      cargo: trabajador.cargo,
+      identificacion: trabajador.identificacion,
     );
 
     final id = await _db.into(_db.trabajadores).insert(companion);

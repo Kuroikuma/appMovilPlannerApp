@@ -174,11 +174,11 @@ class RegistroDiarioCard extends StatelessWidget {
       radius: 24,
       backgroundColor: Colors.grey[200],
       backgroundImage:
-          registro.fotoTrabajador != null
+          registro.fotoTrabajador != null && registro.fotoTrabajador != ''
               ? NetworkImage(registro.fotoTrabajador!)
               : null,
       child:
-          registro.fotoTrabajador == null
+          registro.fotoTrabajador == null || registro.fotoTrabajador == ''
               ? Text(
                 registro.nombreTrabajador != null &&
                         registro.nombreTrabajador!.isNotEmpty
@@ -307,8 +307,12 @@ class RegistroDiarioCard extends StatelessWidget {
   }
 
   String _formatTime(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0');
+    final hour = time.hourOfPeriod.toString().padLeft(
+      2,
+      '0',
+    ); // Convierte a formato de 12 horas
     final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:$minute $period';
   }
 }

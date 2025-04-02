@@ -126,10 +126,6 @@ class UbicacionRepo implements IUbicacionRepository {
 
   @override
   Future<void> eliminarUbicacion(int ubicacionId) async {
-    await _client.delete(
-      '/DeleteIntegracionUbicacionApp?ubicacionId=$ubicacionId',
-    );
-
     await _db.batch((batch) {
       batch.deleteAll(_db.ubicaciones);
       batch.deleteAll(_db.gruposUbicaciones);
@@ -139,5 +135,9 @@ class UbicacionRepo implements IUbicacionRepository {
       batch.deleteAll(_db.registrosBiometricos);
       batch.deleteAll(_db.registrosDiarios);
     });
+
+    await _client.delete(
+      '/DeleteIntegracionUbicacionApp?ubicacionId=$ubicacionId',
+    );
   }
 }

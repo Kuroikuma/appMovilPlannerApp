@@ -60,12 +60,15 @@ class AppDatabase extends _$AppDatabase {
 class Trabajadores extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get nombre => text()();
-  TextColumn get primerApellido => text()();
-  TextColumn get segundoApellido => text()();
-  IntColumn get equipoId => integer().unique()();
+  TextColumn get primerApellido => text().named('primer_apellido')();
+  TextColumn get segundoApellido => text().named('segundo_apellido')();
+  IntColumn get equipoId => integer().unique().named('equipo_id')();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
-  BoolColumn get faceSync => boolean().withDefault(const Constant(false))();
-  TextColumn get fotoUrl => text()();
+  BoolColumn get faceSync =>
+      boolean().withDefault(const Constant(false)).named('face_sync')();
+  TextColumn get fotoUrl => text().named('foto_url')();
+  TextColumn get cargo => text().named('cargo')();
+  TextColumn get identificacion => text().named('identificacion')();
 }
 
 // Tabla: GrupoUbicaciones

@@ -9,7 +9,7 @@ import '../providers/use_case/reconocimiento_facial.dart';
 import '../utils/notification_utils.dart';
 
 class ReconocimientoFacialScreen extends ConsumerStatefulWidget {
-  const ReconocimientoFacialScreen({Key? key}) : super(key: key);
+  const ReconocimientoFacialScreen({super.key});
 
   @override
   ConsumerState<ReconocimientoFacialScreen> createState() =>
@@ -386,7 +386,7 @@ class _ReconocimientoFacialScreenState
                     Transform.scale(
                       scale: scale,
                       alignment: Alignment.center,
-                      child: Center(child: CameraPreview(_cameraController!)),
+                      child: Center(child: Icon(Icons.face, size: 100)),
                     ),
 
                     // Guía para el rostro

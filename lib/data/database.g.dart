@@ -104,6 +104,26 @@ class $TrabajadoresTable extends Trabajadores
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _cargoMeta = const VerificationMeta('cargo');
+  @override
+  late final GeneratedColumn<String> cargo = GeneratedColumn<String>(
+    'cargo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _identificacionMeta = const VerificationMeta(
+    'identificacion',
+  );
+  @override
+  late final GeneratedColumn<String> identificacion = GeneratedColumn<String>(
+    'identificacion',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -114,6 +134,8 @@ class $TrabajadoresTable extends Trabajadores
     estado,
     faceSync,
     fotoUrl,
+    cargo,
+    identificacion,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -188,6 +210,25 @@ class $TrabajadoresTable extends Trabajadores
     } else if (isInserting) {
       context.missing(_fotoUrlMeta);
     }
+    if (data.containsKey('cargo')) {
+      context.handle(
+        _cargoMeta,
+        cargo.isAcceptableOrUnknown(data['cargo']!, _cargoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cargoMeta);
+    }
+    if (data.containsKey('identificacion')) {
+      context.handle(
+        _identificacionMeta,
+        identificacion.isAcceptableOrUnknown(
+          data['identificacion']!,
+          _identificacionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_identificacionMeta);
+    }
     return context;
   }
 
@@ -237,6 +278,16 @@ class $TrabajadoresTable extends Trabajadores
             DriftSqlType.string,
             data['${effectivePrefix}foto_url'],
           )!,
+      cargo:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}cargo'],
+          )!,
+      identificacion:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}identificacion'],
+          )!,
     );
   }
 
@@ -255,6 +306,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
   final bool estado;
   final bool faceSync;
   final String fotoUrl;
+  final String cargo;
+  final String identificacion;
   const Trabajadore({
     required this.id,
     required this.nombre,
@@ -264,6 +317,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     required this.estado,
     required this.faceSync,
     required this.fotoUrl,
+    required this.cargo,
+    required this.identificacion,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -276,6 +331,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     map['estado'] = Variable<bool>(estado);
     map['face_sync'] = Variable<bool>(faceSync);
     map['foto_url'] = Variable<String>(fotoUrl);
+    map['cargo'] = Variable<String>(cargo);
+    map['identificacion'] = Variable<String>(identificacion);
     return map;
   }
 
@@ -289,6 +346,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
       estado: Value(estado),
       faceSync: Value(faceSync),
       fotoUrl: Value(fotoUrl),
+      cargo: Value(cargo),
+      identificacion: Value(identificacion),
     );
   }
 
@@ -306,6 +365,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
       estado: serializer.fromJson<bool>(json['estado']),
       faceSync: serializer.fromJson<bool>(json['faceSync']),
       fotoUrl: serializer.fromJson<String>(json['fotoUrl']),
+      cargo: serializer.fromJson<String>(json['cargo']),
+      identificacion: serializer.fromJson<String>(json['identificacion']),
     );
   }
   @override
@@ -320,6 +381,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
       'estado': serializer.toJson<bool>(estado),
       'faceSync': serializer.toJson<bool>(faceSync),
       'fotoUrl': serializer.toJson<String>(fotoUrl),
+      'cargo': serializer.toJson<String>(cargo),
+      'identificacion': serializer.toJson<String>(identificacion),
     };
   }
 
@@ -332,6 +395,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     bool? estado,
     bool? faceSync,
     String? fotoUrl,
+    String? cargo,
+    String? identificacion,
   }) => Trabajadore(
     id: id ?? this.id,
     nombre: nombre ?? this.nombre,
@@ -341,6 +406,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     estado: estado ?? this.estado,
     faceSync: faceSync ?? this.faceSync,
     fotoUrl: fotoUrl ?? this.fotoUrl,
+    cargo: cargo ?? this.cargo,
+    identificacion: identificacion ?? this.identificacion,
   );
   Trabajadore copyWithCompanion(TrabajadoresCompanion data) {
     return Trabajadore(
@@ -358,6 +425,11 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
       estado: data.estado.present ? data.estado.value : this.estado,
       faceSync: data.faceSync.present ? data.faceSync.value : this.faceSync,
       fotoUrl: data.fotoUrl.present ? data.fotoUrl.value : this.fotoUrl,
+      cargo: data.cargo.present ? data.cargo.value : this.cargo,
+      identificacion:
+          data.identificacion.present
+              ? data.identificacion.value
+              : this.identificacion,
     );
   }
 
@@ -371,7 +443,9 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
           ..write('equipoId: $equipoId, ')
           ..write('estado: $estado, ')
           ..write('faceSync: $faceSync, ')
-          ..write('fotoUrl: $fotoUrl')
+          ..write('fotoUrl: $fotoUrl, ')
+          ..write('cargo: $cargo, ')
+          ..write('identificacion: $identificacion')
           ..write(')'))
         .toString();
   }
@@ -386,6 +460,8 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
     estado,
     faceSync,
     fotoUrl,
+    cargo,
+    identificacion,
   );
   @override
   bool operator ==(Object other) =>
@@ -398,7 +474,9 @@ class Trabajadore extends DataClass implements Insertable<Trabajadore> {
           other.equipoId == this.equipoId &&
           other.estado == this.estado &&
           other.faceSync == this.faceSync &&
-          other.fotoUrl == this.fotoUrl);
+          other.fotoUrl == this.fotoUrl &&
+          other.cargo == this.cargo &&
+          other.identificacion == this.identificacion);
 }
 
 class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
@@ -410,6 +488,8 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
   final Value<bool> estado;
   final Value<bool> faceSync;
   final Value<String> fotoUrl;
+  final Value<String> cargo;
+  final Value<String> identificacion;
   const TrabajadoresCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
@@ -419,6 +499,8 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     this.estado = const Value.absent(),
     this.faceSync = const Value.absent(),
     this.fotoUrl = const Value.absent(),
+    this.cargo = const Value.absent(),
+    this.identificacion = const Value.absent(),
   });
   TrabajadoresCompanion.insert({
     this.id = const Value.absent(),
@@ -429,11 +511,15 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     this.estado = const Value.absent(),
     this.faceSync = const Value.absent(),
     required String fotoUrl,
+    required String cargo,
+    required String identificacion,
   }) : nombre = Value(nombre),
        primerApellido = Value(primerApellido),
        segundoApellido = Value(segundoApellido),
        equipoId = Value(equipoId),
-       fotoUrl = Value(fotoUrl);
+       fotoUrl = Value(fotoUrl),
+       cargo = Value(cargo),
+       identificacion = Value(identificacion);
   static Insertable<Trabajadore> custom({
     Expression<int>? id,
     Expression<String>? nombre,
@@ -443,6 +529,8 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     Expression<bool>? estado,
     Expression<bool>? faceSync,
     Expression<String>? fotoUrl,
+    Expression<String>? cargo,
+    Expression<String>? identificacion,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -453,6 +541,8 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
       if (estado != null) 'estado': estado,
       if (faceSync != null) 'face_sync': faceSync,
       if (fotoUrl != null) 'foto_url': fotoUrl,
+      if (cargo != null) 'cargo': cargo,
+      if (identificacion != null) 'identificacion': identificacion,
     });
   }
 
@@ -465,6 +555,8 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     Value<bool>? estado,
     Value<bool>? faceSync,
     Value<String>? fotoUrl,
+    Value<String>? cargo,
+    Value<String>? identificacion,
   }) {
     return TrabajadoresCompanion(
       id: id ?? this.id,
@@ -475,6 +567,8 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
       estado: estado ?? this.estado,
       faceSync: faceSync ?? this.faceSync,
       fotoUrl: fotoUrl ?? this.fotoUrl,
+      cargo: cargo ?? this.cargo,
+      identificacion: identificacion ?? this.identificacion,
     );
   }
 
@@ -505,6 +599,12 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
     if (fotoUrl.present) {
       map['foto_url'] = Variable<String>(fotoUrl.value);
     }
+    if (cargo.present) {
+      map['cargo'] = Variable<String>(cargo.value);
+    }
+    if (identificacion.present) {
+      map['identificacion'] = Variable<String>(identificacion.value);
+    }
     return map;
   }
 
@@ -518,7 +618,9 @@ class TrabajadoresCompanion extends UpdateCompanion<Trabajadore> {
           ..write('equipoId: $equipoId, ')
           ..write('estado: $estado, ')
           ..write('faceSync: $faceSync, ')
-          ..write('fotoUrl: $fotoUrl')
+          ..write('fotoUrl: $fotoUrl, ')
+          ..write('cargo: $cargo, ')
+          ..write('identificacion: $identificacion')
           ..write(')'))
         .toString();
   }
@@ -3108,6 +3210,8 @@ typedef $$TrabajadoresTableCreateCompanionBuilder =
       Value<bool> estado,
       Value<bool> faceSync,
       required String fotoUrl,
+      required String cargo,
+      required String identificacion,
     });
 typedef $$TrabajadoresTableUpdateCompanionBuilder =
     TrabajadoresCompanion Function({
@@ -3119,6 +3223,8 @@ typedef $$TrabajadoresTableUpdateCompanionBuilder =
       Value<bool> estado,
       Value<bool> faceSync,
       Value<String> fotoUrl,
+      Value<String> cargo,
+      Value<String> identificacion,
     });
 
 final class $$TrabajadoresTableReferences
@@ -3230,6 +3336,16 @@ class $$TrabajadoresTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get cargo => $composableBuilder(
+    column: $table.cargo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get identificacion => $composableBuilder(
+    column: $table.identificacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> registrosBiometricosRefs(
     Expression<bool> Function($$RegistrosBiometricosTableFilterComposer f) f,
   ) {
@@ -3329,6 +3445,16 @@ class $$TrabajadoresTableOrderingComposer
     column: $table.fotoUrl,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get cargo => $composableBuilder(
+    column: $table.cargo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get identificacion => $composableBuilder(
+    column: $table.identificacion,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TrabajadoresTableAnnotationComposer
@@ -3367,6 +3493,14 @@ class $$TrabajadoresTableAnnotationComposer
 
   GeneratedColumn<String> get fotoUrl =>
       $composableBuilder(column: $table.fotoUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get cargo =>
+      $composableBuilder(column: $table.cargo, builder: (column) => column);
+
+  GeneratedColumn<String> get identificacion => $composableBuilder(
+    column: $table.identificacion,
+    builder: (column) => column,
+  );
 
   Expression<T> registrosBiometricosRefs<T extends Object>(
     Expression<T> Function($$RegistrosBiometricosTableAnnotationComposer a) f,
@@ -3460,6 +3594,8 @@ class $$TrabajadoresTableTableManager
                 Value<bool> estado = const Value.absent(),
                 Value<bool> faceSync = const Value.absent(),
                 Value<String> fotoUrl = const Value.absent(),
+                Value<String> cargo = const Value.absent(),
+                Value<String> identificacion = const Value.absent(),
               }) => TrabajadoresCompanion(
                 id: id,
                 nombre: nombre,
@@ -3469,6 +3605,8 @@ class $$TrabajadoresTableTableManager
                 estado: estado,
                 faceSync: faceSync,
                 fotoUrl: fotoUrl,
+                cargo: cargo,
+                identificacion: identificacion,
               ),
           createCompanionCallback:
               ({
@@ -3480,6 +3618,8 @@ class $$TrabajadoresTableTableManager
                 Value<bool> estado = const Value.absent(),
                 Value<bool> faceSync = const Value.absent(),
                 required String fotoUrl,
+                required String cargo,
+                required String identificacion,
               }) => TrabajadoresCompanion.insert(
                 id: id,
                 nombre: nombre,
@@ -3489,6 +3629,8 @@ class $$TrabajadoresTableTableManager
                 estado: estado,
                 faceSync: faceSync,
                 fotoUrl: fotoUrl,
+                cargo: cargo,
+                identificacion: identificacion,
               ),
           withReferenceMapper:
               (p0) =>

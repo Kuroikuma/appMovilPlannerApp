@@ -1,9 +1,19 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/database.dart';
+
+import '../../../core/error/exceptions.dart';
 import '../../../domain/models/registro_diario.dart';
 import '../../../domain/repositories/i_registro_diario_repository.dart';
+import 'api_client.dart';
 
 class RegistroDiarioRepository implements IRegistroDiarioRepository {
+  final ApiClient _client;
+
+  RegistroDiarioRepository(this._client);
+
   // Datos de ejemplo para demostración
   final List<RegistroDiario> _registrosDemo = [
     RegistroDiario(
@@ -108,19 +118,71 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
     ),
   ];
 
+  Future<List<RegistroDiario>> getRegistroDiarioPorUbicacion(
+    String ubicacionId,
+    DateTime? fechaInicio,
+    DateTime? fechaFin,
+  ) async {
+    try {
+      // Simular una llamada a la API
+      final response = await _client.get(
+        '/GetListRegistroDiarioByUbicacionId?ubicacionId=$ubicacionId',
+        queryParameters: {
+          'fechaInicio':
+              '${fechaInicio?.year}-${fechaInicio?.month}-${fechaInicio?.day}',
+          'fechaFin': '${fechaFin?.year}-${fechaFin?.month}-${fechaFin?.day}',
+        },
+      );
+      print('response: ${response.data}');
+
+      List<dynamic> jsonList;
+      if (response.data is String) {
+        try {
+          jsonList = json.decode(response.data);
+        } catch (e) {
+          throw ApiException();
+        }
+      } else if (response.data is List) {
+        jsonList = response.data;
+      } else {
+        throw ApiException();
+      }
+
+      return jsonList.map((json) {
+        try {
+          if (json is! Map<String, dynamic>) {
+            throw ApiException();
+          }
+          return RegistroDiario.fromJson(json);
+        } catch (e) {
+          rethrow;
+        }
+      }).toList();
+    } on DioException catch (e) {
+      if (e.response != null) {
+        throw ApiException();
+      }
+      throw ApiException();
+    }
+  }
+
   @override
   Future<List<RegistroDiario>> obtenerRegistrosPorUbicacion(
     String ubicacionId, {
     DateTime? fecha,
   }) async {
     // Simular una llamada a la API
-    await Future.delayed(const Duration(seconds: 1));
+    final registrosDiarios = await getRegistroDiarioPorUbicacion(
+      ubicacionId,
+      fecha,
+      fecha,
+    );
 
     if (fecha == null) {
       return _registrosDemo;
     }
 
-    return _registrosDemo.where((registro) {
+    return registrosDiarios.where((registro) {
       return registro.fechaIngreso.year == fecha.year &&
           registro.fechaIngreso.month == fecha.month &&
           registro.fechaIngreso.day == fecha.day;
@@ -260,14 +322,21 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
     DateTime? fechaInicio,
     DateTime? fechaFin,
   }) async {
+    print(fechaInicio);
+    print(fechaFin);
+
     // Simular una llamada a la API
-    await Future.delayed(const Duration(seconds: 1));
+    final registrosDiarios = await getRegistroDiarioPorUbicacion(
+      ubicacionId,
+      fechaInicio,
+      fechaFin,
+    );
 
     if (fechaInicio == null && fechaFin == null) {
       return _registrosDemo;
     }
 
-    return _registrosDemo.where((registro) {
+    return registrosDiarios.where((registro) {
       final fecha = registro.fechaIngreso;
 
       if (fechaInicio != null && fechaFin != null) {

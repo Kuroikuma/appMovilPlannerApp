@@ -25,10 +25,13 @@ class ApiClient {
     );
   }
 
-  Future<Response> get(String path) async {
+  Future<Response> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
     try {
       print('Intentando GET request a: ${_dio.options.baseUrl}$path');
-      final response = await _dio.get(path);
+      final response = await _dio.get(path, queryParameters: queryParameters);
       print('Response exitosa: ${response.statusCode}');
       return response;
     } on DioException catch (e) {

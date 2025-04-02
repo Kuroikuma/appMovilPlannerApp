@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../routes/app_routes.dart';
-import '../utils/notification_utils.dart';
 
 class UbicacionScreen extends ConsumerStatefulWidget {
   const UbicacionScreen({super.key});

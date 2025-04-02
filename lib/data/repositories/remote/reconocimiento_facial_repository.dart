@@ -45,6 +45,10 @@ class ReconocimientoFacialRepository
       primerApellido: 'Pérez',
       segundoApellido: 'González',
       fotoUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
+      cargo: 'Jefe de Proyecto',
+      faceSync: true,
+      estado: true,
+      identificacion: '12345678',
     ),
     Trabajador(
       id: 2,
@@ -55,6 +59,8 @@ class ReconocimientoFacialRepository
       faceSync: true,
       estado: true,
       fotoUrl: 'https://randomuser.me/api/portraits/women/2.jpg',
+      cargo: 'Jefe de Proyecto',
+      identificacion: '12345678',
     ),
     Trabajador(
       id: 3,
@@ -65,6 +71,8 @@ class ReconocimientoFacialRepository
       faceSync: true,
       estado: true,
       fotoUrl: 'https://randomuser.me/api/portraits/men/3.jpg',
+      cargo: 'Jefe de Proyecto',
+      identificacion: '12345678',
     ),
   ];
 
