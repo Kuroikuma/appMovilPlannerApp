@@ -145,14 +145,25 @@ class RegistrosBiometricos extends Table {
 // Tabla: RegistroDiario
 class RegistrosDiarios extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get equipoId => integer().references(Trabajadores, #equipoId)();
+  IntColumn get equipoId =>
+      integer().named('equipo_id').references(Trabajadores, #equipoId)();
   TextColumn get registroBiometricoId =>
-      text().nullable().references(RegistrosBiometricos, #id)();
-  TextColumn get fechaIngreso => text().map(const DateConverter())();
-  TextColumn get horaIngreso => text().map(const TimeOfDayConverter())();
-  TextColumn get fechaSalida => text().map(const DateConverter())();
-  TextColumn get horaSalida => text().map(const TimeOfDayConverter())();
+      text()
+          .nullable()
+          .named('registro_biometrico_id')
+          .references(RegistrosBiometricos, #id)();
+  TextColumn get fechaIngreso =>
+      text().named('fecha_ingreso').map(const DateConverter())();
+  TextColumn get horaIngreso =>
+      text().named('hora_ingreso').map(const TimeOfDayConverter())();
+  TextColumn get fechaSalida =>
+      text().named('fecha_salida').map(const DateConverter())();
+  TextColumn get horaSalida =>
+      text().named('hora_salida').map(const TimeOfDayConverter())();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
+  TextColumn get nombreTrabajador => text().named('nombre_trabajador')();
+  TextColumn get fotoTrabajador => text().named('foto_trabajador')();
+  TextColumn get cargoTrabajador => text().named('cargo_trabajador')();
 }
 
 class SyncsEntitys extends Table {

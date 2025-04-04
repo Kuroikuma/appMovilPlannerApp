@@ -1,18 +1,15 @@
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/database.dart';
-
 import '../../../core/error/exceptions.dart';
 import '../../../domain/models/registro_diario.dart';
 import '../../../domain/repositories/i_registro_diario_repository.dart';
 import 'api_client.dart';
 
-class RegistroDiarioRepository implements IRegistroDiarioRepository {
+class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
   final ApiClient _client;
 
-  RegistroDiarioRepository(this._client);
+  RegistroDiarioRepositoryRemote(this._client);
 
   // Datos de ejemplo para demostración
   final List<RegistroDiario> _registrosDemo = [
@@ -133,7 +130,6 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
           'fechaFin': '${fechaFin?.year}-${fechaFin?.month}-${fechaFin?.day}',
         },
       );
-      print('response: ${response.data}');
 
       List<dynamic> jsonList;
       if (response.data is String) {

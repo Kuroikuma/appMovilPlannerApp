@@ -1,5 +1,6 @@
 import 'package:riverpod/riverpod.dart';
 
+import '../../data/repositories/registro_diario_repo.dart';
 import '../../data/repositories/remote/reconocimiento_facial_repository.dart';
 import '../../data/repositories/remote/registro_diario_repository_remote.dart';
 import '../../data/repositories/sync_entity_repo.dart';
@@ -40,7 +41,11 @@ final ubicacionRepositoryProvider = Provider<IUbicacionRepository>((ref) {
 final registroDiarioRepositoryProvider = Provider<IRegistroDiarioRepository>((
   ref,
 ) {
-  return RegistroDiarioRepository(ref.watch(apiClientProvider));
+  return RegistroDiarioRepository(
+    localDataSource: ref.watch(registroDiarioLocalDataSourceProvider),
+    remoteDataSource: ref.watch(registroDiarioRemoteDataSourceProvider),
+    networkInfo: ref.watch(networkInfoProvider),
+  );
 });
 
 final reconocimientoFacialRepositoryProvider =

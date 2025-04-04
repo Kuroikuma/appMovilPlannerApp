@@ -1,23 +1,58 @@
-import 'package:drift/drift.dart';
-import 'package:flutter_application_1/data/database.dart';
+import '../../../core/error/exceptions.dart';
 import '../../../domain/models/registro_diario.dart';
+import '../../../domain/repositories/i_registro_diario_repository.dart';
+import '../../core/network/network_info.dart';
+import 'local/registro_diario_repository_local.dart';
+import 'remote/registro_diario_repository_remote.dart';
 
-class RegistroDiarioRepositoryLocal {
-  final AppDatabase _db;
+class RegistroDiarioRepository implements IRegistroDiarioRepository {
+  final RegistroDiarioRepositoryLocal localDataSource;
+  final RegistroDiarioRepositoryRemote remoteDataSource;
+  final NetworkInfo networkInfo;
 
-  RegistroDiarioRepositoryLocal(this._db);
+  RegistroDiarioRepository({
+    required this.localDataSource,
+    required this.remoteDataSource,
+    required this.networkInfo,
+  });
 
-  Future<List<RegistroDiario>> getRegistroDiario() async {
-    final result = await _db.select(_db.registrosDiarios).get();
-    return result.map(RegistroDiario.fromDataModel).toList();
+  // Datos de ejemplo para demostración
+  Future<List<RegistroDiario>> getRegistroDiarioPorUbicacion(
+    String ubicacionId,
+    DateTime? fechaInicio,
+    DateTime? fechaFin,
+  ) async {
+    final localData = await localDataSource.getRegistroDiario();
+    final isConnected = await networkInfo.isConnected;
+    if (isConnected) {
+      try {
+        final remoteData = await remoteDataSource.getRegistroDiarioPorUbicacion(
+          ubicacionId,
+          fechaInicio,
+          fechaFin,
+        );
+        print('remoteData: $remoteData');
+
+        await localDataSource.syncronizarRegistrosDiarios(remoteData);
+        return remoteData;
+      } catch (e) {
+        return localData.isNotEmpty ? localData : throw CacheException();
+      }
+    } else {
+      return localData.isNotEmpty ? localData : throw NoInternetException();
+    }
   }
 
+  @override
   Future<List<RegistroDiario>> obtenerRegistrosPorUbicacion(
     String ubicacionId, {
     DateTime? fecha,
   }) async {
-    // Simular una llamada a la API
-    final registrosDiarios = await getRegistroDiario();
+    final registrosDiarios = await getRegistroDiarioPorUbicacion(
+      ubicacionId,
+      fecha,
+      fecha,
+    );
 
     if (fecha == null) {
       return registrosDiarios;
@@ -30,9 +65,9 @@ class RegistroDiarioRepositoryLocal {
     }).toList();
   }
 
+  @override
   Future<RegistroDiario?> obtenerRegistroPorId(int id) async {
-    // Simular una llamada a la API
-    final registrosDiarios = await getRegistroDiario();
+    final registrosDiarios = await localDataSource.getRegistroDiario();
 
     try {
       return registrosDiarios.firstWhere((registro) => registro.id == id);
@@ -41,13 +76,43 @@ class RegistroDiarioRepositoryLocal {
     }
   }
 
+  @override
+  Future<RegistroDiario> registrarEntrada(
+    int equipoId, {
+    String? registroBiometricoId,
+  }) async {
+    final registro = await remoteDataSource.registrarEntrada(
+      equipoId,
+      registroBiometricoId: registroBiometricoId,
+    );
+
+    return registro;
+  }
+
+  @override
+  Future<RegistroDiario> registrarSalida(
+    int registroId, {
+    String? registroBiometricoId,
+  }) async {
+    final registroActualizado = await remoteDataSource.registrarSalida(
+      registroId,
+      registroBiometricoId: registroBiometricoId,
+    );
+
+    return registroActualizado;
+  }
+
+  @override
   Future<List<RegistroDiario>> obtenerRegistrosPorTrabajador(
     int equipoId, {
     DateTime? fechaInicio,
     DateTime? fechaFin,
   }) async {
-    // Simular una llamada a la API
-    final registrosDiarios = await getRegistroDiario();
+    final registrosDiarios = await localDataSource.getRegistroDiario();
+
+    if (fechaInicio == null && fechaFin == null) {
+      return registrosDiarios;
+    }
 
     return registrosDiarios.where((registro) {
       bool cumpleFiltroTrabajador = registro.equipoId == equipoId;
@@ -67,13 +132,23 @@ class RegistroDiarioRepositoryLocal {
     }).toList();
   }
 
+  @override
+  Future<void> cambiarEstadoRegistro(int registroId, bool estado) async {
+    await remoteDataSource.cambiarEstadoRegistro(registroId, estado);
+  }
+
+  @override
   Future<List<RegistroDiario>> obtenerRegistrosPorRangoFechas(
     String ubicacionId, {
     DateTime? fechaInicio,
     DateTime? fechaFin,
   }) async {
     // Simular una llamada a la API
-    final registrosDiarios = await getRegistroDiario();
+    final registrosDiarios = await getRegistroDiarioPorUbicacion(
+      ubicacionId,
+      fechaInicio,
+      fechaFin,
+    );
 
     if (fechaInicio == null && fechaFin == null) {
       return registrosDiarios;
@@ -113,37 +188,5 @@ class RegistroDiarioRepositoryLocal {
 
       return true;
     }).toList();
-  }
-
-  Future<void> syncronizarRegistrosDiarios(
-    List<RegistroDiario> registrosDiarios,
-  ) async {
-    try {
-      await _db.batch((batch) {
-        batch.deleteAll(_db.registrosDiarios);
-        batch.insertAll(
-          _db.registrosDiarios,
-          registrosDiarios
-              .map(
-                (e) => RegistrosDiariosCompanion(
-                  cargoTrabajador: Value(e.cargoTrabajador!),
-                  fotoTrabajador: Value(e.fotoTrabajador!),
-                  nombreTrabajador: Value(e.nombreTrabajador!),
-                  estado: Value(e.estado),
-                  horaSalida: Value(e.horaSalida!),
-                  fechaSalida: Value(e.fechaSalida!),
-                  horaIngreso: Value(e.horaIngreso),
-                  fechaIngreso: Value(e.fechaIngreso),
-                  registroBiometricoId: Value(e.registroBiometricoId),
-                  equipoId: Value(e.equipoId),
-                  id: Value(e.id!),
-                ),
-              )
-              .toList(),
-        );
-      });
-    } catch (e) {
-      print('Error al sincronizar registros: $e');
-    }
   }
 }

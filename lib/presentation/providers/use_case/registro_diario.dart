@@ -88,16 +88,6 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
   Future<void> cargarRegistros(String ubicacionId, {DateTime? fecha}) async {
     state = state.copyWith(isLoading: true).clearErrors();
 
-    // Verificar conexión a internet
-    final hasInternet = await networkInfo.isConnected;
-    if (!hasInternet) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'No hay conexión a internet',
-      );
-      return;
-    }
-
     try {
       final registros = await _repository.obtenerRegistrosPorUbicacion(
         ubicacionId,
@@ -131,16 +121,6 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
               fechaFin: fechaFin,
             )
             .clearErrors();
-
-    // Verificar conexión a internet
-    final hasInternet = await networkInfo.isConnected;
-    if (!hasInternet) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'No hay conexión a internet',
-      );
-      return;
-    }
 
     try {
       // Si no se proporciona un rango, usar la fecha seleccionada

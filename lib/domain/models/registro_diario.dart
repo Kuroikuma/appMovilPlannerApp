@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../data/database.dart';
+
 class RegistroDiario {
   final int? id;
   final int equipoId;
@@ -100,7 +102,7 @@ class RegistroDiario {
     return RegistroDiario(
       id: json['registroDiarioId'],
       equipoId: json['equipoId'],
-      registroBiometricoId: json['registroBiometricoId'],
+      registroBiometricoId: json['registroBiometricoId'] ?? '',
       fechaIngreso: DateTime.parse(json['fechaIngreso']),
       horaIngreso: _timeFromString(json['horaIngreso']),
       fechaSalida:
@@ -117,6 +119,22 @@ class RegistroDiario {
           json['trabajadorStringFile'] ??
           'https://randomuser.me/api/portraits/men/1.jpg',
       cargoTrabajador: json['puestoNombre'] ?? 'Desconocido',
+    );
+  }
+
+  factory RegistroDiario.fromDataModel(RegistrosDiario data) {
+    return RegistroDiario(
+      id: data.id,
+      equipoId: data.equipoId,
+      registroBiometricoId: data.registroBiometricoId,
+      fechaIngreso: data.fechaIngreso,
+      horaIngreso: data.horaIngreso,
+      fechaSalida: data.fechaSalida,
+      horaSalida: data.horaSalida,
+      estado: data.estado,
+      nombreTrabajador: data.nombreTrabajador,
+      fotoTrabajador: data.fotoTrabajador,
+      cargoTrabajador: data.cargoTrabajador,
     );
   }
 
