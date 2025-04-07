@@ -244,7 +244,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
             ),
             child: InkWell(
               onTap: () {
-                Navigator.of(context).pushNamed(AppRoutes.reconocimientoFacial);
+                Navigator.of(context).pushNamed(AppRoutes.faceRecognition);
               },
               borderRadius: BorderRadius.circular(12),
               child: Padding(
