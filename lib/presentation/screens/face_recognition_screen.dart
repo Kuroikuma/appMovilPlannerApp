@@ -47,7 +47,7 @@ class _FaceRecognitionScreenState extends ConsumerState<FaceRecognitionScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _checkPermissionsAndInitCamera();
-    final options = FaceDetectorOptions();
+    final options = FaceDetectorOptions(performanceMode: FaceDetectorMode.fast);
     _faceDetector = FaceDetector(options: options);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -126,7 +126,7 @@ class _FaceRecognitionScreenState extends ConsumerState<FaceRecognitionScreen>
 
     _cameraController = CameraController(
       frontCamera,
-      ResolutionPreset.max,
+      ResolutionPreset.low,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.nv21,
     );
@@ -152,6 +152,7 @@ class _FaceRecognitionScreenState extends ConsumerState<FaceRecognitionScreen>
     _cameraController!.startImageStream((CameraImage image) async {
       if (_isDetecting) return;
       _isDetecting = true;
+      print(interpreter);
 
       final finalResult = Multimap<String, Face>();
       try {
@@ -376,6 +377,8 @@ class _FaceRecognitionScreenState extends ConsumerState<FaceRecognitionScreen>
       return noResultsText;
     }
     CustomPainter painter;
+    print('aqui esta el resultado del escanner');
+    print(_scanResults);
 
     final Size imageSize = Size(
       _cameraController!.value.previewSize!.height,

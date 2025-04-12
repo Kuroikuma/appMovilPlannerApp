@@ -62,6 +62,7 @@ class UbicacionRepo implements IUbicacionRepository {
       nombre: ubicacionNombre,
       ubicacionId: int.parse(ubicacionId),
       estado: true,
+      codigoUbicacion: int.parse(codigoUbicacion),
     );
 
     await configurarUbicacionRemota(codigoUbicacion, codigoUbicacionLocal);
@@ -113,6 +114,7 @@ class UbicacionRepo implements IUbicacionRepository {
               nombre: ubicacion.nombre,
               ubicacionId: ubicacion.ubicacionId,
               estado: Value(ubicacion.estado),
+              codigoUbicacion: ubicacion.codigoUbicacion,
             ),
           );
 
@@ -139,5 +141,19 @@ class UbicacionRepo implements IUbicacionRepository {
     await _client.delete(
       '/DeleteIntegracionUbicacionApp?ubicacionId=$ubicacionId',
     );
+  }
+
+  @override
+  Future<String> obtenerCodigoUbicacion(int ubicacionId) async {
+    try {
+      final result = await _client.get(
+        '/GetIntegracionUbicacionApp?ubicacionId=$ubicacionId',
+      );
+
+      return result.data['codigoConfiguracion'];
+    } catch (e) {
+      print('Error al obtener el código de ubicación: $e');
+      rethrow;
+    }
   }
 }

@@ -2,9 +2,10 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart' show TimeOfDay;
 import 'converters/json_converter.dart';
+import 'converters/json_converter_embedding.dart';
 import 'converters/time_converter.dart';
 import 'converters/date_converter.dart';
-import 'converters/metodo_prueba_vida.dart';
+import 'converters/tipo_registro_biometrico.dart';
 
 part 'database.g.dart';
 
@@ -19,6 +20,7 @@ Uuid uuid = const Uuid();
     RegistrosBiometricos,
     RegistrosDiarios,
     SyncsEntitys,
+    ReconocimientosFacial,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -85,6 +87,8 @@ class Ubicaciones extends Table {
   IntColumn get ubicacionId => integer().unique().named('ubicacion_id')();
   // TextColumn get grupoId => text().references(GruposUbicaciones, #id)();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
+  IntColumn get codigoUbicacion =>
+      integer().unique().named('codigo_ubicacion')();
 }
 
 class Horario {
@@ -131,14 +135,28 @@ class Horarios extends Table {
 
 // Tabla: RegistroBiometrico
 class RegistrosBiometricos extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  TextColumn get id => text()();
+  IntColumn get trabajadorId =>
+      integer().named('trabajador_id').references(Trabajadores, #equipoId)();
+  TextColumn get datosBiometricos =>
+      text().named('datos_biometricos').map(const JsonConverterEmbedding())();
+  BoolColumn get estado => boolean().withDefault(const Constant(true))();
+  TextColumn get tipoRegistro =>
+      text()
+          .named('tipo_registro')
+          .map(const TipoRegistroBiometricoConverter())();
+}
+
+class ReconocimientosFacial extends Table {
+  TextColumn get id => text()();
   IntColumn get trabajadorId => integer().references(Trabajadores, #equipoId)();
-  TextColumn get foto => text()();
-  TextColumn get datosBiometricos => text().map(const JsonConverter())();
+  TextColumn get imagenUrl => text()();
   BoolColumn get pruebaVidaExitosa => boolean()();
   TextColumn get metodoPruebaVida =>
-      text().map(const MetodoPruebaVidaConverter())();
+      text().map(const TipoRegistroBiometricoConverter())();
   RealColumn get puntajeConfianza => real()();
+  TextColumn get fechaCreacion =>
+      text().named('fecha_creacion').map(const DateConverter())();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
 }
 
@@ -147,11 +165,11 @@ class RegistrosDiarios extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get equipoId =>
       integer().named('equipo_id').references(Trabajadores, #equipoId)();
-  TextColumn get registroBiometricoId =>
+  TextColumn get reconocimientoFacialId =>
       text()
           .nullable()
-          .named('registro_biometrico_id')
-          .references(RegistrosBiometricos, #id)();
+          .named('reconocimiento_facial_id')
+          .references(ReconocimientosFacial, #id)();
   TextColumn get fechaIngreso =>
       text().named('fecha_ingreso').map(const DateConverter())();
   TextColumn get horaIngreso =>

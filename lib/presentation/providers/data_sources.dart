@@ -3,7 +3,9 @@ import 'package:flutter_application_1/data/repositories/remote/trabajador_remote
 import 'package:flutter_application_1/presentation/providers/providers.dart';
 import 'package:riverpod/riverpod.dart';
 
+import '../../data/repositories/local/registro_biometrico_repo_local.dart';
 import '../../data/repositories/local/registro_diario_repository_local.dart';
+import '../../data/repositories/remote/registro_biometrico_repo_remote.dart';
 import '../../data/repositories/remote/registro_diario_repository_remote.dart';
 
 final trabajadorLocalDataSourceProvider = Provider<TrabajadorLocalDataSource>((
@@ -26,4 +28,14 @@ final registroDiarioRemoteDataSourceProvider =
 final registroDiarioLocalDataSourceProvider =
     Provider<RegistroDiarioRepositoryLocal>((ref) {
       return RegistroDiarioRepositoryLocal(ref.watch(databaseProvider));
+    });
+
+final registroBiometricoLocalDataSourceProvider =
+    Provider<RegistroBiometricoRepositoryLocal>((ref) {
+      return RegistroBiometricoRepositoryLocal(ref.watch(databaseProvider));
+    });
+
+final registroBiometricoRemoteDataSourceProvider =
+    Provider<RegistroBiometricoRepositoryRemote>((ref) {
+      return RegistroBiometricoRepositoryRemote(ref.watch(apiClientProvider));
     });

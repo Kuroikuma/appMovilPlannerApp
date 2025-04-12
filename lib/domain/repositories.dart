@@ -14,8 +14,3 @@ abstract class ISyncEntityRepository {
   Future<List<SyncEntity>> getPendingRemoteSyncOperations();
   Future<void> markMultipleAsSynced(List<SyncEntity> operations);
 }
-
-abstract class IRegistroRepository {
-  Future<RegistroDiario> registrarIngreso(RegistroBiometrico registro);
-  Future<RegistroDiario> registrarSalida(RegistroBiometrico registro);
-}

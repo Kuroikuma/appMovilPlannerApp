@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../widget/trabajador_card.dart';
@@ -21,6 +22,7 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _cargarTrabajadores();
+      _initFaceRecognition();
     });
   }
 
@@ -44,6 +46,10 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen> {
         isError: true,
       );
     }
+  }
+
+  void _initFaceRecognition() {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
   }
 
   @override

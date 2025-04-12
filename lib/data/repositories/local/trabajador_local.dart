@@ -22,6 +22,22 @@ class TrabajadorLocalDataSource {
         );
   }
 
+  Future<Trabajador> getTrabajadorById(int id) async {
+    final result =
+        await (_db.select(_db.trabajadores)
+          ..where((tbl) => tbl.id.equals(id))).getSingle();
+
+    return TrabajadorMapper.fromDataModel(result);
+  }
+
+  Future<Trabajador> getTrabajadorByEquipoId(int equipoId) async {
+    final result =
+        await (_db.select(_db.trabajadores)
+          ..where((tbl) => tbl.equipoId.equals(equipoId))).getSingle();
+
+    return TrabajadorMapper.fromDataModel(result);
+  }
+
   Future<List<Trabajador>> getAllTrabajadores() async {
     final result = await _db.select(_db.trabajadores).get();
     return result.map(TrabajadorMapper.fromDataModel).toList();

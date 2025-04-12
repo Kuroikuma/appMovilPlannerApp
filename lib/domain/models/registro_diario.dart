@@ -5,7 +5,7 @@ import '../../data/database.dart';
 class RegistroDiario {
   final int? id;
   final int equipoId;
-  final String? registroBiometricoId;
+  final int? reconocimientoFacialId;
   final DateTime fechaIngreso;
   final TimeOfDay horaIngreso;
   final DateTime? fechaSalida;
@@ -20,7 +20,7 @@ class RegistroDiario {
   RegistroDiario({
     this.id,
     required this.equipoId,
-    this.registroBiometricoId,
+    this.reconocimientoFacialId,
     required this.fechaIngreso,
     required this.horaIngreso,
     this.fechaSalida,
@@ -72,7 +72,7 @@ class RegistroDiario {
   RegistroDiario copyWith({
     int? id,
     int? equipoId,
-    String? registroBiometricoId,
+    int? reconocimientoFacialId,
     DateTime? fechaIngreso,
     TimeOfDay? horaIngreso,
     DateTime? fechaSalida,
@@ -85,7 +85,8 @@ class RegistroDiario {
     return RegistroDiario(
       id: id ?? this.id,
       equipoId: equipoId ?? this.equipoId,
-      registroBiometricoId: registroBiometricoId ?? this.registroBiometricoId,
+      reconocimientoFacialId:
+          reconocimientoFacialId ?? this.reconocimientoFacialId,
       fechaIngreso: fechaIngreso ?? this.fechaIngreso,
       horaIngreso: horaIngreso ?? this.horaIngreso,
       fechaSalida: fechaSalida ?? this.fechaSalida,
@@ -102,7 +103,7 @@ class RegistroDiario {
     return RegistroDiario(
       id: json['registroDiarioId'],
       equipoId: json['equipoId'],
-      registroBiometricoId: json['registroBiometricoId'] ?? '',
+      reconocimientoFacialId: json['reconocimientoFacialId'] ?? '',
       fechaIngreso: DateTime.parse(json['fechaIngreso']),
       horaIngreso: _timeFromString(json['horaIngreso']),
       fechaSalida:
@@ -126,7 +127,6 @@ class RegistroDiario {
     return RegistroDiario(
       id: data.id,
       equipoId: data.equipoId,
-      registroBiometricoId: data.registroBiometricoId,
       fechaIngreso: data.fechaIngreso,
       horaIngreso: data.horaIngreso,
       fechaSalida: data.fechaSalida,
@@ -143,7 +143,7 @@ class RegistroDiario {
     return {
       'id': id,
       'equipoId': equipoId,
-      'registroBiometricoId': registroBiometricoId,
+      'reconocimientoFacialId': reconocimientoFacialId,
       'fechaIngreso': fechaIngreso.toIso8601String(),
       'horaIngreso': '${horaIngreso.hour}:${horaIngreso.minute}',
       'fechaSalida': fechaSalida?.toIso8601String(),

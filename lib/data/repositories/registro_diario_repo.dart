@@ -79,11 +79,11 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
   @override
   Future<RegistroDiario> registrarEntrada(
     int equipoId, {
-    String? registroBiometricoId,
+    int? reconocimientoFacialId,
   }) async {
     final registro = await remoteDataSource.registrarEntrada(
       equipoId,
-      registroBiometricoId: registroBiometricoId,
+      reconocimientoFacialId: reconocimientoFacialId,
     );
 
     return registro;
@@ -92,11 +92,11 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
   @override
   Future<RegistroDiario> registrarSalida(
     int registroId, {
-    String? registroBiometricoId,
+    int? reconocimientoFacialId,
   }) async {
     final registroActualizado = await remoteDataSource.registrarSalida(
       registroId,
-      registroBiometricoId: registroBiometricoId,
+      reconocimientoFacialId: reconocimientoFacialId,
     );
 
     return registroActualizado;

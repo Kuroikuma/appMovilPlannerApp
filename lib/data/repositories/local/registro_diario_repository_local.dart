@@ -134,7 +134,6 @@ class RegistroDiarioRepositoryLocal {
                   fechaSalida: Value(e.fechaSalida!),
                   horaIngreso: Value(e.horaIngreso),
                   fechaIngreso: Value(e.fechaIngreso),
-                  registroBiometricoId: Value(e.registroBiometricoId),
                   equipoId: Value(e.equipoId),
                   id: Value(e.id!),
                 ),

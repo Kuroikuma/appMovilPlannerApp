@@ -214,7 +214,7 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
 
   Future<void> registrarEntrada(
     int equipoId, {
-    String? registroBiometricoId,
+    int? reconocimientoFacialId,
   }) async {
     state = state.copyWith(isLoading: true).clearErrors();
 
@@ -231,7 +231,7 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
     try {
       final nuevoRegistro = await _repository.registrarEntrada(
         equipoId,
-        registroBiometricoId: registroBiometricoId,
+        reconocimientoFacialId: reconocimientoFacialId,
       );
 
       // Actualizar la lista de registros
@@ -251,7 +251,7 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
 
   Future<void> registrarSalida(
     int registroId, {
-    String? registroBiometricoId,
+    int? reconocimientoFacialId,
   }) async {
     state = state.copyWith(isLoading: true).clearErrors();
 
@@ -268,7 +268,7 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
     try {
       final registroActualizado = await _repository.registrarSalida(
         registroId,
-        registroBiometricoId: registroBiometricoId,
+        reconocimientoFacialId: reconocimientoFacialId,
       );
 
       // Actualizar el registro en la lista

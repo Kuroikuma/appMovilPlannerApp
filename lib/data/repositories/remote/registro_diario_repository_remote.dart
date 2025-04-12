@@ -16,7 +16,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     RegistroDiario(
       id: 1,
       equipoId: 1,
-      registroBiometricoId: 'bio123',
+      reconocimientoFacialId: 1,
       fechaIngreso: DateTime.now().subtract(const Duration(days: 1)),
       horaIngreso: const TimeOfDay(hour: 8, minute: 0),
       fechaSalida: DateTime.now().subtract(const Duration(days: 1)),
@@ -29,7 +29,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     RegistroDiario(
       id: 2,
       equipoId: 2,
-      registroBiometricoId: 'bio124',
+      reconocimientoFacialId: 2,
       fechaIngreso: DateTime.now().subtract(const Duration(days: 1)),
       horaIngreso: const TimeOfDay(hour: 8, minute: 15),
       fechaSalida: DateTime.now().subtract(const Duration(days: 1)),
@@ -42,7 +42,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     RegistroDiario(
       id: 3,
       equipoId: 3,
-      registroBiometricoId: 'bio125',
+      reconocimientoFacialId: 3,
       fechaIngreso: DateTime.now().subtract(const Duration(days: 1)),
       horaIngreso: const TimeOfDay(hour: 9, minute: 0),
       fechaSalida: DateTime.now().subtract(const Duration(days: 1)),
@@ -55,7 +55,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     RegistroDiario(
       id: 4,
       equipoId: 1,
-      registroBiometricoId: 'bio126',
+      reconocimientoFacialId: 4,
       fechaIngreso: DateTime.now(),
       horaIngreso: const TimeOfDay(hour: 8, minute: 5),
       estado: true,
@@ -66,7 +66,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     RegistroDiario(
       id: 5,
       equipoId: 4,
-      registroBiometricoId: 'bio127',
+      reconocimientoFacialId: 5,
       fechaIngreso: DateTime.now(),
       horaIngreso: const TimeOfDay(hour: 8, minute: 30),
       estado: true,
@@ -77,7 +77,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     RegistroDiario(
       id: 9,
       equipoId: 1,
-      registroBiometricoId: 'bio133',
+      reconocimientoFacialId: 9,
       fechaIngreso: DateTime.now().subtract(const Duration(days: 3)),
       horaIngreso: const TimeOfDay(hour: 8, minute: 0),
       fechaSalida: DateTime.now().subtract(const Duration(days: 3)),
@@ -90,7 +90,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     RegistroDiario(
       id: 10,
       equipoId: 2,
-      registroBiometricoId: 'bio134',
+      reconocimientoFacialId: 10,
       fechaIngreso: DateTime.now().subtract(const Duration(days: 4)),
       horaIngreso: const TimeOfDay(hour: 8, minute: 15),
       fechaSalida: DateTime.now().subtract(const Duration(days: 4)),
@@ -103,7 +103,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     RegistroDiario(
       id: 11,
       equipoId: 3,
-      registroBiometricoId: 'bio135',
+      reconocimientoFacialId: 11,
       fechaIngreso: DateTime.now().subtract(const Duration(days: 5)),
       horaIngreso: const TimeOfDay(hour: 9, minute: 0),
       fechaSalida: DateTime.now().subtract(const Duration(days: 5)),
@@ -200,7 +200,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
   @override
   Future<RegistroDiario> registrarEntrada(
     int equipoId, {
-    String? registroBiometricoId,
+    int? reconocimientoFacialId,
   }) async {
     // Simular una llamada a la API
     await Future.delayed(const Duration(milliseconds: 800));
@@ -221,7 +221,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     final nuevoRegistro = RegistroDiario(
       id: _registrosDemo.length + 1,
       equipoId: equipoId,
-      registroBiometricoId: registroBiometricoId,
+      reconocimientoFacialId: reconocimientoFacialId,
       fechaIngreso: DateTime.now(),
       horaIngreso: TimeOfDay.now(),
       estado: true,
@@ -239,7 +239,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
   @override
   Future<RegistroDiario> registrarSalida(
     int registroId, {
-    String? registroBiometricoId,
+    int? reconocimientoFacialId,
   }) async {
     // Simular una llamada a la API
     await Future.delayed(const Duration(milliseconds: 800));
@@ -256,8 +256,9 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     final registroActualizado = _registrosDemo[index].copyWith(
       fechaSalida: DateTime.now(),
       horaSalida: TimeOfDay.now(),
-      registroBiometricoId:
-          registroBiometricoId ?? _registrosDemo[index].registroBiometricoId,
+      reconocimientoFacialId:
+          reconocimientoFacialId ??
+          _registrosDemo[index].reconocimientoFacialId,
     );
 
     // En una implementación real, aquí se actualizaría en la base de datos

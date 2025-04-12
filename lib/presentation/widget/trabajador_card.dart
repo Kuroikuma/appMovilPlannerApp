@@ -1,21 +1,47 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities.dart';
+import '../providers/use_case/reconocimiento_facial.dart';
 
-class TrabajadorCard extends StatelessWidget {
+class TrabajadorCard extends ConsumerStatefulWidget {
   final Trabajador trabajador;
   final VoidCallback? onTap;
   final Function(bool)? onChangeStatus;
 
   const TrabajadorCard({
-    Key? key,
+    super.key,
     required this.trabajador,
     this.onTap,
     this.onChangeStatus,
-  }) : super(key: key);
+  });
+
+  @override
+  ConsumerState<TrabajadorCard> createState() => _TrabajadorCardState();
+}
+
+class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
+  final _imagePicker = ImagePicker();
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final trabajador = widget.trabajador;
+    final onTap = widget.onTap;
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -38,7 +64,7 @@ class TrabajadorCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Avatar del trabajador
-              _buildAvatar(),
+              _buildAvatar(trabajador),
               const SizedBox(width: 16),
 
               // Información del trabajador
@@ -92,7 +118,7 @@ class TrabajadorCard extends StatelessWidget {
                               Icons.face_retouching_off,
                               color: Colors.red,
                             ),
-                    onPressed: onTap,
+                    onPressed: () => _registerFace(trabajador),
                   ),
                 ],
               ),
@@ -103,7 +129,7 @@ class TrabajadorCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar(Trabajador trabajador) {
     return Hero(
       tag: 'trabajador-${trabajador.id}',
       child: CircleAvatar(
@@ -120,7 +146,7 @@ class TrabajadorCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(BuildContext context) {
+  Widget _buildStatusBadge(BuildContext context, Trabajador trabajador) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -132,13 +158,76 @@ class TrabajadorCard extends StatelessWidget {
         ),
       ),
       child: Text(
-        trabajador.faceSync ? 'Activo' : 'Inactivo',
+        trabajador.estado ? 'Activo' : 'Inactivo',
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: trabajador.faceSync ? Colors.green[700] : Colors.red[700],
+          color: trabajador.estado ? Colors.green[700] : Colors.red[700],
         ),
       ),
     );
+  }
+
+  Future<void> _registerFace(Trabajador trabajador) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final path = directory.path;
+      final image = await _imagePicker.pickImage(source: ImageSource.camera);
+
+      if (image == null) {
+        return;
+      }
+
+      InputImage inputImage = InputImage.fromFile(File(image.path));
+      final faces = await ref
+          .read(reconocimientoFacialNotifierProvider.notifier)
+          .detectFaces(inputImage);
+
+      if (faces.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('No face detected')));
+        }
+        return;
+      }
+
+      final input = ref
+          .read(reconocimientoFacialNotifierProvider.notifier)
+          .prepareInputFromImagePath({
+            'imgPath': image.path,
+            'face': faces.first,
+          });
+      final embedding = ref
+          .read(reconocimientoFacialNotifierProvider.notifier)
+          .getEmbedding(input);
+
+      print('pasa del embending?');
+
+      try {
+        final imagenUrl =
+            '$path/faces/${trabajador.id}-${trabajador.equipoId}.jpg';
+        await ref
+            .read(reconocimientoFacialNotifierProvider.notifier)
+            .registerFace(trabajador.equipoId, embedding, image, imagenUrl);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error registering face: $e')));
+        }
+      }
+    } finally {
+      if (mounted) {}
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Face registered successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 }

@@ -1,8 +1,6 @@
 // Enumerado para el método de prueba de vida
 import 'package:flutter/material.dart';
 
-enum MetodoPruebaVida { face, huella, otro }
-
 class Trabajador {
   final int id;
   final String nombre;
@@ -107,32 +105,9 @@ class Horario {
   });
 }
 
-class RegistroBiometrico {
-  final int id;
-  final String trabajadorId;
-  final String foto;
-  final Map<String, dynamic> datosBiometricos;
-  final bool pruebaVidaExitosa;
-  final MetodoPruebaVida metodoPruebaVida;
-  final double puntajeConfianza;
-  final bool estado;
-
-  RegistroBiometrico({
-    required this.id,
-    required this.trabajadorId,
-    required this.foto,
-    required this.datosBiometricos,
-    required this.pruebaVidaExitosa,
-    required this.metodoPruebaVida,
-    required this.puntajeConfianza,
-    this.estado = true,
-  });
-}
-
 class RegistroDiario {
   final int id;
   final String trabajadorId;
-  final String registroBiometricoId;
   final DateTime fechaIngreso;
   final TimeOfDay horaIngreso;
   final DateTime? fechaSalida;
@@ -144,7 +119,6 @@ class RegistroDiario {
   RegistroDiario({
     required this.id,
     required this.trabajadorId,
-    required this.registroBiometricoId,
     required this.fechaIngreso,
     required this.horaIngreso,
     this.fechaSalida,

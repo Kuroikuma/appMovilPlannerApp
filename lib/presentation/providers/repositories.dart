@@ -1,8 +1,9 @@
+import 'package:flutter_application_1/domain/repositories/i_registro_biometrico_repository.dart';
 import 'package:riverpod/riverpod.dart';
 
+import '../../data/repositories/registro_biometrico_repo.dart';
 import '../../data/repositories/registro_diario_repo.dart';
 import '../../data/repositories/remote/reconocimiento_facial_repository.dart';
-import '../../data/repositories/remote/registro_diario_repository_remote.dart';
 import '../../data/repositories/sync_entity_repo.dart';
 import '../../data/repositories/trabajador.dart';
 import '../../data/repositories/ubicacion_repo.dart';
@@ -47,6 +48,16 @@ final registroDiarioRepositoryProvider = Provider<IRegistroDiarioRepository>((
     networkInfo: ref.watch(networkInfoProvider),
   );
 });
+
+final registroBiometricoRepositoryProvider =
+    Provider<IRegistroBiometricoRepository>((ref) {
+      return RegistroBiometricoRepository(
+        localDataSource: ref.watch(registroBiometricoLocalDataSourceProvider),
+        remoteDataSource: ref.watch(registroBiometricoRemoteDataSourceProvider),
+        networkInfo: ref.watch(networkInfoProvider),
+        trabajadorRepo: ref.watch(trabajadorLocalDataSourceProvider),
+      );
+    });
 
 final reconocimientoFacialRepositoryProvider =
     Provider<IReconocimientoFacialRepository>((ref) {
