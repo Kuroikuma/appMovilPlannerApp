@@ -35,6 +35,7 @@ class ReconocimientoFacialStateData {
   final bool registroExitoso;
   final List<RegistroBiometrico> cachedFaces;
   final bool isInitialized;
+  final File? imageFile;
 
   const ReconocimientoFacialStateData({
     this.estado = ReconocimientoFacialEstado.inicial,
@@ -46,6 +47,7 @@ class ReconocimientoFacialStateData {
     this.registroExitoso = false,
     this.cachedFaces = const [],
     this.isInitialized = false,
+    this.imageFile,
   });
 
   ReconocimientoFacialStateData copyWith({
@@ -58,6 +60,7 @@ class ReconocimientoFacialStateData {
     bool? registroExitoso,
     List<RegistroBiometrico>? cachedFaces,
     bool? isInitialized,
+    File? imageFile,
   }) {
     return ReconocimientoFacialStateData(
       estado: estado ?? this.estado,
@@ -70,6 +73,7 @@ class ReconocimientoFacialStateData {
       registroExitoso: registroExitoso ?? this.registroExitoso,
       cachedFaces: cachedFaces ?? this.cachedFaces,
       isInitialized: isInitialized ?? this.isInitialized,
+      imageFile: imageFile ?? this.imageFile,
     );
   }
 
@@ -84,6 +88,7 @@ class ReconocimientoFacialStateData {
       registroExitoso: registroExitoso,
       cachedFaces: cachedFaces,
       isInitialized: isInitialized,
+      imageFile: imageFile,
     );
   }
 }
@@ -143,6 +148,14 @@ class ReconocimientoFacialNotifier
     );
   }
 
+  Future<void> setImagenFile(File imageFile) async {
+    state = state.copyWith(imageFile: imageFile);
+  }
+
+  Future<void> setLoading(bool value) async {
+    state = state.copyWith(isLoading: value);
+  }
+
   Future<void> obtenerReconocimientosPorTrabajador(String trabajadorId) async {
     state = state.copyWith(isLoading: true).clearErrors();
 
@@ -175,7 +188,6 @@ class ReconocimientoFacialNotifier
     XFile image,
     String imagenUrl,
   ) async {
-    print('registerFace');
     state = state.copyWith(
       isLoading: true,
       estado: ReconocimientoFacialEstado.capturando,
@@ -436,8 +448,6 @@ class ReconocimientoFacialNotifier
 
   List<double> getEmbedding(List input) {
     List output = List.generate(1, (_) => List.filled(192, 0));
-    print('esta es la parte del interprete');
-    print(state.isInitialized);
     _interpreter.run(input, output);
     return output[0].cast<double>();
   }

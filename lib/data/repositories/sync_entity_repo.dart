@@ -23,19 +23,8 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
   );
 
   @override
-  Future<void> insertSyncEntity(SyncEntity syncEntity) async {
-    await _db
-        .into(_db.syncsEntitys)
-        .insertOnConflictUpdate(
-          SyncsEntitysCompanion(
-            entityTableNameToSync: Value(syncEntity.entityTableNameToSync),
-            action: Value(syncEntity.action),
-            registerId: Value(syncEntity.registerId),
-            timestamp: Value(syncEntity.timestamp),
-            isSynced: Value(syncEntity.isSynced),
-            data: Value(syncEntity.data),
-          ),
-        );
+  Future<void> insertSyncEntity(SyncsEntitysCompanion syncEntity) async {
+    await _db.into(_db.syncsEntitys).insertOnConflictUpdate(syncEntity);
   }
 
   @override

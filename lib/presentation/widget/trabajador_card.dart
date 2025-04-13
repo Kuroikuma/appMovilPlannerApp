@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
@@ -8,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
+import '../providers/use_case/trabajador.dart';
+import '../providers/use_case/ubicacion.dart';
 
 class TrabajadorCard extends ConsumerStatefulWidget {
   final Trabajador trabajador;
@@ -27,6 +28,7 @@ class TrabajadorCard extends ConsumerStatefulWidget {
 
 class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
   final _imagePicker = ImagePicker();
+
   @override
   void initState() {
     super.initState();
@@ -135,7 +137,7 @@ class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
       child: CircleAvatar(
         radius: 30,
         backgroundColor: Colors.grey[200],
-        backgroundImage: null,
+        backgroundImage: FileImage(File(trabajador.fotoUrl)),
         child: Text(
           trabajador.nombre.isNotEmpty
               ? trabajador.nombre[0].toUpperCase()
@@ -169,19 +171,29 @@ class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
   }
 
   Future<void> _registerFace(Trabajador trabajador) async {
+    final reconocimientoNotifier = ref.read(
+      reconocimientoFacialNotifierProvider.notifier,
+    );
+    final trabajadorNotifier = ref.read(trabajadorNotifierProvider.notifier);
+    final ubicacionState = ref.read(ubicacionNotifierProvider);
+
     try {
       final directory = await getApplicationDocumentsDirectory();
       final path = directory.path;
+
+      await reconocimientoNotifier.setLoading(true);
+
       final image = await _imagePicker.pickImage(source: ImageSource.camera);
 
       if (image == null) {
+        await reconocimientoNotifier.setLoading(false);
         return;
       }
 
+      await reconocimientoNotifier.setImagenFile(File(image.path));
+
       InputImage inputImage = InputImage.fromFile(File(image.path));
-      final faces = await ref
-          .read(reconocimientoFacialNotifierProvider.notifier)
-          .detectFaces(inputImage);
+      final faces = await reconocimientoNotifier.detectFaces(inputImage);
 
       if (faces.isEmpty) {
         if (mounted) {
@@ -189,27 +201,25 @@ class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
             context,
           ).showSnackBar(const SnackBar(content: Text('No face detected')));
         }
+        await reconocimientoNotifier.setLoading(false);
         return;
       }
 
-      final input = ref
-          .read(reconocimientoFacialNotifierProvider.notifier)
-          .prepareInputFromImagePath({
-            'imgPath': image.path,
-            'face': faces.first,
-          });
-      final embedding = ref
-          .read(reconocimientoFacialNotifierProvider.notifier)
-          .getEmbedding(input);
-
-      print('pasa del embending?');
+      final input = reconocimientoNotifier.prepareInputFromImagePath({
+        'imgPath': image.path,
+        'face': faces.first,
+      });
+      final embedding = reconocimientoNotifier.getEmbedding(input);
 
       try {
-        final imagenUrl =
-            '$path/faces/${trabajador.id}-${trabajador.equipoId}.jpg';
-        await ref
-            .read(reconocimientoFacialNotifierProvider.notifier)
-            .registerFace(trabajador.equipoId, embedding, image, imagenUrl);
+        final imagenUrl = '$path/${trabajador.id}-${trabajador.equipoId}.jpg';
+        await reconocimientoNotifier.registerFace(
+          trabajador.equipoId,
+          embedding,
+          image,
+          imagenUrl,
+        );
+        await trabajadorNotifier.cargarTrabajadores(ubicacionState.ubicacionId);
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(
@@ -218,7 +228,9 @@ class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
         }
       }
     } finally {
-      if (mounted) {}
+      if (mounted) {
+        await reconocimientoNotifier.setLoading(false);
+      }
     }
 
     if (mounted) {

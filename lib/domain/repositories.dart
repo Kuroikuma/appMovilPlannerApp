@@ -1,12 +1,14 @@
 import 'package:flutter_application_1/domain/entities.dart';
 
+import '../data/database.dart';
+
 abstract class ITrabajadorRepository {
   Future<Trabajador> crearTrabajador(Trabajador trabajador);
   Future<List<Trabajador>> obtenerTrabajadoresPorUbicacion(String ubicacionId);
 }
 
 abstract class ISyncEntityRepository {
-  Future<void> insertSyncEntity(SyncEntity syncEntity);
+  Future<void> insertSyncEntity(SyncsEntitysCompanion syncEntity);
   Future<void> syncEntitys(List<Trabajador> trabajadores);
   Future<void> syncRemoteWithLocalData();
   Future<void> syncLocalWithRemoteData();

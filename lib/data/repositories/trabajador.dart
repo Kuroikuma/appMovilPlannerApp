@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:drift/drift.dart';
 import 'package:flutter_application_1/data/repositories/local/trabajador_local.dart';
 import 'package:flutter_application_1/data/repositories/remote/trabajador_remote.dart';
 import 'package:flutter_application_1/data/repositories/base_hybrid_repository.dart';
@@ -8,6 +9,10 @@ import 'package:flutter_application_1/domain/repositories.dart';
 
 import 'package:flutter_application_1/core/network/network_info.dart';
 import 'package:flutter_application_1/core/error/exceptions.dart';
+
+import '../converters/action_sync.dart';
+import '../database.dart';
+import '../mappers/trabajador_mappers.dart';
 
 class TrabajadorRepository
     implements ITrabajadorRepository, BaseHybridRepository {
@@ -35,17 +40,7 @@ class TrabajadorRepository
         final localTrabajador = await localDataSource.insertOfflineTrabajador(
           trabajador,
         );
-        // syncEntityRepository.insertSyncEntity(
-        //   SyncEntity(
-        //     id: localTrabajador.id,
-        //     entityTableNameToSync: 'trabajador',
-        //     action: 'CREATE',
-        //     registerId: "{$localTrabajador.id}",
-        //     timestamp: DateTime.now(),
-        //     isSynced: false,
-        //     data: TrabajadorMapper.toApiJson(localTrabajador),
-        //   ),
-        // );
+        insertQueuTrabajador(localTrabajador, TipoAccionesSync.create);
         return localTrabajador.copyWith(id: localTrabajador.id);
       }
     } on SocketException {
@@ -90,25 +85,20 @@ class TrabajadorRepository
     }
   }
 
-  // @override
-  // Future<void> syncLocalWithRemote() async {
-  //   final pendingOperations = await localDataSource.getPendingSyncOperations();
-
-  //   for (final operation in pendingOperations) {
-  //     try {
-  //       switch (operation.action) {
-  //         case 'create':
-  //           await remoteDataSource.createTrabajador(operation.data);
-  //           await localDataSource.markOperationAsSynced(operation.id);
-  //           break;
-  //         case 'update':
-  //         // Lógica similar para updates
-  //       }
-  //     } catch (e) {
-  //       // Registrar error y reintentar luego
-  //     }
-  //   }
-  // }
-
-  // Resto de implementaciones...
+  //Sync Functions
+  Future<void> insertQueuTrabajador(
+    Trabajador trabajador,
+    TipoAccionesSync action,
+  ) async {
+    syncEntityRepository.insertSyncEntity(
+      SyncsEntitysCompanion(
+        entityTableNameToSync: Value('trabajador'),
+        action: Value(action),
+        registerId: Value("{$trabajador.id}"),
+        timestamp: Value(DateTime.now()),
+        isSynced: Value(false),
+        data: Value(TrabajadorMapper.toApiJson(trabajador)),
+      ),
+    );
+  }
 }

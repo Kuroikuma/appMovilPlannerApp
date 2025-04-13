@@ -46,7 +46,14 @@ class ApiClient {
   Future<Response> post(String path, {dynamic data}) async {
     try {
       print('Intentando POST request a: ${_dio.options.baseUrl}$path');
-      final response = await _dio.post(path, data: data);
+      final response = await _dio.post(
+        path,
+        data: data,
+        options: Options(
+          contentType:
+              data is FormData ? 'multipart/form-data' : 'application/json',
+        ),
+      );
       print('Response exitosa: ${response.statusCode}');
       return response;
     } on DioException catch (e) {

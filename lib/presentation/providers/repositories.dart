@@ -56,6 +56,7 @@ final registroBiometricoRepositoryProvider =
         remoteDataSource: ref.watch(registroBiometricoRemoteDataSourceProvider),
         networkInfo: ref.watch(networkInfoProvider),
         trabajadorRepo: ref.watch(trabajadorLocalDataSourceProvider),
+        syncEntityRepository: ref.watch(syncEntityRepoProvider),
       );
     });
 

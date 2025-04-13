@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:camera/camera.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_application_1/domain/models/registro_biometrico.dart';
@@ -28,15 +30,22 @@ class RegistroBiometricoRepositoryRemote {
     RegistroBiometrico registroBiometrico,
     XFile image,
   ) async {
-    final file = await MultipartFile.fromFile(
-      image.path,
-      filename: image.name,
-      contentType: DioMediaType('image/jpeg', 'image/png'),
-    );
+    try {
+      final file = await MultipartFile.fromFile(
+        image.path,
+        filename: image.name,
+        contentType: DioMediaType('image/jpeg', 'image/png'),
+      );
 
-    await _client.post(
-      '/PostSaveRegistroBiometrico',
-      data: {'registroBiometrico': registroBiometrico, 'file': file},
-    );
+      final formData = FormData.fromMap({
+        'registroBiometrico': jsonEncode(registroBiometrico.toJson()),
+        'file': file,
+      });
+
+      await _client.post('/PostSaveRegistroBiometrico', data: formData);
+    } catch (e) {
+      print(e);
+      throw Exception('Error al guardar el rostro');
+    }
   }
 }

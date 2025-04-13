@@ -19,7 +19,6 @@ class RegistroBiometricoRepositoryLocal {
     List<double> embedding,
   ) async {
     print(equipoId);
-    print(embedding);
     try {
       final registroBiometrico = RegistroBiometrico(
         id: uuid.v4(),

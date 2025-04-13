@@ -1,6 +1,8 @@
 // Enumerado para el método de prueba de vida
 import 'package:flutter/material.dart';
 
+import '../data/converters/action_sync.dart';
+
 class Trabajador {
   final int id;
   final String nombre;
@@ -132,7 +134,7 @@ class RegistroDiario {
 class SyncEntity {
   final int id;
   final String entityTableNameToSync;
-  final String action; // 'CREATE', 'UPDATE', 'DELETE'
+  final TipoAccionesSync action; // 'CREATE', 'UPDATE', 'DELETE'
   final String registerId;
   final DateTime timestamp;
   final bool isSynced;

@@ -3374,15 +3374,15 @@ class $SyncsEntitysTable extends SyncsEntitys
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
-  static const VerificationMeta _actionMeta = const VerificationMeta('action');
   @override
-  late final GeneratedColumn<String> action = GeneratedColumn<String>(
-    'action',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<TipoAccionesSync, String> action =
+      GeneratedColumn<String>(
+        'action',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<TipoAccionesSync>($SyncsEntitysTable.$converteraction);
   static const VerificationMeta _registerIdMeta = const VerificationMeta(
     'registerId',
   );
@@ -3466,14 +3466,6 @@ class $SyncsEntitysTable extends SyncsEntitys
     } else if (isInserting) {
       context.missing(_entityTableNameToSyncMeta);
     }
-    if (data.containsKey('action')) {
-      context.handle(
-        _actionMeta,
-        action.isAcceptableOrUnknown(data['action']!, _actionMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_actionMeta);
-    }
     if (data.containsKey('register_id')) {
       context.handle(
         _registerIdMeta,
@@ -3513,11 +3505,12 @@ class $SyncsEntitysTable extends SyncsEntitys
             DriftSqlType.string,
             data['${effectivePrefix}entity_table_name_to_sync'],
           )!,
-      action:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}action'],
-          )!,
+      action: $SyncsEntitysTable.$converteraction.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}action'],
+        )!,
+      ),
       registerId:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
@@ -3547,6 +3540,8 @@ class $SyncsEntitysTable extends SyncsEntitys
     return $SyncsEntitysTable(attachedDatabase, alias);
   }
 
+  static TypeConverter<TipoAccionesSync, String> $converteraction =
+      const TipoAccionesSyncConverter();
   static TypeConverter<Map<String, dynamic>, String> $converterdata =
       const JsonConverter();
 }
@@ -3554,7 +3549,7 @@ class $SyncsEntitysTable extends SyncsEntitys
 class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
   final int id;
   final String entityTableNameToSync;
-  final String action;
+  final TipoAccionesSync action;
   final String registerId;
   final DateTime timestamp;
   final bool isSynced;
@@ -3573,7 +3568,11 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['entity_table_name_to_sync'] = Variable<String>(entityTableNameToSync);
-    map['action'] = Variable<String>(action);
+    {
+      map['action'] = Variable<String>(
+        $SyncsEntitysTable.$converteraction.toSql(action),
+      );
+    }
     map['register_id'] = Variable<String>(registerId);
     map['timestamp'] = Variable<DateTime>(timestamp);
     map['is_synced'] = Variable<bool>(isSynced);
@@ -3607,7 +3606,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
       entityTableNameToSync: serializer.fromJson<String>(
         json['entityTableNameToSync'],
       ),
-      action: serializer.fromJson<String>(json['action']),
+      action: serializer.fromJson<TipoAccionesSync>(json['action']),
       registerId: serializer.fromJson<String>(json['registerId']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
@@ -3620,7 +3619,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'entityTableNameToSync': serializer.toJson<String>(entityTableNameToSync),
-      'action': serializer.toJson<String>(action),
+      'action': serializer.toJson<TipoAccionesSync>(action),
       'registerId': serializer.toJson<String>(registerId),
       'timestamp': serializer.toJson<DateTime>(timestamp),
       'isSynced': serializer.toJson<bool>(isSynced),
@@ -3631,7 +3630,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
   SyncsEntity copyWith({
     int? id,
     String? entityTableNameToSync,
-    String? action,
+    TipoAccionesSync? action,
     String? registerId,
     DateTime? timestamp,
     bool? isSynced,
@@ -3701,7 +3700,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
 class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
   final Value<int> id;
   final Value<String> entityTableNameToSync;
-  final Value<String> action;
+  final Value<TipoAccionesSync> action;
   final Value<String> registerId;
   final Value<DateTime> timestamp;
   final Value<bool> isSynced;
@@ -3718,7 +3717,7 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
   SyncsEntitysCompanion.insert({
     this.id = const Value.absent(),
     required String entityTableNameToSync,
-    required String action,
+    required TipoAccionesSync action,
     required String registerId,
     this.timestamp = const Value.absent(),
     this.isSynced = const Value.absent(),
@@ -3751,7 +3750,7 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
   SyncsEntitysCompanion copyWith({
     Value<int>? id,
     Value<String>? entityTableNameToSync,
-    Value<String>? action,
+    Value<TipoAccionesSync>? action,
     Value<String>? registerId,
     Value<DateTime>? timestamp,
     Value<bool>? isSynced,
@@ -3781,7 +3780,9 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
       );
     }
     if (action.present) {
-      map['action'] = Variable<String>(action.value);
+      map['action'] = Variable<String>(
+        $SyncsEntitysTable.$converteraction.toSql(action.value),
+      );
     }
     if (registerId.present) {
       map['register_id'] = Variable<String>(registerId.value);
@@ -6864,7 +6865,7 @@ typedef $$SyncsEntitysTableCreateCompanionBuilder =
     SyncsEntitysCompanion Function({
       Value<int> id,
       required String entityTableNameToSync,
-      required String action,
+      required TipoAccionesSync action,
       required String registerId,
       Value<DateTime> timestamp,
       Value<bool> isSynced,
@@ -6874,7 +6875,7 @@ typedef $$SyncsEntitysTableUpdateCompanionBuilder =
     SyncsEntitysCompanion Function({
       Value<int> id,
       Value<String> entityTableNameToSync,
-      Value<String> action,
+      Value<TipoAccionesSync> action,
       Value<String> registerId,
       Value<DateTime> timestamp,
       Value<bool> isSynced,
@@ -6900,9 +6901,10 @@ class $$SyncsEntitysTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get action => $composableBuilder(
+  ColumnWithTypeConverterFilters<TipoAccionesSync, TipoAccionesSync, String>
+  get action => $composableBuilder(
     column: $table.action,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<String> get registerId => $composableBuilder(
@@ -6993,7 +6995,7 @@ class $$SyncsEntitysTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get action =>
+  GeneratedColumnWithTypeConverter<TipoAccionesSync, String> get action =>
       $composableBuilder(column: $table.action, builder: (column) => column);
 
   GeneratedColumn<String> get registerId => $composableBuilder(
@@ -7045,7 +7047,7 @@ class $$SyncsEntitysTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> entityTableNameToSync = const Value.absent(),
-                Value<String> action = const Value.absent(),
+                Value<TipoAccionesSync> action = const Value.absent(),
                 Value<String> registerId = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
@@ -7063,7 +7065,7 @@ class $$SyncsEntitysTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required String entityTableNameToSync,
-                required String action,
+                required TipoAccionesSync action,
                 required String registerId,
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),

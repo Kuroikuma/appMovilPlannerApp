@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
@@ -13,9 +15,12 @@ class TrabajadoresScreen extends ConsumerStatefulWidget {
   ConsumerState<TrabajadoresScreen> createState() => _TrabajadoresScreenState();
 }
 
-class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen> {
+class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
+  // Animation controller for the loading screen
+  late AnimationController _animationController;
 
   @override
   void initState() {
@@ -23,12 +28,20 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _cargarTrabajadores();
       _initFaceRecognition();
+
+      // Initialize animation controller
+      _animationController = AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 2),
+      )..repeat();
     });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _disposeFaceRecognition();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -52,10 +65,21 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen> {
     ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
   }
 
+  void _disposeFaceRecognition() {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final trabajadorState = ref.watch(trabajadorNotifierProvider);
     final ubicacionState = ref.watch(ubicacionNotifierProvider);
+    final reconocimientoFacialState = ref.watch(
+      reconocimientoFacialNotifierProvider,
+    );
+
+    if (reconocimientoFacialState.isLoading) {
+      return _buildProcesando(context);
+    }
 
     return Scaffold(
       appBar: _buildAppBar(context, ubicacionState),
@@ -448,5 +472,247 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen> {
         );
       },
     );
+  }
+
+  Widget _buildProcesando(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      color: theme.colorScheme.primary,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.face_retouching_natural,
+                    color: theme.colorScheme.onPrimary,
+                    size: 32,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Registro Biométrico',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Main content
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.background,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Animated face scan indicator
+                    SizedBox(
+                      width: 120,
+                      height: 120,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Outer circle
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: theme.colorScheme.primary.withOpacity(
+                                  0.2,
+                                ),
+                                width: 8,
+                              ),
+                            ),
+                          ),
+
+                          // Animated progress circle
+                          AnimatedBuilder(
+                            animation: _animationController,
+                            builder: (context, child) {
+                              return CustomPaint(
+                                painter: LoadingArcPainter(
+                                  progress: _animationController.value,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                size: const Size(120, 120),
+                              );
+                            },
+                          ),
+
+                          // Face icon
+                          Icon(
+                            Icons.face,
+                            size: 50,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Status text
+                    Text(
+                      'Registrando datos biométricos',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Progress steps
+                    _buildProgressStep(
+                      icon: Icons.face_retouching_natural,
+                      text: 'Analizando datos biométricos',
+                      isActive: true,
+                    ),
+                    _buildProgressStep(
+                      icon: Icons.insights,
+                      text: 'Procesando datos biométricos',
+                      isActive: true,
+                    ),
+                    _buildProgressStep(
+                      icon: Icons.save,
+                      text: 'Guardando datos biométricos',
+                      isActive: false,
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Tip text
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'Por favor, espere mientras guardamos sus datos biométricos para futuras verificaciones. Este proceso puede tomar unos segundos.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: theme.colorScheme.onBackground.withOpacity(
+                            0.7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressStep({
+    required IconData icon,
+    required String text,
+    required bool isActive,
+  }) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color:
+                  isActive
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.primary.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color:
+                  isActive
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.primary.withOpacity(0.5),
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                color:
+                    isActive
+                        ? theme.colorScheme.onBackground
+                        : theme.colorScheme.onBackground.withOpacity(0.5),
+              ),
+            ),
+          ),
+          if (isActive)
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// Clase para dibujar el arco de carga animado
+class LoadingArcPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  LoadingArcPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromCircle(
+      center: Offset(size.width / 2, size.height / 2),
+      radius: size.width / 2,
+    );
+
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 8.0
+          ..strokeCap = StrokeCap.round;
+
+    // Dibujar arco animado
+    canvas.drawArc(
+      rect,
+      -math.pi / 2, // Comenzar desde arriba
+      2 * math.pi * progress, // Ángulo basado en el progreso
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant LoadingArcPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }

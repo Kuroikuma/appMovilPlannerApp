@@ -62,18 +62,6 @@ class TrabajadorNotifier extends StateNotifier<TrabajadorState> {
   Future<void> cargarTrabajadores(String ubicacionId) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
-    // Verificar conexión a internet
-    final hasInternet = await networkInfo.isConnected;
-    if (!hasInternet) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'No hay conexión a internet',
-      );
-      return;
-    }
-
-    print('ubicacionId: $ubicacionId');
-
     try {
       final trabajadores = await _repository.obtenerTrabajadoresPorUbicacion(
         ubicacionId,

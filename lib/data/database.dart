@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart' show TimeOfDay;
+import 'converters/action_sync.dart';
 import 'converters/json_converter.dart';
 import 'converters/json_converter_embedding.dart';
 import 'converters/time_converter.dart';
@@ -187,7 +188,8 @@ class RegistrosDiarios extends Table {
 class SyncsEntitys extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get entityTableNameToSync => text()();
-  TextColumn get action => text()();
+  // TextColumn get action => text()();
+  TextColumn get action => text().map(const TipoAccionesSyncConverter())();
   TextColumn get registerId => text()();
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();

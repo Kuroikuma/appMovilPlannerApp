@@ -1,5 +1,6 @@
 import 'package:riverpod/riverpod.dart';
 
+import '../../../data/database.dart';
 import '../../../domain/entities.dart';
 
 import '../../../domain/repositories.dart';
@@ -51,7 +52,7 @@ class SyncEntityNotifier extends StateNotifier<AsyncValue<List<SyncEntity>>> {
     }
   }
 
-  Future<void> insertSyncEntity(SyncEntity syncEntity) async {
+  Future<void> insertSyncEntity(SyncsEntitysCompanion syncEntity) async {
     try {
       await _repository.insertSyncEntity(syncEntity);
       await _loadSyncEntity();
