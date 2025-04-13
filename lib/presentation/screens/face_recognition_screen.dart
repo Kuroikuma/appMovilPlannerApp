@@ -233,7 +233,7 @@ class _FaceRecognitionScreenState extends ConsumerState<FaceRecognitionScreen>
                 fit: StackFit.expand,
                 children: <Widget>[
                   CameraPreview(_cameraController!),
-                  _buildResults(),
+                  // _buildResults(),
                 ],
               ),
     );
@@ -369,24 +369,24 @@ class _FaceRecognitionScreenState extends ConsumerState<FaceRecognitionScreen>
     );
   }
 
-  Widget _buildResults() {
-    const Text noResultsText = const Text('');
-    if (_scanResults == null ||
-        _cameraController == null ||
-        !_cameraController!.value.isInitialized) {
-      return noResultsText;
-    }
-    CustomPainter painter;
-    print('aqui esta el resultado del escanner');
-    print(_scanResults);
+  // Widget _buildResults() {
+  //   const Text noResultsText = const Text('');
+  //   if (_scanResults == null ||
+  //       _cameraController == null ||
+  //       !_cameraController!.value.isInitialized) {
+  //     return noResultsText;
+  //   }
+  //   CustomPainter painter;
+  //   print('aqui esta el resultado del escanner');
+  //   print(_scanResults);
 
-    final Size imageSize = Size(
-      _cameraController!.value.previewSize!.height,
-      _cameraController!.value.previewSize!.width,
-    );
-    painter = FaceDetectorPainter(imageSize, _scanResults);
-    return CustomPaint(painter: painter);
-  }
+  //   final Size imageSize = Size(
+  //     _cameraController!.value.previewSize!.height,
+  //     _cameraController!.value.previewSize!.width,
+  //   );
+  //   painter = FaceDetectorPainter(imageSize, _scanResults);
+  //   return CustomPaint(painter: painter);
+  // }
 
   imglib.Image _cropFace(imglib.Image convertedImage, Face face) {
     final rect = face.boundingBox;

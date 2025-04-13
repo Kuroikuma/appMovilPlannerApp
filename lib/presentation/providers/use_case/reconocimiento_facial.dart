@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter_application_1/domain/repositories/i_registro_biometrico_repository.dart';
+import 'package:flutter_application_1/presentation/providers/use_case/trabajador.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image/image.dart' as img;
@@ -478,14 +479,19 @@ class ReconocimientoFacialNotifier
     double threshold = 0.8,
   }) async {
     double minDistance = double.maxFinite;
-    String name = 'Kaun hai re tu?'; // Unknown
+    String name = 'No Registrado'; // Unknown
+
+    final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
 
     for (var face in state.cachedFaces) {
       final distance = _euclideanDistance(embedding, face.datosBiometricos);
+      final Trabajador? trabajador = trabajadores
+          .cast<Trabajador?>()
+          .firstWhere((t) => t?.id == face.trabajadorId, orElse: () => null);
 
       if (distance <= threshold && distance < minDistance) {
         minDistance = distance;
-        name = face.trabajadorId.toString();
+        name = trabajador?.nombre ?? "No Registrado";
       }
     }
 

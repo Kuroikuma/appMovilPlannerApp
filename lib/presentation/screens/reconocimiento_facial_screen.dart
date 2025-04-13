@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
 import '../utils/notification_utils.dart';
+import '../widget/face_detector_painter.dart';
 
 class ReconocimientoFacialScreen extends ConsumerStatefulWidget {
   const ReconocimientoFacialScreen({super.key});
@@ -26,21 +30,33 @@ class _ReconocimientoFacialScreenState
   File? _imageFile;
   bool _isFlashOn = false;
   bool _isPermissionGranted = false;
+  CustomPaint? customPaint;
+  bool _isBusy = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _checkPermissionsAndInitCamera();
+    _initFaceRecognition();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
     });
   }
 
+  void _initFaceRecognition() {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
+  }
+
+  void _disposeFaceRecognition() {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).dispose();
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _disposeFaceRecognition();
     _cameraController?.dispose();
     super.dispose();
   }
@@ -107,6 +123,7 @@ class _ReconocimientoFacialScreenState
       );
 
       await _cameraController!.initialize();
+      _cameraController!.startImageStream(_processCameraImage);
 
       if (mounted) {
         setState(() {
@@ -144,9 +161,9 @@ class _ReconocimientoFacialScreenState
 
       _cameraController = CameraController(
         _cameras![newCameraIndex],
-        ResolutionPreset.high,
+        ResolutionPreset.medium,
         enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.jpeg,
+        imageFormatGroup: ImageFormatGroup.nv21,
       );
 
       await _cameraController!.initialize();
@@ -156,6 +173,110 @@ class _ReconocimientoFacialScreenState
           _isCameraInitialized = true;
         });
       }
+    }
+  }
+
+  Future<void> _processCameraImage(CameraImage image) async {
+    if (_isBusy) return;
+
+    final reconocimientoNotifier = ref.read(
+      reconocimientoFacialNotifierProvider.notifier,
+    );
+
+    _isBusy = true;
+
+    try {
+      // Prepare input image
+      final orientations = {
+        DeviceOrientation.portraitUp: 0,
+        DeviceOrientation.landscapeLeft: 90,
+        DeviceOrientation.portraitDown: 180,
+        DeviceOrientation.landscapeRight: 270,
+      };
+
+      final newCameraIndex =
+          _isFrontCameraSelected
+              ? _cameras!.indexWhere(
+                (camera) => camera.lensDirection == CameraLensDirection.front,
+              )
+              : _cameras!.indexWhere(
+                (camera) => camera.lensDirection == CameraLensDirection.back,
+              );
+
+      final camera = _cameras![newCameraIndex];
+
+      InputImageRotation? rotation;
+      if (Platform.isIOS) {
+        rotation = InputImageRotationValue.fromRawValue(
+          camera.sensorOrientation,
+        );
+      } else {
+        var rotationCompensation =
+            orientations[_cameraController!.value.deviceOrientation];
+        if (rotationCompensation == null) return;
+        if (camera.lensDirection == CameraLensDirection.front) {
+          rotationCompensation =
+              (camera.sensorOrientation + rotationCompensation) % 360;
+        } else {
+          rotationCompensation =
+              (camera.sensorOrientation - rotationCompensation + 360) % 360;
+        }
+        rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
+      }
+      if (rotation == null) return;
+      final format = InputImageFormatValue.fromRawValue(image.format.raw);
+      if (format == null) return;
+
+      InputImage inputImage = InputImage.fromBytes(
+        bytes: image.planes[0].bytes,
+        metadata: InputImageMetadata(
+          size: Size(image.width.toDouble(), image.height.toDouble()),
+          rotation: rotation,
+          format: format,
+          bytesPerRow: image.planes[0].bytesPerRow,
+        ),
+      );
+
+      // Detect faces
+      final faces = await reconocimientoNotifier.detectFaces(inputImage);
+      if (faces.isEmpty) {
+        if (mounted) {
+          setState(() => customPaint = null);
+        }
+        _isBusy = false;
+        return;
+      }
+
+      // Prepare input list
+      List input = await compute(reconocimientoNotifier.prepareInputFromNV21, {
+        'nv21Data': image.planes[0].bytes,
+        'width': image.width,
+        'height': image.height,
+        'isFrontCamera': camera.lensDirection == CameraLensDirection.front,
+        'face': faces.first,
+      });
+
+      // Get embedding
+      final embedding = reconocimientoNotifier.getEmbedding(input);
+      // Identify the face
+      final name = await reconocimientoNotifier.identifyFace(embedding);
+
+      // Update UI
+      if (mounted) {
+        setState(() {
+          customPaint = CustomPaint(
+            painter: FaceDetectorPainter(
+              faces,
+              inputImage.metadata!.size,
+              inputImage.metadata!.rotation,
+              camera.lensDirection,
+              name,
+            ),
+          );
+        });
+      }
+    } finally {
+      _isBusy = false;
     }
   }
 
@@ -386,7 +507,7 @@ class _ReconocimientoFacialScreenState
                     Transform.scale(
                       scale: scale,
                       alignment: Alignment.center,
-                      child: Center(child: Icon(Icons.face, size: 100)),
+                      child: Center(child: CameraPreview(_cameraController!)),
                     ),
 
                     // Guía para el rostro
