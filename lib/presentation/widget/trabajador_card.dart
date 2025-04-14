@@ -9,6 +9,7 @@ import '../../domain/entities.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
+import '../utils/facial_recognition_utils_dos.dart';
 
 class TrabajadorCard extends ConsumerStatefulWidget {
   final Trabajador trabajador;
@@ -205,7 +206,7 @@ class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
         return;
       }
 
-      final input = reconocimientoNotifier.prepareInputFromImagePath({
+      final input = FacialRecognitionUtilsDos.prepareInputFromImagePath({
         'imgPath': image.path,
         'face': faces.first,
       });

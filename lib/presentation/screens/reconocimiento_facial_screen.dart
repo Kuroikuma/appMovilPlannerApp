@@ -9,6 +9,7 @@ import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
+import '../utils/facial_recognition_utils_dos.dart';
 import '../utils/notification_utils.dart';
 import '../widget/face_detector_painter.dart';
 
@@ -32,6 +33,8 @@ class _ReconocimientoFacialScreenState
   bool _isPermissionGranted = false;
   CustomPaint? customPaint;
   bool _isBusy = false;
+  final FacialRecognitionUtilsDos _facialRecognition =
+      FacialRecognitionUtilsDos();
 
   @override
   void initState() {
@@ -40,13 +43,13 @@ class _ReconocimientoFacialScreenState
     _checkPermissionsAndInitCamera();
     _initFaceRecognition();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
+    // });
   }
 
-  void _initFaceRecognition() {
-    ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
+  void _initFaceRecognition() async {
+    await ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
   }
 
   void _disposeFaceRecognition() {
@@ -161,7 +164,7 @@ class _ReconocimientoFacialScreenState
 
       _cameraController = CameraController(
         _cameras![newCameraIndex],
-        ResolutionPreset.medium,
+        ResolutionPreset.high,
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.nv21,
       );
@@ -177,6 +180,10 @@ class _ReconocimientoFacialScreenState
   }
 
   Future<void> _processCameraImage(CameraImage image) async {
+    final state = ref.watch(reconocimientoFacialNotifierProvider);
+
+    if (state.estado == ReconocimientoFacialEstado.exito) return;
+
     if (_isBusy) return;
 
     final reconocimientoNotifier = ref.read(
@@ -227,12 +234,19 @@ class _ReconocimientoFacialScreenState
       final format = InputImageFormatValue.fromRawValue(image.format.raw);
       if (format == null) return;
 
+      final yPlane = image.planes[0].bytes;
+      final uvPlane = image.planes[1].bytes;
+
+      final buffer = Uint8List(yPlane.length + uvPlane.length);
+      buffer.setRange(0, yPlane.length, yPlane);
+      buffer.setRange(yPlane.length, buffer.length, uvPlane);
+
       InputImage inputImage = InputImage.fromBytes(
-        bytes: image.planes[0].bytes,
+        bytes: buffer,
         metadata: InputImageMetadata(
           size: Size(image.width.toDouble(), image.height.toDouble()),
           rotation: rotation,
-          format: format,
+          format: InputImageFormat.nv21,
           bytesPerRow: image.planes[0].bytesPerRow,
         ),
       );
@@ -247,20 +261,26 @@ class _ReconocimientoFacialScreenState
         return;
       }
 
+      reconocimientoNotifier.cambiarEstado(
+        ReconocimientoFacialEstado.capturando,
+      );
+
+      final nv21Data = FacialRecognitionUtilsDos.yuv420ToNv21(image);
+
       // Prepare input list
-      List input = await compute(reconocimientoNotifier.prepareInputFromNV21, {
-        'nv21Data': image.planes[0].bytes,
-        'width': image.width,
-        'height': image.height,
-        'isFrontCamera': camera.lensDirection == CameraLensDirection.front,
-        'face': faces.first,
-      });
+      List input =
+          await compute(FacialRecognitionUtilsDos.prepareInputFromNV21, {
+            'nv21Data': nv21Data,
+            'width': image.width,
+            'height': image.height,
+            'isFrontCamera': camera.lensDirection == CameraLensDirection.front,
+            'face': faces.first,
+          });
 
       // Get embedding
       final embedding = reconocimientoNotifier.getEmbedding(input);
       // Identify the face
       final name = await reconocimientoNotifier.identifyFace(embedding);
-
       // Update UI
       if (mounted) {
         setState(() {
@@ -507,7 +527,12 @@ class _ReconocimientoFacialScreenState
                     Transform.scale(
                       scale: scale,
                       alignment: Alignment.center,
-                      child: Center(child: CameraPreview(_cameraController!)),
+                      child: Center(
+                        child: CameraPreview(
+                          _cameraController!,
+                          child: customPaint,
+                        ),
+                      ),
                     ),
 
                     // Guía para el rostro
@@ -765,7 +790,7 @@ class _ReconocimientoFacialScreenState
                 backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
                 backgroundImage:
                     trabajador.fotoUrl != null
-                        ? NetworkImage(trabajador.fotoUrl!)
+                        ? FileImage(File(trabajador.fotoUrl))
                         : null,
                 child:
                     trabajador.fotoUrl == null

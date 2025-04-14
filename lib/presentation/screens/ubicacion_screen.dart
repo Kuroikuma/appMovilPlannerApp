@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../routes/app_routes.dart';
@@ -18,27 +19,27 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
     final ubicacionNotifier = ref.read(ubicacionNotifierProvider.notifier);
     final theme = Theme.of(context);
 
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor:
+            theme
+                .colorScheme
+                .primary, // Cambia el color de fondo de la barra de estado
+        statusBarIconBrightness:
+            Brightness.light, // Iconos claros si el fondo es oscuro
+      ),
+    );
+
     return Scaffold(
       body: Center(
-        child: Card(
-          elevation: 4,
-          margin: const EdgeInsets.only(top: 40),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+        child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Encabezado con estado de verificación
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
+                decoration: BoxDecoration(color: theme.colorScheme.primary),
                 child: Row(
                   children: [
                     Container(

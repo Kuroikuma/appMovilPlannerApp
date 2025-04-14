@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/core/network/network_info.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/providers.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../routes/app_routes.dart';
 import '../utils/notification_utils.dart';
@@ -214,6 +216,24 @@ class _ConfiurarUbicacionFormScreenState
 
   void _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
+      final hasInternet = await ref.watch(networkInfoProvider).isConnected;
+      print('hasinter $hasInternet');
+      if (!hasInternet) {
+        NotificationUtils.showSnackBar(
+          context: context,
+          message: 'No hay conexión a internet',
+          isError: false,
+          icon: Icons.error,
+        );
+
+        setState(() {
+          _isSubmitting = false;
+        });
+        return;
+      }
+
+      print('Despues del hasInternet');
+
       setState(() {
         _isSubmitting = true;
       });
@@ -226,10 +246,8 @@ class _ConfiurarUbicacionFormScreenState
               _codigoUbicacionController.text,
             );
 
-        print('Ubicación configurada correctamente');
         // Mostrar notificación de éxito
         if (mounted) {
-          print('Mostrando notificación de éxito');
           NotificationUtils.showSnackBar(
             context: context,
             message: 'Ubicación configurada correctamente',
@@ -239,7 +257,6 @@ class _ConfiurarUbicacionFormScreenState
 
           Navigator.of(context).pushNamed(AppRoutes.ubicacion);
         } else {
-          print('La pantalla no está montada');
           // Manejar el caso en el que la pantalla no esté montada
           // Puedes mostrar un mensaje de error o realizar alguna acción adicional
         }

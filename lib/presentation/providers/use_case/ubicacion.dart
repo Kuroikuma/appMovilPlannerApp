@@ -251,9 +251,20 @@ class UbicacionNotifier extends StateNotifier<UbicacionState> {
   Future<void> handleSubmitConfiguracionUbicacion(
     String codigoUbicacion,
   ) async {
-    print('handleSubmitConfiguracionUbicacion');
+    state = state.copyWith(isLoading: true).clearErrors();
+
+    final hasInternet = await networkInfo.isConnected;
+
+    if (!hasInternet) {
+      state = state.copyWith(
+        isLoading: false,
+        errorType: UbicacionErrorType.noInternet,
+        errorMessage: 'No hay conexión a internet',
+      );
+      return;
+    }
+
     await getUbicacionByCodigoUbicacion(codigoUbicacion);
-    print('siuiente');
     await configurarUbicacion(codigoUbicacion);
     await verificarUbicacionConfiguradaLocal();
   }

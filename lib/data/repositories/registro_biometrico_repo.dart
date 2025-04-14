@@ -31,8 +31,6 @@ class RegistroBiometricoRepository extends IRegistroBiometricoRepository {
   Future<List<RegistroBiometrico>> getFaces(int ubicacionId) async {
     final localData = await localDataSource.getFaces();
 
-    print(localData);
-
     final isConnected = await networkInfo.isConnected;
     if (isConnected) {
       try {

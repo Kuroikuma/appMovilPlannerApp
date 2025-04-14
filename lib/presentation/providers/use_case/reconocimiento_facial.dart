@@ -139,14 +139,13 @@ class ReconocimientoFacialNotifier
 
     final codigoUbicacon =
         ref.read(ubicacionNotifierProvider).ubicacion!.codigoUbicacion;
-    final codigoLocal = ref.read(ubicacionNotifierProvider).ubicacion!.id;
+    // final codigoLocal = ref.read(ubicacionNotifierProvider).ubicacion!.id;
 
-    print('codigoLocal: $codigoLocal');
+    final faces = await _biometricoRepository.getFaces(codigoUbicacon);
 
-    state = state.copyWith(
-      cachedFaces: await _biometricoRepository.getFaces(codigoUbicacon),
-      isInitialized: true,
-    );
+    print('faces: $faces');
+
+    state = state.copyWith(cachedFaces: faces, isInitialized: true);
   }
 
   Future<void> setImagenFile(File imageFile) async {
@@ -404,74 +403,20 @@ class ReconocimientoFacialNotifier
     state = state.clearErrors();
   }
 
-  //detecttor de rostros app vieja
-  List prepareInputFromNV21(Map<String, dynamic> params) {
-    final nv21Data = params['nv21Data'] as Uint8List;
-    final width = params['width'] as int;
-    final height = params['height'] as int;
-    final isFrontCamera = params['isFrontCamera'] as bool;
-    final face = params['face'] as Face;
-
-    img.Image image = convertNV21ToImage(nv21Data, width, height);
-    image = img.copyRotate(image, angle: isFrontCamera ? -90 : 90);
-
-    return prepareInput(image, face);
-  }
-
-  List prepareInputFromImagePath(Map<String, dynamic> params) {
-    final imgPath = params['imgPath'] as String;
-    final face = params['face'] as Face;
-
-    img.Image image = img.decodeImage(File(imgPath).readAsBytesSync())!;
-    return prepareInput(image, face);
-  }
-
-  static List prepareInput(img.Image image, Face face) {
-    int x, y, w, h;
-    x = face.boundingBox.left.round();
-    y = face.boundingBox.top.round();
-    w = face.boundingBox.width.round();
-    h = face.boundingBox.height.round();
-
-    img.Image faceImage = img.copyCrop(image, x: x, y: y, width: w, height: h);
-    img.Image resizedImage = img.copyResizeCropSquare(faceImage, size: 112);
-
-    // Save cropped face image
-    // final docDir = await getApplicationDocumentsDirectory();
-    // final file = File('${docDir.path}/${face.hashCode}.jpg');
-    // await file.writeAsBytes(img.encodeJpg(resizedImage));
-
-    List input = _imageToByteListFloat32(resizedImage, 112, 127.5, 127.5);
-    input = input.reshape([1, 112, 112, 3]);
-
-    return input;
-  }
-
   List<double> getEmbedding(List input) {
+    state =
+        state
+            .copyWith(
+              isLoading: true,
+              estado: ReconocimientoFacialEstado.procesando,
+              trabajadorIdentificado: null,
+              registroExitoso: false,
+            )
+            .clearErrors();
+
     List output = List.generate(1, (_) => List.filled(192, 0));
     _interpreter.run(input, output);
     return output[0].cast<double>();
-  }
-
-  static List _imageToByteListFloat32(
-    img.Image image,
-    int size,
-    double mean,
-    double std,
-  ) {
-    var convertedBytes = Float32List(1 * size * size * 3);
-    var buffer = Float32List.view(convertedBytes.buffer);
-    int pixelIndex = 0;
-
-    for (var i = 0; i < size; i++) {
-      for (var j = 0; j < size; j++) {
-        var pixel = image.getPixel(j, i);
-        buffer[pixelIndex++] = (pixel.r - mean) / std;
-        buffer[pixelIndex++] = (pixel.g - mean) / std;
-        buffer[pixelIndex++] = (pixel.b - mean) / std;
-      }
-    }
-    return convertedBytes.toList();
   }
 
   Future<String> identifyFace(
@@ -479,23 +424,41 @@ class ReconocimientoFacialNotifier
     double threshold = 0.8,
   }) async {
     double minDistance = double.maxFinite;
-    String name = 'No Registrado'; // Unknown
+    int equipoId = 0;
 
     final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
 
     for (var face in state.cachedFaces) {
       final distance = _euclideanDistance(embedding, face.datosBiometricos);
-      final Trabajador? trabajador = trabajadores
-          .cast<Trabajador?>()
-          .firstWhere((t) => t?.id == face.trabajadorId, orElse: () => null);
 
-      if (distance <= threshold && distance < minDistance) {
+      final validateDistance = distance <= threshold && distance < minDistance;
+
+      if (validateDistance) {
         minDistance = distance;
-        name = trabajador?.nombre ?? "No Registrado";
+        equipoId = face.trabajadorId;
       }
     }
 
-    return name;
+    final Trabajador? trabajador = trabajadores.cast<Trabajador?>().firstWhere(
+      (t) => t?.equipoId == equipoId,
+      orElse: () => null,
+    );
+
+    if (trabajador != null) {
+      state = state.copyWith(
+        trabajadorIdentificado: trabajador,
+        isLoading: false,
+        estado: ReconocimientoFacialEstado.exito,
+      );
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'No se pudo identificar al trabajador',
+        estado: ReconocimientoFacialEstado.error,
+      );
+    }
+
+    return trabajador?.nombre ?? 'No Registrado';
   }
 
   double _euclideanDistance(List e1, List e2) {
