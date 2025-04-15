@@ -24,6 +24,7 @@ enum ReconocimientoFacialEstado {
   procesando,
   exito,
   error,
+  inactivo,
 }
 
 class ReconocimientoFacialStateData {
@@ -129,6 +130,16 @@ class ReconocimientoFacialNotifier
   }
 
   Future<void> initialize() async {
+    // final codigoUbicacon =
+    //     ref.read(ubicacionNotifierProvider).ubicacion!.codigoUbicacion;
+    final codigoLocal = ref.read(ubicacionNotifierProvider).ubicacion!.id;
+
+    final faces = await _biometricoRepository.getFaces(codigoLocal);
+
+    print('faces: $faces');
+
+    state = state.copyWith(cachedFaces: faces);
+
     if (state.isInitialized) return;
     final interpreterOptions = InterpreterOptions();
 
@@ -137,15 +148,7 @@ class ReconocimientoFacialNotifier
       options: interpreterOptions,
     );
 
-    final codigoUbicacon =
-        ref.read(ubicacionNotifierProvider).ubicacion!.codigoUbicacion;
-    // final codigoLocal = ref.read(ubicacionNotifierProvider).ubicacion!.id;
-
-    final faces = await _biometricoRepository.getFaces(codigoUbicacon);
-
-    print('faces: $faces');
-
-    state = state.copyWith(cachedFaces: faces, isInitialized: true);
+    state = state.copyWith(isInitialized: true);
   }
 
   Future<void> setImagenFile(File imageFile) async {
@@ -183,7 +186,7 @@ class ReconocimientoFacialNotifier
   }
 
   Future<void> registerFace(
-    int equipoId,
+    int trabajadorId,
     List<double> embedding,
     XFile image,
     String imagenUrl,
@@ -195,7 +198,7 @@ class ReconocimientoFacialNotifier
 
     try {
       final registroBiometrico = await _biometricoRepository.saveFace(
-        equipoId,
+        trabajadorId,
         embedding,
         image,
         imagenUrl,
@@ -404,16 +407,6 @@ class ReconocimientoFacialNotifier
   }
 
   List<double> getEmbedding(List input) {
-    state =
-        state
-            .copyWith(
-              isLoading: true,
-              estado: ReconocimientoFacialEstado.procesando,
-              trabajadorIdentificado: null,
-              registroExitoso: false,
-            )
-            .clearErrors();
-
     List output = List.generate(1, (_) => List.filled(192, 0));
     _interpreter.run(input, output);
     return output[0].cast<double>();
@@ -424,7 +417,7 @@ class ReconocimientoFacialNotifier
     double threshold = 0.8,
   }) async {
     double minDistance = double.maxFinite;
-    int equipoId = 0;
+    int trabajadorId = 0;
 
     final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
 
@@ -435,12 +428,12 @@ class ReconocimientoFacialNotifier
 
       if (validateDistance) {
         minDistance = distance;
-        equipoId = face.trabajadorId;
+        trabajadorId = face.trabajadorId;
       }
     }
 
     final Trabajador? trabajador = trabajadores.cast<Trabajador?>().firstWhere(
-      (t) => t?.equipoId == equipoId,
+      (t) => t?.id == trabajadorId,
       orElse: () => null,
     );
 
@@ -449,12 +442,6 @@ class ReconocimientoFacialNotifier
         trabajadorIdentificado: trabajador,
         isLoading: false,
         estado: ReconocimientoFacialEstado.exito,
-      );
-    } else {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'No se pudo identificar al trabajador',
-        estado: ReconocimientoFacialEstado.error,
       );
     }
 
@@ -474,11 +461,10 @@ class ReconocimientoFacialNotifier
 
   Future<void> deleteFace(int equipoId, String registroBiometricoId) async {
     await _biometricoRepository.deleteFace(equipoId, registroBiometricoId);
-    final codigoUbicacon =
-        ref.read(ubicacionNotifierProvider).ubicacion!.codigoUbicacion;
+    final codigo = ref.read(ubicacionNotifierProvider).ubicacion!.id;
 
     state = state.copyWith(
-      cachedFaces: await _biometricoRepository.getFaces(codigoUbicacon),
+      cachedFaces: await _biometricoRepository.getFaces(codigo),
     );
   }
 

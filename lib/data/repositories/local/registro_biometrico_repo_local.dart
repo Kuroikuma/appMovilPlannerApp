@@ -15,14 +15,13 @@ class RegistroBiometricoRepositoryLocal {
   }
 
   Future<RegistroBiometrico> saveFace(
-    int equipoId,
+    int trabajadorId,
     List<double> embedding,
   ) async {
-    print(equipoId);
     try {
       final registroBiometrico = RegistroBiometrico(
         id: uuid.v4(),
-        trabajadorId: equipoId,
+        trabajadorId: trabajadorId,
         datosBiometricos: embedding,
         estado: true,
         tipoRegistro: TipoRegistroBiometrico.face,

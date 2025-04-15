@@ -43,3 +43,8 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 final networkInfoProvider = Provider<NetworkInfo>((ref) {
   return NetworkInfoImpl(InternetConnectionChecker.createInstance());
 });
+
+final asyncHasInternetProvider = FutureProvider<bool>((ref) async {
+  final info = NetworkInfoImpl(InternetConnectionChecker.createInstance());
+  return await info.isConnected;
+});

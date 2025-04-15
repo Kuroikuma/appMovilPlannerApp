@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
@@ -89,14 +90,13 @@ class UbicacionRepo implements IUbicacionRepository {
     String codigoUbicacion,
     String codigoUbicacionLocal,
   ) async {
+    final formData = FormData.fromMap({
+      'codigoUbicacion': codigoUbicacion,
+      'codigoUbicacionLocal': codigoUbicacionLocal,
+    });
+
     try {
-      await _client.post(
-        '/PostSaveIntegracionUbicacionApp',
-        data: {
-          'codigoUbicacion': codigoUbicacion,
-          'codigoUbicacionLocal': codigoUbicacionLocal,
-        },
-      );
+      await _client.post('/PostSaveIntegracionUbicacionApp', data: formData);
 
       return true;
     } catch (e) {
@@ -135,6 +135,7 @@ class UbicacionRepo implements IUbicacionRepository {
       batch.deleteAll(_db.horarios);
       batch.deleteAll(_db.syncsEntitys);
       batch.deleteAll(_db.registrosBiometricos);
+      batch.deleteAll(_db.reconocimientosFacial);
       batch.deleteAll(_db.registrosDiarios);
     });
 

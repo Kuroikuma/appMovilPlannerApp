@@ -9,6 +9,8 @@ import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
+import '../providers/use_case/trabajador.dart';
+import '../providers/use_case/ubicacion.dart';
 import '../utils/facial_recognition_utils_dos.dart';
 import '../utils/notification_utils.dart';
 import '../widget/face_detector_painter.dart';
@@ -33,27 +35,41 @@ class _ReconocimientoFacialScreenState
   bool _isPermissionGranted = false;
   CustomPaint? customPaint;
   bool _isBusy = false;
-  final FacialRecognitionUtilsDos _facialRecognition =
-      FacialRecognitionUtilsDos();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkPermissionsAndInitCamera();
-    _initFaceRecognition();
-
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPermissionsAndInitCamera();
+      _initFaceRecognition();
+      _cargarTrabajadores();
+    });
   }
 
   void _initFaceRecognition() async {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
     await ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
   }
 
   void _disposeFaceRecognition() {
     ref.read(reconocimientoFacialNotifierProvider.notifier).dispose();
+  }
+
+  void _cargarTrabajadores() {
+    final ubicacionState = ref.read(ubicacionNotifierProvider);
+    if (ubicacionState.ubicacion != null &&
+        ubicacionState.ubicacion!.ubicacionId != null) {
+      ref
+          .read(trabajadorNotifierProvider.notifier)
+          .cargarTrabajadores(ubicacionState.ubicacion!.ubicacionId.toString());
+    } else {
+      NotificationUtils.showSnackBar(
+        context: context,
+        message: 'No se pudo obtener la ID de la ubicación',
+        isError: true,
+      );
+    }
   }
 
   @override
@@ -260,10 +276,6 @@ class _ReconocimientoFacialScreenState
         _isBusy = false;
         return;
       }
-
-      reconocimientoNotifier.cambiarEstado(
-        ReconocimientoFacialEstado.capturando,
-      );
 
       final nv21Data = FacialRecognitionUtilsDos.yuv420ToNv21(image);
 

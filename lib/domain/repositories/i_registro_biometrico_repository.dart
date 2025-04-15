@@ -3,9 +3,9 @@ import 'package:camera/camera.dart';
 import '../models/registro_biometrico.dart';
 
 abstract class IRegistroBiometricoRepository {
-  Future<List<RegistroBiometrico>> getFaces(int ubicacionId);
+  Future<List<RegistroBiometrico>> getFaces(String codigo);
   Future<RegistroBiometrico> saveFace(
-    int equipoId,
+    int trabajadorId,
     List<double> embedding,
     XFile image,
     String imagenUrl,

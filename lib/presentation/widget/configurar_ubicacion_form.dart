@@ -216,8 +216,12 @@ class _ConfiurarUbicacionFormScreenState
 
   void _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isSubmitting = true;
+      });
+
       final hasInternet = await ref.watch(networkInfoProvider).isConnected;
-      print('hasinter $hasInternet');
+
       if (!hasInternet) {
         NotificationUtils.showSnackBar(
           context: context,
@@ -231,12 +235,6 @@ class _ConfiurarUbicacionFormScreenState
         });
         return;
       }
-
-      print('Despues del hasInternet');
-
-      setState(() {
-        _isSubmitting = true;
-      });
 
       try {
         // Obtener el ID de ubicación

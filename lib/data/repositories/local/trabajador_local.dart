@@ -38,10 +38,10 @@ class TrabajadorLocalDataSource {
     return TrabajadorMapper.fromDataModel(result);
   }
 
-  Future<Trabajador> getTrabajadorByEquipoId(int equipoId) async {
+  Future<Trabajador> getTrabajadorByEquipoId(int trabajadorId) async {
     final result =
         await (_db.select(_db.trabajadores)
-          ..where((tbl) => tbl.equipoId.equals(equipoId))).getSingle();
+          ..where((tbl) => tbl.id.equals(trabajadorId))).getSingle();
 
     return TrabajadorMapper.fromDataModel(result);
   }

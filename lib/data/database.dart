@@ -138,7 +138,7 @@ class Horarios extends Table {
 class RegistrosBiometricos extends Table {
   TextColumn get id => text()();
   IntColumn get trabajadorId =>
-      integer().named('trabajador_id').references(Trabajadores, #equipoId)();
+      integer().named('trabajador_id').references(Trabajadores, #id)();
   TextColumn get datosBiometricos =>
       text().named('datos_biometricos').map(const JsonConverterEmbedding())();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();

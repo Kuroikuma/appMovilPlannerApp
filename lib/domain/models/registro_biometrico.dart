@@ -1,6 +1,5 @@
-import 'package:drift/drift.dart';
 import 'package:flutter_application_1/data/database.dart';
-
+import '../../data/converters/json_converter_embedding.dart';
 import '../../data/converters/tipo_registro_biometrico.dart';
 
 class RegistroBiometrico {
@@ -19,15 +18,18 @@ class RegistroBiometrico {
   });
 
   factory RegistroBiometrico.fromJson(Map<String, dynamic> json) {
-    return RegistroBiometrico(
+    final registroBiometrico = RegistroBiometrico(
       id: json['id'],
       trabajadorId: json['trabajadorId'],
       estado: json['estado'] ?? true,
-      datosBiometricos: json['datosBiometricos'] as List<double>,
+      datosBiometricos: JsonConverterEmbedding().fromSql(
+        json['datosBiometricos'],
+      ),
       tipoRegistro: TipoRegistroBiometrico.values.firstWhere(
-        (element) => element.name == json['tipoRegistro'],
+        (element) => element.index == json['tipoRegistro'],
       ),
     );
+    return registroBiometrico;
   }
 
   factory RegistroBiometrico.fromDataModel(RegistrosBiometrico data) {

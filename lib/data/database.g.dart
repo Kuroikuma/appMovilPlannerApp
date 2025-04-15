@@ -1696,7 +1696,7 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES trabajadores (equipo_id)',
+      'REFERENCES trabajadores (id)',
     ),
   );
   @override
@@ -3887,7 +3887,7 @@ final class $$TrabajadoresTableReferences
       MultiTypedResultKey.fromTable(
         db.registrosBiometricos,
         aliasName: $_aliasNameGenerator(
-          db.trabajadores.equipoId,
+          db.trabajadores.id,
           db.registrosBiometricos.trabajadorId,
         ),
       );
@@ -3897,9 +3897,7 @@ final class $$TrabajadoresTableReferences
     final manager = $$RegistrosBiometricosTableTableManager(
       $_db,
       $_db.registrosBiometricos,
-    ).filter(
-      (f) => f.trabajadorId.equipoId.sqlEquals($_itemColumn<int>('equipo_id')!),
-    );
+    ).filter((f) => f.trabajadorId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(
       _registrosBiometricosRefsTable($_db),
@@ -4029,7 +4027,7 @@ class $$TrabajadoresTableFilterComposer
   ) {
     final $$RegistrosBiometricosTableFilterComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.equipoId,
+      getCurrentColumn: (t) => t.id,
       referencedTable: $db.registrosBiometricos,
       getReferencedColumn: (t) => t.trabajadorId,
       builder:
@@ -4212,7 +4210,7 @@ class $$TrabajadoresTableAnnotationComposer
     final $$RegistrosBiometricosTableAnnotationComposer composer =
         $composerBuilder(
           composer: this,
-          getCurrentColumn: (t) => t.equipoId,
+          getCurrentColumn: (t) => t.id,
           referencedTable: $db.registrosBiometricos,
           getReferencedColumn: (t) => t.trabajadorId,
           builder:
@@ -4406,7 +4404,7 @@ class $$TrabajadoresTableTableManager
                               ).registrosBiometricosRefs,
                       referencedItemsForCurrentItem:
                           (item, referencedItems) => referencedItems.where(
-                            (e) => e.trabajadorId == item.equipoId,
+                            (e) => e.trabajadorId == item.id,
                           ),
                       typedResults: items,
                     ),
@@ -5447,7 +5445,7 @@ final class $$RegistrosBiometricosTableReferences
       db.trabajadores.createAlias(
         $_aliasNameGenerator(
           db.registrosBiometricos.trabajadorId,
-          db.trabajadores.equipoId,
+          db.trabajadores.id,
         ),
       );
 
@@ -5457,7 +5455,7 @@ final class $$RegistrosBiometricosTableReferences
     final manager = $$TrabajadoresTableTableManager(
       $_db,
       $_db.trabajadores,
-    ).filter((f) => f.equipoId.sqlEquals($_column));
+    ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_trabajadorIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -5506,7 +5504,7 @@ class $$RegistrosBiometricosTableFilterComposer
       composer: this,
       getCurrentColumn: (t) => t.trabajadorId,
       referencedTable: $db.trabajadores,
-      getReferencedColumn: (t) => t.equipoId,
+      getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
@@ -5559,7 +5557,7 @@ class $$RegistrosBiometricosTableOrderingComposer
       composer: this,
       getCurrentColumn: (t) => t.trabajadorId,
       referencedTable: $db.trabajadores,
-      getReferencedColumn: (t) => t.equipoId,
+      getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
@@ -5610,7 +5608,7 @@ class $$RegistrosBiometricosTableAnnotationComposer
       composer: this,
       getCurrentColumn: (t) => t.trabajadorId,
       referencedTable: $db.trabajadores,
-      getReferencedColumn: (t) => t.equipoId,
+      getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
@@ -5739,7 +5737,7 @@ class $$RegistrosBiometricosTableTableManager
                             referencedColumn:
                                 $$RegistrosBiometricosTableReferences
                                     ._trabajadorIdTable(db)
-                                    .equipoId,
+                                    .id,
                           )
                           as T;
                 }

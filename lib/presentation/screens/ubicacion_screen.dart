@@ -15,8 +15,9 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
   @override
   Widget build(BuildContext context) {
     final ubicacionState = ref.watch(ubicacionNotifierProvider);
-    final ubicacion = ubicacionState.ubicacion!;
     final ubicacionNotifier = ref.read(ubicacionNotifierProvider.notifier);
+    final ubicacion = ubicacionState.ubicacion!;
+
     final theme = Theme.of(context);
 
     SystemChrome.setSystemUIOverlayStyle(
@@ -136,11 +137,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                     // Información de la ubicación
                     _buildInfoCard(context, [
                       if (ubicacion.ubicacionId != null)
-                        _buildInfoRow(
-                          context,
-                          'Ubicación',
-                          ubicacion.ubicacionId.toString(),
-                        ),
+                        _buildInfoRow(context, 'Ubicación', ubicacion.id),
                       if (ubicacion.nombre != null)
                         _buildInfoRow(context, 'Nombre', ubicacion.nombre!),
                     ]),

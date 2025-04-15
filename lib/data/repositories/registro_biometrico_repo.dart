@@ -28,36 +28,38 @@ class RegistroBiometricoRepository extends IRegistroBiometricoRepository {
   });
 
   @override
-  Future<List<RegistroBiometrico>> getFaces(int ubicacionId) async {
+  Future<List<RegistroBiometrico>> getFaces(String codigo) async {
     final localData = await localDataSource.getFaces();
 
     final isConnected = await networkInfo.isConnected;
     if (isConnected) {
       try {
-        final remoteData = await remoteDataSource.getFaces(ubicacionId);
+        final remoteData = await remoteDataSource.getFaces(codigo);
         await localDataSource.syncronizarRegistrosBiometricos(remoteData);
         return remoteData;
       } catch (e) {
-        return localData.isNotEmpty ? localData : throw CacheException();
+        return localData.isNotEmpty ? localData : [];
       }
     } else {
-      return localData.isNotEmpty ? localData : throw NoInternetException();
+      return localData.isNotEmpty ? localData : [];
     }
   }
 
   @override
   Future<RegistroBiometrico> saveFace(
-    int equipoId,
+    int trabajadorId,
     List<double> embedding,
     XFile file,
     String imagenUrl,
   ) async {
     final registroBiometrico = await localDataSource.saveFace(
-      equipoId,
+      trabajadorId,
       embedding,
     );
 
-    final trabajador = await trabajadorRepo.getTrabajadorByEquipoId(equipoId);
+    final trabajador = await trabajadorRepo.getTrabajadorByEquipoId(
+      trabajadorId,
+    );
 
     final updatedTrabajador = trabajador.copyWith(
       faceSync: true,

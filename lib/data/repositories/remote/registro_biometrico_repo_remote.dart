@@ -11,10 +11,10 @@ class RegistroBiometricoRepositoryRemote {
 
   RegistroBiometricoRepositoryRemote(this._client);
 
-  Future<List<RegistroBiometrico>> getFaces(int ubicacionId) async {
+  Future<List<RegistroBiometrico>> getFaces(String codigoUbicacionLocal) async {
     try {
       final response = await _client.get(
-        '/GetListRegistroBiometricoByCodigoUbicacionLocal?codigoUbicacionLocal=$ubicacionId',
+        '/GetListRegistroBiometricoByCodigoUbicacionLocal?codigoUbicacionLocal=$codigoUbicacionLocal',
       );
       if (response.statusCode != 200) {
         throw Exception('Error al obtener registros biometricos');
@@ -38,7 +38,10 @@ class RegistroBiometricoRepositoryRemote {
       );
 
       final formData = FormData.fromMap({
-        'registroBiometrico': jsonEncode(registroBiometrico.toJson()),
+        'registroBiometrico': {
+          ...registroBiometrico.toJson(),
+          'datosBiometricos': registroBiometrico.datosBiometricos.toString(),
+        },
         'file': file,
       });
 

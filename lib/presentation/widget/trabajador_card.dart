@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities.dart';
+import '../providers/providers.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
@@ -133,19 +134,34 @@ class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
   }
 
   Widget _buildAvatar(Trabajador trabajador) {
-    return Hero(
-      tag: 'trabajador-${trabajador.id}',
-      child: CircleAvatar(
-        radius: 30,
-        backgroundColor: Colors.grey[200],
-        backgroundImage: FileImage(File(trabajador.fotoUrl)),
-        child: Text(
-          trabajador.nombre.isNotEmpty
-              ? trabajador.nombre[0].toUpperCase()
-              : '?',
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-      ),
+    return FutureBuilder<bool>(
+      future: ref.watch(networkInfoProvider).isConnected,
+      builder: (context, snapshot) {
+        final hasInternet = snapshot.data ?? false;
+        final fotoUrl = trabajador.fotoUrl;
+        final hasImage = fotoUrl.isNotEmpty && hasInternet;
+
+        return Hero(
+          tag: 'trabajador-${trabajador.id}',
+          child: CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.grey[200],
+            backgroundImage: hasImage ? NetworkImage(fotoUrl) : null,
+            child:
+                !hasImage
+                    ? Text(
+                      trabajador.nombre.isNotEmpty
+                          ? trabajador.nombre[0].toUpperCase()
+                          : '?',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                    : null,
+          ),
+        );
+      },
     );
   }
 
@@ -215,7 +231,7 @@ class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
       try {
         final imagenUrl = '$path/${trabajador.id}-${trabajador.equipoId}.jpg';
         await reconocimientoNotifier.registerFace(
-          trabajador.equipoId,
+          trabajador.id,
           embedding,
           image,
           imagenUrl,

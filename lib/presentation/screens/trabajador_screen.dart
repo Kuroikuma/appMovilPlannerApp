@@ -26,8 +26,8 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _cargarTrabajadores();
       _initFaceRecognition();
+      _cargarTrabajadores();
 
       // Initialize animation controller
       _animationController = AnimationController(
@@ -40,7 +40,7 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
   @override
   void dispose() {
     _searchController.dispose();
-    _disposeFaceRecognition();
+    // _disposeFaceRecognition();
     _animationController.dispose();
     super.dispose();
   }
@@ -61,8 +61,9 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
     }
   }
 
-  void _initFaceRecognition() {
-    ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
+  void _initFaceRecognition() async {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
+    await ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
   }
 
   void _disposeFaceRecognition() {
