@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
+import 'dart:math' as math;
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +27,7 @@ class ReconocimientoFacialScreen extends ConsumerStatefulWidget {
 
 class _ReconocimientoFacialScreenState
     extends ConsumerState<ReconocimientoFacialScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _isCameraInitialized = false;
@@ -36,14 +38,29 @@ class _ReconocimientoFacialScreenState
   CustomPaint? customPaint;
   bool _isBusy = false;
 
+  // Animation controller for the loading screen
+  late AnimationController _animationController;
+
+  // Timer para detectar inactividad
+  Timer? _inactivityTimer;
+  // Duración de inactividad antes de mostrar la pantalla (30 segundos)
+  final Duration _inactivityDuration = const Duration(seconds: 30);
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkPermissionsAndInitCamera();
       _initFaceRecognition();
       _cargarTrabajadores();
+      _startInactivityTimer();
     });
   }
 
@@ -77,7 +94,44 @@ class _ReconocimientoFacialScreenState
     WidgetsBinding.instance.removeObserver(this);
     _disposeFaceRecognition();
     _cameraController?.dispose();
+    _animationController.dispose();
+    _inactivityTimer?.cancel();
     super.dispose();
+  }
+
+  // Iniciar el temporizador de inactividad
+  void _startInactivityTimer() {
+    _inactivityTimer?.cancel();
+    _inactivityTimer = Timer(_inactivityDuration, _onInactivity);
+  }
+
+  // Reiniciar el temporizador de inactividad
+  void _resetInactivityTimer() {
+    _startInactivityTimer();
+  }
+
+  // Función que se ejecuta cuando se detecta inactividad
+  Future<void> _onInactivity() async {
+    final currentState = ref.read(reconocimientoFacialNotifierProvider).estado;
+    // Solo cambiar a inactivo si estamos en el estado inicial (cámara activa)
+    if (currentState == ReconocimientoFacialEstado.inicial) {
+      ref
+          .read(reconocimientoFacialNotifierProvider.notifier)
+          .cambiarEstado(ReconocimientoFacialEstado.inactivo);
+
+      await _cameraController?.stopImageStream();
+    }
+  }
+
+  // Reanudar la actividad
+  Future<void> _resumeActivity() async {
+    ref
+        .read(reconocimientoFacialNotifierProvider.notifier)
+        .cambiarEstado(ReconocimientoFacialEstado.inicial);
+
+    await _cameraController?.startImageStream(_processCameraImage);
+
+    _resetInactivityTimer();
   }
 
   @override
@@ -91,8 +145,10 @@ class _ReconocimientoFacialScreenState
 
     if (state == AppLifecycleState.inactive) {
       cameraController.dispose();
+      _inactivityTimer?.cancel();
     } else if (state == AppLifecycleState.resumed) {
       _initCamera();
+      _resetInactivityTimer();
     }
   }
 
@@ -192,13 +248,19 @@ class _ReconocimientoFacialScreenState
           _isCameraInitialized = true;
         });
       }
+
+      // Reiniciar el temporizador de inactividad al cambiar la cámara
+      _resetInactivityTimer();
     }
   }
 
   Future<void> _processCameraImage(CameraImage image) async {
     final state = ref.watch(reconocimientoFacialNotifierProvider);
 
-    if (state.estado == ReconocimientoFacialEstado.exito) return;
+    if (state.estado == ReconocimientoFacialEstado.exito ||
+        state.estado == ReconocimientoFacialEstado.inactivo) {
+      return;
+    }
 
     if (_isBusy) return;
 
@@ -274,8 +336,12 @@ class _ReconocimientoFacialScreenState
           setState(() => customPaint = null);
         }
         _isBusy = false;
+
         return;
       }
+
+      // Reiniciar el temporizador de inactividad
+      _resetInactivityTimer();
 
       final nv21Data = FacialRecognitionUtilsDos.yuv420ToNv21(image);
 
@@ -326,6 +392,9 @@ class _ReconocimientoFacialScreenState
       setState(() {
         _isFlashOn = !_isFlashOn;
       });
+
+      // Reiniciar el temporizador de inactividad al cambiar el flash
+      _resetInactivityTimer();
     } catch (e) {
       NotificationUtils.showSnackBar(
         context: context,
@@ -356,6 +425,9 @@ class _ReconocimientoFacialScreenState
 
       // Procesar la imagen
       await _procesarImagen(base64Image);
+
+      // Cancelar el temporizador de inactividad al capturar una imagen
+      _inactivityTimer?.cancel();
     } catch (e) {
       ref
           .read(reconocimientoFacialNotifierProvider.notifier)
@@ -392,11 +464,17 @@ class _ReconocimientoFacialScreenState
 
         // Procesar la imagen
         await _procesarImagen(base64Image);
+        // Cancelar el temporizador de inactividad al seleccionar una imagen
+        _inactivityTimer?.cancel();
       } else {
         // El usuario canceló la selección
         ref
             .read(reconocimientoFacialNotifierProvider.notifier)
             .cambiarEstado(ReconocimientoFacialEstado.inicial);
+
+        // Reiniciar el temporizador de inactividad
+        _resetInactivityTimer();
+        print('_seleccionarImagen');
       }
     } catch (e) {
       ref
@@ -430,6 +508,9 @@ class _ReconocimientoFacialScreenState
     });
 
     ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
+
+    // Reiniciar el temporizador de inactividad
+    _resetInactivityTimer();
   }
 
   @override
@@ -459,7 +540,8 @@ class _ReconocimientoFacialScreenState
           IconButton(
             icon: const Icon(Icons.photo_library),
             onPressed:
-                state.estado == ReconocimientoFacialEstado.inicial
+                state.estado == ReconocimientoFacialEstado.inicial ||
+                        state.estado == ReconocimientoFacialEstado.inactivo
                     ? _seleccionarImagen
                     : null,
             tooltip: 'Seleccionar de galería',
@@ -482,9 +564,201 @@ class _ReconocimientoFacialScreenState
         return _buildExito(context, state);
       case ReconocimientoFacialEstado.error:
         return _buildError(context, state.errorMessage ?? 'Error desconocido');
+      case ReconocimientoFacialEstado.inactivo:
+        return _buildInactivo(context);
       default:
         return _buildCameraPreview(context);
     }
+  }
+
+  // Nueva pantalla para el estado de inactividad
+  Widget _buildInactivo(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      color: theme.colorScheme.primary,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.hourglass_empty,
+                    color: theme.colorScheme.onPrimary,
+                    size: 32,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Sistema en Espera',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Main content
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.background,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Animated icon
+                    AnimatedBuilder(
+                      animation: _animationController,
+                      builder: (context, child) {
+                        return Transform.rotate(
+                          angle: _animationController.value * 2 * math.pi,
+                          child: Icon(
+                            Icons.timelapse,
+                            size: 100,
+                            color: theme.colorScheme.primary.withOpacity(0.7),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Mensaje de inactividad
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'Sistema en espera por inactividad',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Descripción
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'No se ha detectado actividad en los últimos 30 segundos. El sistema de reconocimiento facial está en pausa.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: theme.colorScheme.onBackground.withOpacity(
+                            0.7,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Botón para reanudar
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: FilledButton.icon(
+                        onPressed: _resumeActivity,
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Reanudar Reconocimiento Facial'),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 56),
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Botón para seleccionar imagen
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: OutlinedButton.icon(
+                        onPressed: _seleccionarImagen,
+                        icon: const Icon(Icons.photo_library),
+                        label: const Text('Seleccionar Imagen de Galería'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 56),
+                          foregroundColor: theme.colorScheme.primary,
+                          side: BorderSide(color: theme.colorScheme.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Consejos
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 32),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.lightbulb_outline,
+                                color: theme.colorScheme.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Consejos',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Para un mejor reconocimiento facial, asegúrate de estar en un lugar bien iluminado y mantener tu rostro centrado en la pantalla.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: theme.colorScheme.onBackground.withOpacity(
+                                0.7,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildCameraPreview(BuildContext context) {
