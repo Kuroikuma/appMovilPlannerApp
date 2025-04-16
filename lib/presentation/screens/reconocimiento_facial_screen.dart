@@ -685,26 +685,6 @@ class _ReconocimientoFacialScreenState
                       ),
                     ),
 
-                    const SizedBox(height: 16),
-
-                    // Botón para seleccionar imagen
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: OutlinedButton.icon(
-                        onPressed: _seleccionarImagen,
-                        icon: const Icon(Icons.photo_library),
-                        label: const Text('Seleccionar Imagen de Galería'),
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 56),
-                          foregroundColor: theme.colorScheme.primary,
-                          side: BorderSide(color: theme.colorScheme.primary),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      ),
-                    ),
-
                     const SizedBox(height: 40),
 
                     // Consejos

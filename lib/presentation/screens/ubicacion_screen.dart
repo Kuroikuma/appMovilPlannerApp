@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../routes/app_routes.dart';
+import '../utils/notification_utils.dart';
+import '../widget/location_deletion_overlay.dart';
 
 class UbicacionScreen extends ConsumerStatefulWidget {
   const UbicacionScreen({super.key});
@@ -12,6 +14,24 @@ class UbicacionScreen extends ConsumerStatefulWidget {
 }
 
 class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
+  bool _isDeleting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Escuchar cambios en el estado de verificación para detectar cuando
+    // la ubicación ha sido eliminada
+    ref.listenManual(ubicacionNotifierProvider, (previous, next) {
+      // Si estamos eliminando y el estado de verificación cambia a false,
+      // significa que la eliminación se completó
+      if (_isDeleting && next.isVerify == false && !next.isLoading) {
+        Navigator.of(
+          context,
+        ).pushReplacementNamed(AppRoutes.configurarUbicacion);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final ubicacionState = ref.watch(ubicacionNotifierProvider);
@@ -30,6 +50,10 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
             Brightness.light, // Iconos claros si el fondo es oscuro
       ),
     );
+
+    if (_isDeleting) {
+      return LocationDeletionOverlay(isDeleting: _isDeleting);
+    }
 
     return Scaffold(
       body: Center(
@@ -163,6 +187,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                   ],
                 ),
               ),
+              // Overlay de eliminación
             ],
           ),
         ),
@@ -483,12 +508,32 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
               child: const Text('Cancelar'),
             ),
             FilledButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                notifier.eliminarUbicacion();
-                Navigator.of(
-                  context,
-                ).pushReplacementNamed(AppRoutes.configurarUbicacion);
+
+                setState(() {
+                  _isDeleting = true;
+                });
+
+                try {
+                  // Eliminar ubicación
+                  await notifier.eliminarUbicacion();
+                } catch (e) {
+                  // Manejar error si es necesario
+                  if (mounted) {
+                    NotificationUtils.showSnackBar(
+                      context: context,
+                      message:
+                          'Error al eliminar la ubicación: ${e.toString()}',
+                      isError: true,
+                    );
+
+                    // Ocultar pantalla de carga en caso de error
+                    setState(() {
+                      _isDeleting = false;
+                    });
+                  }
+                }
               },
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
