@@ -35,7 +35,6 @@ class _RegistroAsistenciaScreenState
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _cargarRegistros();
-      _cargarTrabajadores();
     });
   }
 
@@ -72,16 +71,6 @@ class _RegistroAsistenciaScreenState
         message: 'No se pudo obtener la ID de la ubicación',
         isError: true,
       );
-    }
-  }
-
-  void _cargarTrabajadores() {
-    final ubicacionState = ref.read(ubicacionNotifierProvider);
-    if (ubicacionState.ubicacion != null &&
-        ubicacionState.ubicacion!.ubicacionId != null) {
-      ref
-          .read(trabajadorNotifierProvider.notifier)
-          .cargarTrabajadores(ubicacionState.ubicacion!.ubicacionId.toString());
     }
   }
 
@@ -368,10 +357,7 @@ class _RegistroAsistenciaScreenState
                         onRegistrarSalida:
                             registro.tieneSalida
                                 ? null
-                                : () => _registrarSalida(registro.id!),
-                        onCambiarEstado:
-                            (value) =>
-                                _cambiarEstadoRegistro(registro.id!, value),
+                                : () => _registrarSalida(registro.equipoId, 36825),
                       ),
                     )
                     .toList(),
@@ -439,7 +425,7 @@ class _RegistroAsistenciaScreenState
                         IconButton(
                           icon: const Icon(Icons.login, color: Colors.blue),
                           onPressed:
-                              () => _registrarEntrada(trabajador.id.toString()),
+                              () => _registrarEntrada(trabajador.equipoId, 36825),
                           tooltip: 'Registrar entrada',
                         ),
                         IconButton(
@@ -588,21 +574,10 @@ class _RegistroAsistenciaScreenState
     );
   }
 
-  void _registrarEntrada(String trabajadorId) {
-    // Convertir el ID de string a int
-    final equipoId = int.tryParse(trabajadorId);
-    if (equipoId == null) {
-      NotificationUtils.showSnackBar(
-        context: context,
-        message: 'ID de trabajador inválido',
-        isError: true,
-      );
-      return;
-    }
-
+  void _registrarEntrada(int equipoId, int horaAprobadaId) {
     ref
         .read(registroDiarioNotifierProvider.notifier)
-        .registrarEntrada(equipoId)
+        .registrarAsistencia(equipoId, horaAprobadaId)
         .then((_) {
           NotificationUtils.showSnackBar(
             context: context,
@@ -615,31 +590,14 @@ class _RegistroAsistenciaScreenState
         });
   }
 
-  void _registrarSalida(int registroId) {
+  void _registrarSalida(int equipoId, int horaAprobadaId) {
     ref
         .read(registroDiarioNotifierProvider.notifier)
-        .registrarSalida(registroId)
+        .registrarAsistencia(equipoId, horaAprobadaId)
         .then((_) {
           NotificationUtils.showSnackBar(
             context: context,
             message: 'Salida registrada correctamente',
-            isError: false,
-            icon: Icons.check_circle,
-          );
-        });
-  }
-
-  void _cambiarEstadoRegistro(int registroId, bool estado) {
-    ref
-        .read(registroDiarioNotifierProvider.notifier)
-        .cambiarEstadoRegistro(registroId, estado)
-        .then((_) {
-          NotificationUtils.showSnackBar(
-            context: context,
-            message:
-                estado
-                    ? 'Registro activado correctamente'
-                    : 'Registro desactivado correctamente',
             isError: false,
             icon: Icons.check_circle,
           );

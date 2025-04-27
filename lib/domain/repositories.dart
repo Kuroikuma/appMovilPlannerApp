@@ -15,4 +15,9 @@ abstract class ISyncEntityRepository {
   Future<List<SyncEntity>> getPendingLocalSyncOperations();
   Future<List<SyncEntity>> getPendingRemoteSyncOperations();
   Future<void> markMultipleAsSynced(List<SyncEntity> operations);
+  Future<SyncsEntity> getSyncEntityByTableNameAndId(
+    String tableName,
+    String registerId,
+  );
+  Future<void> updateSyncEntity(SyncsEntitysCompanion syncEntity);
 }

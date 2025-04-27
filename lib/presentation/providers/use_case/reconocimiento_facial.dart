@@ -16,6 +16,7 @@ import '../../../domain/models/registro_biometrico.dart';
 import '../../../domain/repositories/i_reconocimiento_facial_repository.dart';
 import '../providers.dart';
 import '../repositories.dart';
+import 'horario_notifier.dart';
 import 'ubicacion.dart';
 
 enum ReconocimientoFacialEstado {
@@ -324,19 +325,12 @@ class ReconocimientoFacialNotifier
 
     state = state.copyWith(isLoading: true).clearErrors();
 
-    // Verificar conexión a internet
-    final hasInternet = await networkInfo.isConnected;
-    if (!hasInternet) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'No hay conexión a internet',
-      );
-      return;
-    }
+    final horaAprobadaId = ref.read(horarioNotifierProvider).horario!.id;
 
     try {
       final exito = await _repository.registrarAsistenciaPorReconocimiento(
-        state.trabajadorIdentificado!.id.toString(),
+        state.trabajadorIdentificado!.equipoId,
+        horaAprobadaId,
       );
 
       state = state.copyWith(
@@ -443,6 +437,8 @@ class ReconocimientoFacialNotifier
         isLoading: false,
         estado: ReconocimientoFacialEstado.exito,
       );
+
+     await registrarAsistenciaPorReconocimiento();
     }
 
     return trabajador?.nombre ?? 'No Registrado';

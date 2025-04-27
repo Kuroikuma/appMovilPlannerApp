@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/database.dart';
 import '../../../domain/models/registro_diario.dart';
 
@@ -136,6 +137,7 @@ class RegistroDiarioRepositoryLocal {
                   fechaIngreso: Value(e.fechaIngreso),
                   equipoId: Value(e.equipoId),
                   id: Value(e.id!),
+                  horarioId: Value(e.horarioId),
                 ),
               )
               .toList(),
@@ -143,6 +145,157 @@ class RegistroDiarioRepositoryLocal {
       });
     } catch (e) {
       print('Error al sincronizar registros: $e');
+    }
+  }
+
+  Future<RegistroDiario> registrarEntrada(
+    int equipoId,
+    int horaAprobadaId,
+  ) async {
+    try {
+      // Simular una llamada a la API
+      final registrosDiarios = await getRegistroDiario();
+
+      // Buscar información del trabajador
+      final trabajador = registrosDiarios.firstWhere(
+        (registro) => registro.equipoId == equipoId,
+        orElse:
+            () => RegistroDiario(
+              equipoId: equipoId,
+              fechaIngreso: DateTime.now(),
+              horaIngreso: TimeOfDay.now(),
+              nombreTrabajador: 'Trabajador #$equipoId',
+              horarioId: horaAprobadaId,
+            ),
+      );
+
+      // Crear nuevo registro
+      final nuevoRegistro = RegistroDiario(
+        id: registrosDiarios.length + 1,
+        equipoId: equipoId,
+        fechaIngreso: DateTime.now(),
+        horaIngreso: TimeOfDay.now(),
+        estado: true,
+        nombreTrabajador: trabajador.nombreTrabajador,
+        fotoTrabajador: trabajador.fotoTrabajador,
+        cargoTrabajador: trabajador.cargoTrabajador,
+        horarioId: horaAprobadaId,
+      );
+
+      // En una implementación real, aquí se guardaría en la base de datos
+      await _db
+          .into(_db.registrosDiarios)
+          .insert(
+            RegistrosDiariosCompanion(
+              id: Value(nuevoRegistro.id!),
+              equipoId: Value(nuevoRegistro.equipoId),
+              fechaIngreso: Value(nuevoRegistro.fechaIngreso),
+              horaIngreso: Value(nuevoRegistro.horaIngreso),
+              estado: Value(nuevoRegistro.estado),
+              nombreTrabajador: Value(
+                nuevoRegistro.nombreTrabajador ?? "Desconocido",
+              ),
+              fotoTrabajador: Value(nuevoRegistro.fotoTrabajador ?? ""),
+              cargoTrabajador: Value(
+                nuevoRegistro.cargoTrabajador ?? "Desconocido",
+              ),
+              horarioId: Value(nuevoRegistro.horarioId),
+            ),
+          );
+
+      return nuevoRegistro;
+    } catch (e) {
+      throw Exception('Error al registrar entrada: $e');
+    }
+  }
+
+  Future<RegistroDiario> registrarSalida(
+    int registroId,
+    int horaAprobadaId,
+  ) async {
+    // Simular una llamada a la API
+    final registrosDiarios = await getRegistroDiario();
+
+    // Buscar el registro
+    final index = registrosDiarios.indexWhere(
+      (registro) => registro.id == registroId,
+    );
+    if (index == -1) {
+      throw Exception('Registro no encontrado');
+    }
+
+    // Actualizar el registro con la salida
+    final registroActualizado = registrosDiarios[index].copyWith(
+      fechaSalida: DateTime.now(),
+      horaSalida: TimeOfDay.now(),
+      horarioId: horaAprobadaId,
+    );
+
+    // En una implementación real, aquí se actualizaría en la base de datos
+    await _db.batch((batch) {
+      for (final registro in registrosDiarios) {
+        batch.update(
+          _db.registrosDiarios,
+          RegistrosDiariosCompanion(
+            id: Value(registro.id!),
+            equipoId: Value(registro.equipoId),
+            fechaIngreso: Value(registro.fechaIngreso),
+            horaIngreso: Value(registro.horaIngreso),
+            fechaSalida: Value(registro.fechaSalida!),
+            horaSalida: Value(registro.horaSalida!),
+            estado: Value(registro.estado),
+            nombreTrabajador: Value(registro.nombreTrabajador!),
+            fotoTrabajador: Value(registro.fotoTrabajador!),
+            cargoTrabajador: Value(registro.cargoTrabajador!),
+          ),
+          where:
+              (tbl) => tbl.id.equals(
+                registro.id!,
+              ), // Asegura que uses la clave primaria
+        );
+      }
+    });
+
+    return registroActualizado;
+  }
+
+  Future<bool> isEntry(int equipoId) async {
+    final registrosDiarios = await getRegistroDiario();
+    final hoy = DateTime.now();
+
+    return registrosDiarios.any((registro) {
+      return registro.equipoId == equipoId &&
+          registro.fechaIngreso.year == hoy.year &&
+          registro.fechaIngreso.month == hoy.month &&
+          registro.fechaIngreso.day == hoy.day;
+    });
+  }
+
+  Future<RegistroDiario> registrarAsistencia(
+    int equipoId,
+    int horaAprobadaId,
+  ) async {
+    final hoy = DateTime.now();
+    final registrosDiarios = await getRegistroDiario();
+    final registrosHoy =
+        registrosDiarios.where((registro) {
+          return registro.equipoId == equipoId &&
+              registro.fechaIngreso.year == hoy.year &&
+              registro.fechaIngreso.month == hoy.month &&
+              registro.fechaIngreso.day == hoy.day;
+        }).toList();
+
+    if (registrosHoy.isEmpty) {
+      // No hay registro de entrada hoy, registrar entrada
+      return await registrarEntrada(equipoId, horaAprobadaId);
+    } else {
+      // Ya hay un registro de entrada, registrar salida sobre el último registro de hoy
+      final registroDelDia = registrosHoy.lastWhere(
+        (registro) => registro.fechaSalida == null,
+        orElse: () => registrosHoy.last,
+      );
+
+      return await registrarSalida(registroDelDia.id!, horaAprobadaId);
     }
   }
 }

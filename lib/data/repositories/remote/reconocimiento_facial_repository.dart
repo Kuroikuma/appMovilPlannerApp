@@ -148,18 +148,12 @@ class ReconocimientoFacialRepository
   }
 
   @override
-  Future<bool> registrarAsistenciaPorReconocimiento(String trabajadorId) async {
+  Future<bool> registrarAsistenciaPorReconocimiento(int equipoId, int horaAprobadaId) async {
     try {
-      // Convertir el ID de string a int
-      final equipoId = int.tryParse(trabajadorId);
-      if (equipoId == null) {
-        return false;
-      }
-
       // Registrar la entrada
-      await _registroDiarioRepository.registrarEntrada(
+      await _registroDiarioRepository.registrarAsistencia(
         equipoId,
-        reconocimientoFacialId: 1,
+        horaAprobadaId, 
       );
 
       return true;

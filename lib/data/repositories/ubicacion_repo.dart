@@ -49,6 +49,14 @@ class UbicacionRepo implements IUbicacionRepository {
     return result.first;
   }
 
+  Future<String> obtenerHorarioId(int ubicacionId) async {
+    final horarios = await _client.get(
+      'GetListHorarioByUbicacionId?ubicacionid=$ubicacionId&fechaInicio=2023-08-23&fechaFin=2025-04-23',
+    );
+
+    return horarios.data[0]?.horarioId ?? '24845';
+  }
+
   @override
   Future<Ubicacione> configurarUbicacion(
     String codigoUbicacion,

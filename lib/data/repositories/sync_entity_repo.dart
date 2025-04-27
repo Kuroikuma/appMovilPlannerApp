@@ -28,6 +28,30 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
   }
 
   @override
+  Future<void> updateSyncEntity(SyncsEntitysCompanion syncEntity) async {
+    await _db.update(_db.syncsEntitys).replace(syncEntity);
+  }
+
+  @override
+  Future<SyncsEntity> getSyncEntityByTableNameAndId(
+    String tableName,
+    String registerId,
+  ) async {
+    final op =
+        await (_db.select(_db.syncsEntitys)..where(
+          (op) =>
+              op.entityTableNameToSync.equals(tableName) &
+              op.registerId.equals(registerId),
+        )).getSingleOrNull();
+
+    if (op == null) {
+      throw Exception('SyncEntity not found');
+    }
+
+    return op;
+  }
+
+  @override
   Future<void> syncEntitys(List<Trabajador> trabajadores) async {
     await _db.batch((batch) {
       batch.deleteAll(_db.trabajadores);

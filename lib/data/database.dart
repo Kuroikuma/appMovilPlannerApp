@@ -176,13 +176,14 @@ class RegistrosDiarios extends Table {
   TextColumn get horaIngreso =>
       text().named('hora_ingreso').map(const TimeOfDayConverter())();
   TextColumn get fechaSalida =>
-      text().named('fecha_salida').map(const DateConverter())();
+      text().nullable().named('fecha_salida').map(const DateConverter())();
   TextColumn get horaSalida =>
-      text().named('hora_salida').map(const TimeOfDayConverter())();
+      text().nullable().named('hora_salida').map(const TimeOfDayConverter())();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
   TextColumn get nombreTrabajador => text().named('nombre_trabajador')();
   TextColumn get fotoTrabajador => text().named('foto_trabajador')();
   TextColumn get cargoTrabajador => text().named('cargo_trabajador')();
+  IntColumn get horarioId => integer().named('horario_id').references(Horarios, #id)();
 }
 
 class SyncsEntitys extends Table {

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/use_case/horario_notifier.dart';
+import '../providers/use_case/registro_diario.dart';
+import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../routes/app_routes.dart';
 import '../utils/notification_utils.dart';
@@ -21,6 +24,13 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
     super.initState();
     // Escuchar cambios en el estado de verificación para detectar cuando
     // la ubicación ha sido eliminada
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initHorarios();
+      _initRegistrosDiarios();
+      _cargarTrabajadores();
+    });
+
     ref.listenManual(ubicacionNotifierProvider, (previous, next) {
       // Si estamos eliminando y el estado de verificación cambia a false,
       // significa que la eliminación se completó
@@ -30,6 +40,36 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
         ).pushReplacementNamed(AppRoutes.configurarUbicacion);
       }
     });
+  }
+
+  void _initHorarios() async {
+    final ubicacionState = ref.read(ubicacionNotifierProvider);
+    ref
+        .read(horarioNotifierProvider.notifier)
+        .cargarHorarios(ubicacionState.ubicacion!.ubicacionId.toString());
+  }
+
+  void _initRegistrosDiarios() async {
+    final ubicacionState = ref.read(ubicacionNotifierProvider);
+    ref
+        .read(registroDiarioNotifierProvider.notifier)
+        .cargarRegistros(ubicacionState.ubicacion!.ubicacionId.toString(), fecha: DateTime.now());
+  }
+
+    void _cargarTrabajadores() {
+    final ubicacionState = ref.read(ubicacionNotifierProvider);
+    if (ubicacionState.ubicacion != null &&
+        ubicacionState.ubicacion!.ubicacionId != null) {
+      ref
+          .read(trabajadorNotifierProvider.notifier)
+          .cargarTrabajadores(ubicacionState.ubicacion!.ubicacionId.toString());
+    } else {
+      NotificationUtils.showSnackBar(
+        context: context,
+        message: 'No se pudo obtener la ID de la ubicación',
+        isError: true,
+      );
+    }
   }
 
   @override
@@ -161,7 +201,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                     // Información de la ubicación
                     _buildInfoCard(context, [
                       if (ubicacion.ubicacionId != null)
-                        _buildInfoRow(context, 'Ubicación', ubicacion.id),
+                        _buildInfoRow(context, 'Ubicación ID', ubicacion.ubicacionId.toString()),
                       if (ubicacion.nombre != null)
                         _buildInfoRow(context, 'Nombre', ubicacion.nombre!),
                     ]),

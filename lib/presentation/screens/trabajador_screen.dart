@@ -27,7 +27,6 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initFaceRecognition();
-      _cargarTrabajadores();
 
       // Initialize animation controller
       _animationController = AnimationController(

@@ -1,8 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_application_1/domain/repositories/i_registro_biometrico_repository.dart';
-
-import '../../core/error/exceptions.dart';
 import '../../core/network/network_info.dart';
 import '../../domain/models/registro_biometrico.dart';
 import '../../domain/repositories.dart';
@@ -71,13 +69,11 @@ class RegistroBiometricoRepository extends IRegistroBiometricoRepository {
     final isConnected = await networkInfo.isConnected;
     if (isConnected) {
       try {
-        print(imagenUrl);
 
         file.saveTo(imagenUrl);
         await remoteDataSource.saveFace(registroBiometrico, file);
         return registroBiometrico;
       } catch (e) {
-        print('Error al guardar el rostro... repo: $e');
         return registroBiometrico;
       }
     } else {

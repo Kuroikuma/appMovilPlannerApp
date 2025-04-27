@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../providers/use_case/horario_notifier.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
@@ -45,6 +46,9 @@ class _ReconocimientoFacialScreenState
   Timer? _inactivityTimer;
   // Duración de inactividad antes de mostrar la pantalla (30 segundos)
   final Duration _inactivityDuration = const Duration(seconds: 30);
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _isSearching = false;
 
   @override
   void initState() {
@@ -56,10 +60,11 @@ class _ReconocimientoFacialScreenState
       duration: const Duration(seconds: 2),
     )..repeat();
 
+    _searchController.addListener(_onSearchChanged);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkPermissionsAndInitCamera();
       _initFaceRecognition();
-      _cargarTrabajadores();
       _startInactivityTimer();
     });
   }
@@ -69,24 +74,16 @@ class _ReconocimientoFacialScreenState
     await ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
   }
 
-  void _disposeFaceRecognition() {
-    ref.read(reconocimientoFacialNotifierProvider.notifier).dispose();
+  void _onSearchChanged() {
+    print('buscando: ${_searchController.text}');
+    setState(() {
+      _searchQuery = _searchController.text;
+      _isSearching = _searchQuery.isNotEmpty;
+    });
   }
 
-  void _cargarTrabajadores() {
-    final ubicacionState = ref.read(ubicacionNotifierProvider);
-    if (ubicacionState.ubicacion != null &&
-        ubicacionState.ubicacion!.ubicacionId != null) {
-      ref
-          .read(trabajadorNotifierProvider.notifier)
-          .cargarTrabajadores(ubicacionState.ubicacion!.ubicacionId.toString());
-    } else {
-      NotificationUtils.showSnackBar(
-        context: context,
-        message: 'No se pudo obtener la ID de la ubicación',
-        isError: true,
-      );
-    }
+  void _disposeFaceRecognition() {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).dispose();
   }
 
   @override
@@ -96,6 +93,9 @@ class _ReconocimientoFacialScreenState
     _cameraController?.dispose();
     _animationController.dispose();
     _inactivityTimer?.cancel();
+    _searchController.dispose();
+
+    print('dispose de la camara');
     super.dispose();
   }
 
@@ -372,6 +372,14 @@ class _ReconocimientoFacialScreenState
             ),
           );
         });
+      }
+
+      await Future.delayed(const Duration(seconds: 5));
+
+      if (name != 'No Registrado') {
+        ref
+            .read(reconocimientoFacialNotifierProvider.notifier)
+            .cambiarEstado(ReconocimientoFacialEstado.inicial);
       }
     } finally {
       _isBusy = false;
@@ -768,14 +776,32 @@ class _ReconocimientoFacialScreenState
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             color: theme.colorScheme.primary,
-            child: Text(
-              'Coloca tu rostro dentro del marco y presiona el botón para capturar',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: theme.colorScheme.onPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Column(
+              children: [
+                Text(
+                  'Coloca tu rostro dentro del marco y presiona el botón para capturar',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: theme.colorScheme.onPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Botón principal
+                FilledButton.icon(
+                  onPressed: () => _buildDraggableSearchSheet(context),
+                  icon: const Icon(Icons.location_on),
+                  label: const Text('buscar trabajador'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -1018,6 +1044,7 @@ class _ReconocimientoFacialScreenState
   ) {
     final theme = Theme.of(context);
     final trabajador = state.trabajadorIdentificado;
+    final size = MediaQuery.of(context).size;
 
     return Container(
       color: theme.colorScheme.primary.withOpacity(0.1),
@@ -1153,45 +1180,55 @@ class _ReconocimientoFacialScreenState
               ),
             ],
 
-            const SizedBox(height: 32),
-
-            if (!state.registroExitoso) ...[
-              FilledButton.icon(
-                onPressed: _registrarAsistencia,
-                icon: const Icon(Icons.check),
-                label: const Text('Registrar Asistencia'),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: theme.colorScheme.onPrimary,
-                ),
+            Container(
+              width: size.width * 0.7,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: LinearProgressIndicator(
+                backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+                color: theme.colorScheme.primary,
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(4),
               ),
-            ] else ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green[700]),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Asistencia registrada correctamente',
-                        style: TextStyle(
-                          color: Colors.green[700],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
 
+            // const SizedBox(height: 32),
+            //
+            // if (!state.registroExitoso) ...[
+            //   FilledButton.icon(
+            //     onPressed: _registrarAsistencia,
+            //     icon: const Icon(Icons.check),
+            //     label: const Text('Registrar Asistencia'),
+            //     style: FilledButton.styleFrom(
+            //       minimumSize: const Size(double.infinity, 50),
+            //       backgroundColor: theme.colorScheme.primary,
+            //       foregroundColor: theme.colorScheme.onPrimary,
+            //     ),
+            //   ),
+            // ] else ...[
+            //   Container(
+            //     padding: const EdgeInsets.all(16),
+            //     decoration: BoxDecoration(
+            //       color: Colors.green[50],
+            //       borderRadius: BorderRadius.circular(12),
+            //       border: Border.all(color: Colors.green),
+            //     ),
+            //     child: Row(
+            //       children: [
+            //         Icon(Icons.check_circle, color: Colors.green[700]),
+            //         const SizedBox(width: 12),
+            //         Expanded(
+            //           child: Text(
+            //             'Asistencia registrada correctamente',
+            //             style: TextStyle(
+            //               color: Colors.green[700],
+            //               fontWeight: FontWeight.bold,
+            //             ),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ],
             const SizedBox(height: 16),
 
             OutlinedButton.icon(
@@ -1260,6 +1297,267 @@ class _ReconocimientoFacialScreenState
           ),
         ),
       ),
+    );
+  }
+
+  void _buildDraggableSearchSheet(BuildContext context) {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => DraggableScrollableSheet(
+            initialChildSize: 0.9,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    // Indicador de arrastre
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.onSurface.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+
+                    // Título
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'Buscar Trabajador',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+
+                    // Campo de búsqueda
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Buscar por nombre...',
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon:
+                              _searchQuery.isNotEmpty
+                                  ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                    },
+                                  )
+                                  : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Resultados de búsqueda
+                    Expanded(child: _buildSearchResults(scrollController)),
+                  ],
+                ),
+              );
+            },
+          ),
+    );
+  }
+
+  Widget _buildSearchResults(ScrollController scrollController) {
+    // Usar el provider de trabajadores para obtener la lista
+    final trabajadoresState = ref.watch(trabajadorNotifierProvider);
+    final theme = Theme.of(context);
+
+    // Si está cargando
+    if (trabajadoresState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Si hay un error
+    if (trabajadoresState.errorMessage != null) {
+      return Center(
+        child: Text(
+          'Error: ${trabajadoresState.errorMessage}',
+          style: TextStyle(color: theme.colorScheme.error),
+        ),
+      );
+    }
+
+    // Si no hay trabajadores
+    if (trabajadoresState.trabajadores.isEmpty) {
+      return const Center(child: Text('No hay trabajadores registrados'));
+    }
+
+    // Filtrar trabajadores por nombre si hay una búsqueda
+    final filteredTrabajadores =
+        _searchQuery.isEmpty
+            ? trabajadoresState.trabajadores
+            : trabajadoresState.trabajadores.where((t) {
+              final nombreCompleto = t.nombre.toLowerCase();
+              return nombreCompleto.contains(_searchQuery.toLowerCase());
+            }).toList();
+
+    print('Filtered trabajadores: ${filteredTrabajadores.length}');
+
+    // Si no hay resultados de búsqueda
+    if (_isSearching && filteredTrabajadores.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 48,
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No se encontraron trabajadores con ese nombre',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Mostrar resultados
+    return ListView.builder(
+      controller: scrollController,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: filteredTrabajadores.length,
+      itemBuilder: (context, index) {
+        final trabajador = filteredTrabajadores[index];
+
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // Avatar o iniciales
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: theme.colorScheme.primary.withOpacity(
+                        0.2,
+                      ),
+                      backgroundImage:
+                          trabajador.fotoUrl != null
+                              ? NetworkImage(trabajador.fotoUrl!)
+                              : null,
+                      child:
+                          trabajador.fotoUrl == null
+                              ? Text(
+                                trabajador.nombre[0].toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              )
+                              : null,
+                    ),
+
+                    const SizedBox(width: 16),
+
+                    // Información del trabajador
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            trabajador.nombre,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (trabajador.cargo != null)
+                            Text(
+                              trabajador.cargo!,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.7,
+                                ),
+                              ),
+                            ),
+                          if (trabajador.cargo != null)
+                            Text(
+                              trabajador.cargo!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.5,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Botón para tomar foto
+                FilledButton.icon(
+                  onPressed: () {
+                    // Cerrar el DraggableScrollableSheet
+                    Navigator.of(context).pop();
+
+                    // Capturar imagen
+                    _captureImage();
+                  },
+                  icon: const Icon(Icons.camera_alt),
+                  label: const Text('Tomar Fotografía'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 48),
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
