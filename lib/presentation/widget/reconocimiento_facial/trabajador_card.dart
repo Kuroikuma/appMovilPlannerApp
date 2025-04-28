@@ -6,22 +6,18 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../domain/entities.dart';
-import '../../providers/providers.dart';
 import '../../providers/use_case/reconocimiento_facial.dart';
 import '../../providers/use_case/trabajador.dart';
 import '../../providers/use_case/ubicacion.dart';
 import '../../utils/facial_recognition_utils_dos.dart';
 
-
 class TrabajadorCard extends ConsumerStatefulWidget {
   final Trabajador trabajador;
-  final VoidCallback? onTap;
   final Function(bool)? onChangeStatus;
 
   const TrabajadorCard({
     super.key,
     required this.trabajador,
-    this.onTap,
     this.onChangeStatus,
   });
 
@@ -49,105 +45,94 @@ class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
     final theme = Theme.of(context);
 
     return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    // Avatar o iniciales
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: theme.colorScheme.primary.withOpacity(
-                        0.2,
-                      ),
-                      backgroundImage:
-                          trabajador.fotoUrl != null
-                              ? NetworkImage(trabajador.fotoUrl!)
-                              : null,
-                      child:
-                          trabajador.fotoUrl == null
-                              ? Text(
-                                trabajador.nombre[0].toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              )
-                              : null,
-                    ),
-
-                    const SizedBox(width: 16),
-
-                    // Información del trabajador
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            trabajador.nombre,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                // Avatar o iniciales
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+                  backgroundImage:
+                      trabajador.fotoUrl != ''
+                          ? NetworkImage(trabajador.fotoUrl!)
+                          : null,
+                  child:
+                      trabajador.fotoUrl == ''
+                          ? Text(
+                            trabajador.nombre[0].toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: theme.colorScheme.primary,
                             ),
-                          ),
-                          if (trabajador.cargo != null)
-                            Text(
-                              trabajador.cargo!,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.7,
-                                ),
-                              ),
-                            ),
-                          if (trabajador.cargo != null)
-                            Text(
-                              trabajador.cargo!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.5,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
+                          )
+                          : null,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(width: 16),
 
-                // Botón para tomar foto
-                FilledButton.icon(
-                  onPressed: () {
-                    // Cerrar el DraggableScrollableSheet
-                    Navigator.of(context).pop();
-
-                    // Capturar imagen
-                    _registerFace(trabajador);
-                  },
-                  icon: const Icon(Icons.camera_alt),
-                  label: const Text('Tomar Fotografía'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 48),
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
+                // Información del trabajador
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${trabajador.primerApellido} ${trabajador.segundoApellido} ${trabajador.nombre}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        trabajador.cargo,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                      ),
+                      Text(
+                        trabajador.identificacion,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        );
-  }
 
+            const SizedBox(height: 16),
+
+            // Botón para tomar foto
+            FilledButton.icon(
+              onPressed: () {
+                // Cerrar el DraggableScrollableSheet
+                Navigator.of(context).pop();
+
+                // Capturar imagen
+                _registerFace(trabajador);
+              },
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('Tomar Fotografía'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<void> _registerFace(Trabajador trabajador) async {
     final reconocimientoNotifier = ref.read(

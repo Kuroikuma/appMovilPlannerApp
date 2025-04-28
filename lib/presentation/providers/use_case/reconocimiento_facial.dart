@@ -26,6 +26,7 @@ enum ReconocimientoFacialEstado {
   exito,
   error,
   inactivo,
+  pausado,
 }
 
 class ReconocimientoFacialStateData {
@@ -152,6 +153,18 @@ class ReconocimientoFacialNotifier
     state = state.copyWith(isInitialized: true);
   }
 
+  Future<void> cargarRegistrosBiometricos() async {
+    final ubicacionId = ref.read(ubicacionNotifierProvider).ubicacion!.id;
+
+    try {
+      final registros = await _biometricoRepository.getFaces(ubicacionId);
+
+      state = state.copyWith(cachedFaces: registros);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+    }
+  }
+
   Future<void> setImagenFile(File imageFile) async {
     state = state.copyWith(imageFile: imageFile);
   }
@@ -209,7 +222,7 @@ class ReconocimientoFacialNotifier
       cachedNewFaces.add(registroBiometrico);
 
       state = state.copyWith(
-        estado: ReconocimientoFacialEstado.exito,
+        estado: ReconocimientoFacialEstado.inicial,
         isLoading: false,
         cachedFaces: cachedNewFaces,
       );
@@ -438,7 +451,7 @@ class ReconocimientoFacialNotifier
         estado: ReconocimientoFacialEstado.exito,
       );
 
-     await registrarAsistenciaPorReconocimiento();
+      await registrarAsistenciaPorReconocimiento();
     }
 
     return trabajador?.nombre ?? 'No Registrado';
