@@ -14,14 +14,17 @@ final syncEntityNotifierProvider =
 class SyncEntityNotifier extends StateNotifier<AsyncValue<List<SyncEntity>>> {
   final ISyncEntityRepository _repository;
 
-  SyncEntityNotifier(this._repository) : super(const AsyncValue.loading()) {
-    _loadSyncEntity();
-  }
+  SyncEntityNotifier(this._repository) : super(const AsyncValue.loading());
 
-  Future<void> _loadSyncEntity() async {
+  Future<void> loadSyncEntity() async {
     try {
-      final syncEntity = await _repository.getPendingLocalSyncOperations();
-      state = AsyncValue.data(syncEntity);
+      print('🔄 Iniciando sincronización automática');
+
+    // Paso 1: Primero descargar cambios del servidor
+    await syncLocalWithRemoteData();
+
+    // Paso 2: Luego enviar cambios locales pendientes
+    await syncRemoteWithLocalData();
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
@@ -46,7 +49,7 @@ class SyncEntityNotifier extends StateNotifier<AsyncValue<List<SyncEntity>>> {
   Future<void> markMultipleAsSynced(List<SyncEntity> operations) async {
     try {
       await _repository.markMultipleAsSynced(operations);
-      await _loadSyncEntity();
+      await loadSyncEntity();
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
@@ -55,7 +58,7 @@ class SyncEntityNotifier extends StateNotifier<AsyncValue<List<SyncEntity>>> {
   Future<void> insertSyncEntity(SyncsEntitysCompanion syncEntity) async {
     try {
       await _repository.insertSyncEntity(syncEntity);
-      await _loadSyncEntity();
+      await loadSyncEntity();
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }

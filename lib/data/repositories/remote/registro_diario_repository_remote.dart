@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/converters/time_converter.dart';
 import '../../../core/error/exceptions.dart';
 import '../../../domain/models/registro_diario.dart';
 import 'api_client.dart';
@@ -83,7 +84,10 @@ class RegistroDiarioRepositoryRemote {
   Future<RegistroDiario> registrarAsistencia(
     int equipoId,
     int horaAprobadaId,
-    bool isEntry
+    bool isEntry,
+    DateTime? fechaIngreso,
+    TimeOfDay? horaIngreso,
+    int? registroDiarioId,
   ) async {
 
     // Simular una llamada a la API
@@ -95,21 +99,46 @@ class RegistroDiarioRepositoryRemote {
 
     if (isEntry == true) {
       data['fechaSalida'] = DateTime.now();
-      data['horaSalida'] = TimeOfDay.now();
+      data['horaSalida'] = TimeOfDayConverter().toSql(TimeOfDay.now());
+      data['fechaIngreso'] = fechaIngreso;
+      data['horaIngreso'] = TimeOfDayConverter().toSql(horaIngreso!);
+      data['registroDiarioId'] = registroDiarioId;
     } else {
       data['fechaIngreso'] = DateTime.now();
-      data['horaIngreso'] = TimeOfDay.now();
+      data['horaIngreso'] = TimeOfDayConverter().toSql(TimeOfDay.now());
     }
-
     
     final nuevoRegistroFormData = FormData.fromMap(data);
 
+
+     final response = isEntry
+      ? await _client.put(
+          '/UpdateRegistroDiarioByLocal',
+          data: nuevoRegistroFormData,
+        )
+      : await _client.post(
+          '/PostSaveRegistroDiarioByLocal',
+          data: nuevoRegistroFormData,
+        );
+
+    return RegistroDiario.fromJson(response.data);
+  }
+
+  Future<void> insertarRegistroDiario(
+    Map<String, dynamic> registroDiario,
+  ) async {
+
+  final nuevoRegistroFormData = FormData.fromMap(registroDiario);
+
+    // Simular una llamada a la API
     final nuevoRegistro = await _client.post(
       '/PostSaveRegistroDiarioByLocal',
       data: nuevoRegistroFormData,
     );
 
-    return RegistroDiario.fromJson(nuevoRegistro.data);
+    if (nuevoRegistro.statusCode != 200) {
+      throw ApiException();
+    }
   }
 
 

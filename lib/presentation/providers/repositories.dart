@@ -21,6 +21,8 @@ final syncEntityRepoProvider = Provider<ISyncEntityRepository>((ref) {
     ref.watch(databaseProvider),
     ref.watch(trabajadorRemoteDataSourceProvider),
     ref.watch(trabajadorLocalDataSourceProvider),
+    ref.watch(registroDiarioLocalDataSourceProvider),
+    ref.watch(registroDiarioRemoteDataSourceProvider),
     ref.watch(apiClientProvider),
   );
 });

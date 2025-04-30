@@ -102,25 +102,21 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
           equipoId,
           horaAprobadaId,
           isEntry,
+          isEntry ? registroAsistencia.fechaIngreso : null,
+          isEntry ? registroAsistencia.horaIngreso : null,
+          isEntry ? registroAsistencia.id : null,
         );
+
+        await localDataSource.actualizarRegistroLocal(remoteData);
         return remoteData;
       } catch (e) {
         throw ApiException();
       }
     } else {
       if (isEntry) {
-        final registroDiarioSync = await syncEntityRepository
-            .getSyncEntityByTableNameAndId(
-              'registroDiario',
-              "${registroAsistencia.id}",
-            );
-
-        final registroDiarioSync2 = registroDiarioSync.copyWith(
-          data: registroAsistencia.toJson(),
-        );
-
-        await updateQueuSyncRegistroDiario(
-          registroDiarioSync2.toCompanion(true),
+        await insertQueuSyncRegistroDiario(
+          registroAsistencia,
+          TipoAccionesSync.update,
         );
       } else {
         await insertQueuSyncRegistroDiario(

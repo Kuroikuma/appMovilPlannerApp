@@ -107,30 +107,6 @@ class Horario {
   });
 }
 
-class RegistroDiario {
-  final int id;
-  final String trabajadorId;
-  final DateTime fechaIngreso;
-  final TimeOfDay horaIngreso;
-  final DateTime? fechaSalida;
-  final TimeOfDay? horaSalida;
-  final bool ingresofonconizado;
-  final bool salidaforconizada;
-  final bool estado;
-
-  RegistroDiario({
-    required this.id,
-    required this.trabajadorId,
-    required this.fechaIngreso,
-    required this.horaIngreso,
-    this.fechaSalida,
-    this.horaSalida,
-    required this.ingresofonconizado,
-    required this.salidaforconizada,
-    this.estado = true,
-  });
-}
-
 class SyncEntity {
   final int id;
   final String entityTableNameToSync;

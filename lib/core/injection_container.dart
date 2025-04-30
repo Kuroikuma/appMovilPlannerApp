@@ -12,6 +12,9 @@ import 'package:flutter_application_1/domain/repositories.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
+import '../data/repositories/local/registro_diario_repository_local.dart';
+import '../data/repositories/remote/registro_diario_repository_remote.dart';
+
 final getIt = GetIt.instance;
 
 Future<void> setupDependencies() async {
@@ -51,6 +54,8 @@ Future<void> setupDependencies() async {
       getIt<AppDatabase>(),
       getIt<TrabajadorRemoteDataSource>(),
       getIt<TrabajadorLocalDataSource>(),
+      getIt<RegistroDiarioRepositoryLocal >(),
+      getIt<RegistroDiarioRepositoryRemote >(),
       getIt<ApiClient>(),
     ),
   );

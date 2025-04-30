@@ -5,7 +5,7 @@ import '../../data/database.dart';
 class RegistroDiario {
   final int? id;
   final int equipoId;
-  final int? reconocimientoFacialId;
+  final String? reconocimientoFacialId;
   final DateTime fechaIngreso;
   final TimeOfDay horaIngreso;
   final DateTime? fechaSalida;
@@ -74,7 +74,7 @@ class RegistroDiario {
   RegistroDiario copyWith({
     int? id,
     int? equipoId,
-    int? reconocimientoFacialId,
+    String? reconocimientoFacialId,
     DateTime? fechaIngreso,
     TimeOfDay? horaIngreso,
     DateTime? fechaSalida,
@@ -111,11 +111,11 @@ class RegistroDiario {
       fechaIngreso: DateTime.parse(json['fechaIngreso']),
       horaIngreso: _timeFromString(json['horaIngreso']),
       fechaSalida:
-          json['fechaSalida'] != null
+          json['fechaSalida'] != "0001-01-01T00:00:00"
               ? DateTime.parse(json['fechaSalida'])
               : null,
       horaSalida:
-          json['horaSalida'] != null
+          json['horaSalida'] != "00:00:00"
               ? _timeFromString(json['horaSalida'])
               : null,
       estado: json['estado'] ?? true,

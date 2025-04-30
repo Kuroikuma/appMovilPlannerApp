@@ -1,24 +1,34 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_application_1/core/error/exceptions.dart';
 import 'package:flutter_application_1/data/database.dart';
 import 'package:flutter_application_1/data/mappers/trabajador_mappers.dart';
 import 'package:flutter_application_1/domain/entities.dart';
 
+import '../../domain/models/registro_diario.dart';
 import '../../domain/repositories.dart';
+import '../converters/action_sync.dart';
+import 'local/registro_diario_repository_local.dart';
 import 'local/trabajador_local.dart';
 import 'remote/api_client.dart';
+import 'remote/registro_diario_repository_remote.dart';
 import 'remote/trabajador_remote.dart';
 
 class SyncEntityLocalDataSource implements ISyncEntityRepository {
   final AppDatabase _db;
   final TrabajadorRemoteDataSource trabajadorRemoteDataSource;
   final TrabajadorLocalDataSource trabajadorLocalDataSource;
+  final RegistroDiarioRepositoryLocal registroDiarioLocalDataSource;
+  final RegistroDiarioRepositoryRemote registroDiarioRepositoryRemote;
   final ApiClient _client;
 
   SyncEntityLocalDataSource(
     this._db,
     this.trabajadorRemoteDataSource,
     this.trabajadorLocalDataSource,
+    this.registroDiarioLocalDataSource,
+    this.registroDiarioRepositoryRemote,
     this._client,
   );
 
@@ -115,6 +125,10 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
             }
             break;
         }
+
+        if (entity == 'registroDiario') {
+          await syncPendingChanges(entry.value);
+        }
       } catch (e) {
         // Manejar error para todo el grupo
       }
@@ -174,6 +188,10 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
             }
             break;
         }
+
+        if (entity == 'registroDiario') {
+          await fetchUpdatesFromServerRegistroDiario(entry.value);
+        }
       } catch (e) {
         // Manejar error para todo el grupo
       }
@@ -203,7 +221,9 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
 
   @override
   Future<List<SyncEntity>> getPendingRemoteSyncOperations() async {
-    final operations = await _client.get('/sync-entities');
+    final operations = await _client.get(
+      '/IntegracionExternaHoras/GetListRegistroSyncsEntityByTableName?tableName=RegistroDiario',
+    );
 
     if (operations.data is List) {
       return operations.data
@@ -231,5 +251,96 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
     await (_db.update(_db.syncsEntitys)..where(
       (op) => op.id.isIn(ids),
     )).write(const SyncsEntitysCompanion(isSynced: Value(true)));
+  }
+
+  Future<void> markSyncedByRegisterId(
+    String registerId,
+    TipoAccionesSync action,
+  ) async {
+    await (_db.update(_db.syncsEntitys)..where(
+      (op) =>
+          op.registerId.equals(registerId) &
+          op.action.equals(TipoAccionesSyncConverter().toSql(action)),
+    )).write(const SyncsEntitysCompanion(isSynced: Value(true)));
+  }
+
+  // logica solo para registro diario
+  Future<void> fetchUpdatesFromServerRegistroDiario(
+    List<SyncEntity> operations,
+  ) async {
+    try {
+      for (var op in operations) {
+        final registroJson = op.data;
+        final servidorRegistro = RegistroDiario.fromJson(registroJson);
+
+        final localRegistro = await registroDiarioLocalDataSource
+            .buscarRegistroLocal(
+              servidorRegistro.equipoId,
+              servidorRegistro.fechaIngreso,
+            );
+
+        if (localRegistro == null) {
+          // No existe local, insertarlo
+          await registroDiarioLocalDataSource.insertarRegistroLocal(
+            servidorRegistro,
+          );
+        } else {
+          // Existe localmente
+          // Aquí comparas y decides: por ahora, siempre sobreescribimos con el servidor
+          await registroDiarioLocalDataSource.actualizarRegistroLocal(
+            servidorRegistro,
+          );
+
+          await markSyncedByRegisterId(localRegistro.id.toString(), op.action);
+        }
+      }
+
+      print('✅ Registros sincronizados desde el servidor');
+    } catch (e) {
+      print('❌ Error al sincronizar registros del servidor: $e');
+    }
+  }
+
+  Future<void> syncPendingChanges(List<SyncEntity> cambios) async {
+    print('📦 Cambios locales pendientes: ${cambios.length}');
+    final updates =
+        cambios.where((op) => op.action == TipoAccionesSync.update).toList();
+
+    final create =
+        cambios.where((op) => op.action == TipoAccionesSync.create).toList();
+
+    final registrosDiarios = create.map((op) => op.data).toList();
+    final updatesRegistrosDiarios = updates.map((op) => op.data).toList();
+
+    await _client.post(
+      'PostSaveMultipleRegistroDiarioByLocal',
+      data: registrosDiarios.toString(),
+    );
+
+    await _client.put(
+      'PostUpdateMultipleRegistroDiarioByLocal',
+      data: updatesRegistrosDiarios.toString(),
+    );
+
+    // for (final cambio in cambios) {
+    //   try {
+    //     final dataJson = cambio.data; // El JSON ya mapeado
+
+    //     if (cambio.action == TipoAccionesSync.create) {
+    //       await registroDiarioRepositoryRemote.insertarRegistroDiario(dataJson);
+    //     }
+    //     //  else if (cambio.action == TipoAccionesSync.update) {
+    //     //   await dio.put('/registros_diarios/${cambio.registerId}', data: parsedData);
+    //     // } else if (cambio.action == TipoAccionesSync.delete) {
+    //     //   await dio.delete('/registros_diarios/${cambio.registerId}');
+    //     // }
+
+    //     await markSyncedByRegisterId(cambio.registerId.toString(), cambio.action);
+    //     print('✅ Cambio sincronizado exitosamente: ${cambio.id}');
+    //   } catch (e) {
+    //     print('❌ Error sincronizando cambio ${cambio.id}: $e');
+    //     // Podrías aquí agregar retries o logs especiales
+    //   }
+    // }
   }
 }

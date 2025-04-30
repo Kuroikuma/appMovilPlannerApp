@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'presentation/providers/auto_refresher_provider.dart';
+import 'presentation/providers/use_case/internet_status_provider.dart';
 import 'presentation/routes/app_routes.dart';
 
 void main() async {
@@ -36,6 +37,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     // Iniciar el refresco automático de trabajadores
     Future.microtask(() {
       ref.read(autoRefresherProvider);
+      ref.read(internetStatusProvider);
     });
   }
 

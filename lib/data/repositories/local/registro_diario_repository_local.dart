@@ -2,6 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/database.dart';
 import '../../../domain/models/registro_diario.dart';
+import '../../converters/date_converter.dart';
+import '../../converters/time_converter.dart';
 
 class RegistroDiarioRepositoryLocal {
   final AppDatabase _db;
@@ -131,8 +133,8 @@ class RegistroDiarioRepositoryLocal {
                   fotoTrabajador: Value(e.fotoTrabajador!),
                   nombreTrabajador: Value(e.nombreTrabajador!),
                   estado: Value(e.estado),
-                  horaSalida: Value(e.horaSalida!),
-                  fechaSalida: Value(e.fechaSalida!),
+                  horaSalida: Value(e.horaSalida),
+                  fechaSalida: Value(e.fechaSalida),
                   horaIngreso: Value(e.horaIngreso),
                   fechaIngreso: Value(e.fechaIngreso),
                   equipoId: Value(e.equipoId),
@@ -232,29 +234,21 @@ class RegistroDiarioRepositoryLocal {
     );
 
     // En una implementación real, aquí se actualizaría en la base de datos
-    await _db.batch((batch) {
-      for (final registro in registrosDiarios) {
-        batch.update(
-          _db.registrosDiarios,
-          RegistrosDiariosCompanion(
-            id: Value(registro.id!),
-            equipoId: Value(registro.equipoId),
-            fechaIngreso: Value(registro.fechaIngreso),
-            horaIngreso: Value(registro.horaIngreso),
-            fechaSalida: Value(registro.fechaSalida!),
-            horaSalida: Value(registro.horaSalida!),
-            estado: Value(registro.estado),
-            nombreTrabajador: Value(registro.nombreTrabajador!),
-            fotoTrabajador: Value(registro.fotoTrabajador!),
-            cargoTrabajador: Value(registro.cargoTrabajador!),
-          ),
-          where:
-              (tbl) => tbl.id.equals(
-                registro.id!,
-              ), // Asegura que uses la clave primaria
-        );
-      }
-    });
+    // Guardar el registro actualizado en la base de datos
+    await (_db.update(_db.registrosDiarios)
+      ..where((tbl) => tbl.id.equals(registroActualizado.id!))).write(
+      RegistrosDiariosCompanion(
+        equipoId: Value(registroActualizado.equipoId),
+        fechaIngreso: Value(registroActualizado.fechaIngreso),
+        horaIngreso: Value(registroActualizado.horaIngreso),
+        fechaSalida: Value(registroActualizado.fechaSalida!),
+        horaSalida: Value(registroActualizado.horaSalida!),
+        estado: Value(registroActualizado.estado),
+        nombreTrabajador: Value(registroActualizado.nombreTrabajador!),
+        fotoTrabajador: Value(registroActualizado.fotoTrabajador!),
+        cargoTrabajador: Value(registroActualizado.cargoTrabajador!),
+      ),
+    );
 
     return registroActualizado;
   }
@@ -297,5 +291,74 @@ class RegistroDiarioRepositoryLocal {
 
       return await registrarSalida(registroDelDia.id!, horaAprobadaId);
     }
+  }
+
+  Future<RegistroDiario?> buscarRegistroLocal(
+    int equipoId,
+    DateTime fechaIngreso,
+  ) async {
+    final registros = await _db.select(_db.registrosDiarios).get();
+
+    for (final registro in registros) {
+      if (registro.equipoId == equipoId &&
+          registro.fechaIngreso.year == fechaIngreso.year &&
+          registro.fechaIngreso.month == fechaIngreso.month &&
+          registro.fechaIngreso.day == fechaIngreso.day) {
+        return RegistroDiario.fromDataModel(registro);
+      }
+    }
+    return null;
+  }
+
+  Future<void> insertarRegistroLocal(RegistroDiario registro) async {
+    await _db
+        .into(_db.registrosDiarios)
+        .insert(
+          RegistrosDiariosCompanion(
+            equipoId: Value(registro.equipoId),
+            reconocimientoFacialId: Value(registro.reconocimientoFacialId),
+            fechaIngreso: Value(registro.fechaIngreso),
+            horaIngreso: Value(registro.horaIngreso),
+            fechaSalida:
+                registro.fechaSalida != null
+                    ? Value(registro.fechaSalida!)
+                    : const Value.absent(),
+            horaSalida:
+                registro.horaSalida != null
+                    ? Value(registro.horaSalida!)
+                    : const Value.absent(),
+            estado: Value(registro.estado),
+            nombreTrabajador: Value(registro.nombreTrabajador ?? "Desconocido"),
+            fotoTrabajador: Value(registro.fotoTrabajador ?? ""),
+            cargoTrabajador: Value(registro.cargoTrabajador ?? "Desconocido"),
+            horarioId: Value(registro.horarioId),
+          ),
+        );
+  }
+
+  Future<void> actualizarRegistroLocal(RegistroDiario registro) async {
+    await (_db.update(_db.registrosDiarios)..where(
+      (tbl) =>
+          tbl.equipoId.equals(registro.equipoId) &
+          tbl.fechaIngreso.equals(DateConverter().toSql(registro.fechaIngreso)),
+    )).write(
+      RegistrosDiariosCompanion(
+        reconocimientoFacialId: Value(registro.reconocimientoFacialId),
+        horaIngreso: Value(registro.horaIngreso),
+        fechaSalida:
+            registro.fechaSalida != null
+                ? Value(registro.fechaSalida!)
+                : const Value.absent(),
+        horaSalida:
+            registro.horaSalida != null
+                ? Value(registro.horaSalida!)
+                : const Value.absent(),
+        estado: Value(registro.estado),
+        nombreTrabajador: Value(registro.nombreTrabajador ?? "Desconocido"),
+        fotoTrabajador: Value(registro.fotoTrabajador ?? ""),
+        cargoTrabajador: Value(registro.cargoTrabajador ?? "Desconocido"),
+        horarioId: Value(registro.horarioId),
+      ),
+    );
   }
 }
