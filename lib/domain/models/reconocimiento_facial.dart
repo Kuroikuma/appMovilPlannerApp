@@ -1,18 +1,24 @@
+import '../../data/converters/tipo_registro_biometrico.dart';
+
 class ReconocimientoFacial {
   final String id;
   final String trabajadorId;
   final String imagenUrl;
-  final double confianza;
+  final double puntajeConfianza;
   final DateTime fechaCreacion;
-  final bool activo;
+  final bool estado;
+  final bool pruebaVidaExitosa;
+  final TipoRegistroBiometrico metodoPruebaVida;
 
   ReconocimientoFacial({
     required this.id,
     required this.trabajadorId,
     required this.imagenUrl,
-    required this.confianza,
+    required this.puntajeConfianza,
     required this.fechaCreacion,
-    this.activo = true,
+    this.estado = true,
+    required this.pruebaVidaExitosa,
+    required this.metodoPruebaVida,
   });
 
   factory ReconocimientoFacial.fromJson(Map<String, dynamic> json) {
@@ -20,9 +26,13 @@ class ReconocimientoFacial {
       id: json['id'],
       trabajadorId: json['trabajadorId'],
       imagenUrl: json['imagenUrl'],
-      confianza: json['confianza'].toDouble(),
+      puntajeConfianza: json['puntajeConfianza'].toDouble(),
       fechaCreacion: DateTime.parse(json['fechaCreacion']),
-      activo: json['activo'] ?? true,
+      estado: json['estado'] ?? true,
+      pruebaVidaExitosa: json['pruebaVidaExitosa'] ?? false,
+      metodoPruebaVida: TipoRegistroBiometrico.values.firstWhere(
+        (element) => element.name == json['metodoPruebaVida'],
+      ),
     );
   }
 
@@ -31,9 +41,11 @@ class ReconocimientoFacial {
       'id': id,
       'trabajadorId': trabajadorId,
       'imagenUrl': imagenUrl,
-      'confianza': confianza,
+      'puntajeConfianza': puntajeConfianza,
       'fechaCreacion': fechaCreacion.toIso8601String(),
-      'activo': activo,
+      'estado': estado,
+      'pruebaVidaExitosa': pruebaVidaExitosa,
+      'metodoPruebaVida': metodoPruebaVida.name,
     };
   }
 }

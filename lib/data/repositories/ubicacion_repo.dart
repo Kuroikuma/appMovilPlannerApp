@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
@@ -48,6 +49,14 @@ class UbicacionRepo implements IUbicacionRepository {
     return result.first;
   }
 
+  Future<String> obtenerHorarioId(int ubicacionId) async {
+    final horarios = await _client.get(
+      'GetListHorarioByUbicacionId?ubicacionid=$ubicacionId&fechaInicio=2023-08-23&fechaFin=2025-04-23',
+    );
+
+    return horarios.data[0]?.horarioId ?? '24845';
+  }
+
   @override
   Future<Ubicacione> configurarUbicacion(
     String codigoUbicacion,
@@ -62,6 +71,7 @@ class UbicacionRepo implements IUbicacionRepository {
       nombre: ubicacionNombre,
       ubicacionId: int.parse(ubicacionId),
       estado: true,
+      codigoUbicacion: int.parse(codigoUbicacion),
     );
 
     await configurarUbicacionRemota(codigoUbicacion, codigoUbicacionLocal);
@@ -88,14 +98,13 @@ class UbicacionRepo implements IUbicacionRepository {
     String codigoUbicacion,
     String codigoUbicacionLocal,
   ) async {
+    final formData = FormData.fromMap({
+      'codigoUbicacion': codigoUbicacion,
+      'codigoUbicacionLocal': codigoUbicacionLocal,
+    });
+
     try {
-      await _client.post(
-        '/PostSaveIntegracionUbicacionApp',
-        data: {
-          'codigoUbicacion': codigoUbicacion,
-          'codigoUbicacionLocal': codigoUbicacionLocal,
-        },
-      );
+      await _client.post('/PostSaveIntegracionUbicacionApp', data: formData);
 
       return true;
     } catch (e) {
@@ -113,6 +122,7 @@ class UbicacionRepo implements IUbicacionRepository {
               nombre: ubicacion.nombre,
               ubicacionId: ubicacion.ubicacionId,
               estado: Value(ubicacion.estado),
+              codigoUbicacion: ubicacion.codigoUbicacion,
             ),
           );
 
@@ -133,11 +143,26 @@ class UbicacionRepo implements IUbicacionRepository {
       batch.deleteAll(_db.horarios);
       batch.deleteAll(_db.syncsEntitys);
       batch.deleteAll(_db.registrosBiometricos);
+      batch.deleteAll(_db.reconocimientosFacial);
       batch.deleteAll(_db.registrosDiarios);
     });
 
     await _client.delete(
       '/DeleteIntegracionUbicacionApp?ubicacionId=$ubicacionId',
     );
+  }
+
+  @override
+  Future<String> obtenerCodigoUbicacion(int ubicacionId) async {
+    try {
+      final result = await _client.get(
+        '/GetIntegracionUbicacionApp?ubicacionId=$ubicacionId',
+      );
+
+      return result.data['codigoConfiguracion'];
+    } catch (e) {
+      print('Error al obtener el código de ubicación: $e');
+      rethrow;
+    }
   }
 }

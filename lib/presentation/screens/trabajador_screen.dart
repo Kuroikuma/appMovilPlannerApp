@@ -1,7 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
+import '../widget/reconocimiento_facial/build_procesando.dart';
 import '../widget/trabajador_card.dart';
 import '../utils/notification_utils.dart';
 
@@ -12,21 +16,32 @@ class TrabajadoresScreen extends ConsumerStatefulWidget {
   ConsumerState<TrabajadoresScreen> createState() => _TrabajadoresScreenState();
 }
 
-class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen> {
+class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
+  // Animation controller for the loading screen
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _cargarTrabajadores();
+      _initFaceRecognition();
+
+      // Initialize animation controller
+      _animationController = AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 2),
+      )..repeat();
     });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    // _disposeFaceRecognition();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -46,10 +61,26 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen> {
     }
   }
 
+  void _initFaceRecognition() async {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
+    await ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
+  }
+
+  void _disposeFaceRecognition() {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final trabajadorState = ref.watch(trabajadorNotifierProvider);
     final ubicacionState = ref.watch(ubicacionNotifierProvider);
+    final reconocimientoFacialState = ref.watch(
+      reconocimientoFacialNotifierProvider,
+    );
+
+    if (reconocimientoFacialState.isLoading) {
+      return buildProcesandoRegistroBiometrico(context, _animationController);
+    }
 
     return Scaffold(
       appBar: _buildAppBar(context, ubicacionState),
@@ -442,5 +473,42 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen> {
         );
       },
     );
+  }
+}
+
+// Clase para dibujar el arco de carga animado
+class LoadingArcPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  LoadingArcPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromCircle(
+      center: Offset(size.width / 2, size.height / 2),
+      radius: size.width / 2,
+    );
+
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 8.0
+          ..strokeCap = StrokeCap.round;
+
+    // Dibujar arco animado
+    canvas.drawArc(
+      rect,
+      -math.pi / 2, // Comenzar desde arriba
+      2 * math.pi * progress, // Ángulo basado en el progreso
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant LoadingArcPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }

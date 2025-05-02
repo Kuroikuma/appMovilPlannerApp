@@ -1,119 +1,15 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/converters/time_converter.dart';
 import '../../../core/error/exceptions.dart';
 import '../../../domain/models/registro_diario.dart';
-import '../../../domain/repositories/i_registro_diario_repository.dart';
 import 'api_client.dart';
 
-class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
+class RegistroDiarioRepositoryRemote {
   final ApiClient _client;
 
   RegistroDiarioRepositoryRemote(this._client);
-
-  // Datos de ejemplo para demostración
-  final List<RegistroDiario> _registrosDemo = [
-    RegistroDiario(
-      id: 1,
-      equipoId: 1,
-      registroBiometricoId: 'bio123',
-      fechaIngreso: DateTime.now().subtract(const Duration(days: 1)),
-      horaIngreso: const TimeOfDay(hour: 8, minute: 0),
-      fechaSalida: DateTime.now().subtract(const Duration(days: 1)),
-      horaSalida: const TimeOfDay(hour: 17, minute: 30),
-      estado: true,
-      nombreTrabajador: 'Juan Pérez',
-      fotoTrabajador: 'https://randomuser.me/api/portraits/men/1.jpg',
-      cargoTrabajador: 'Desarrollador Senior',
-    ),
-    RegistroDiario(
-      id: 2,
-      equipoId: 2,
-      registroBiometricoId: 'bio124',
-      fechaIngreso: DateTime.now().subtract(const Duration(days: 1)),
-      horaIngreso: const TimeOfDay(hour: 8, minute: 15),
-      fechaSalida: DateTime.now().subtract(const Duration(days: 1)),
-      horaSalida: const TimeOfDay(hour: 16, minute: 45),
-      estado: true,
-      nombreTrabajador: 'María González',
-      fotoTrabajador: 'https://randomuser.me/api/portraits/women/2.jpg',
-      cargoTrabajador: 'Diseñadora UX/UI',
-    ),
-    RegistroDiario(
-      id: 3,
-      equipoId: 3,
-      registroBiometricoId: 'bio125',
-      fechaIngreso: DateTime.now().subtract(const Duration(days: 1)),
-      horaIngreso: const TimeOfDay(hour: 9, minute: 0),
-      fechaSalida: DateTime.now().subtract(const Duration(days: 1)),
-      horaSalida: const TimeOfDay(hour: 18, minute: 0),
-      estado: false,
-      nombreTrabajador: 'Carlos Rodríguez',
-      fotoTrabajador: 'https://randomuser.me/api/portraits/men/3.jpg',
-      cargoTrabajador: 'Gerente de Proyecto',
-    ),
-    RegistroDiario(
-      id: 4,
-      equipoId: 1,
-      registroBiometricoId: 'bio126',
-      fechaIngreso: DateTime.now(),
-      horaIngreso: const TimeOfDay(hour: 8, minute: 5),
-      estado: true,
-      nombreTrabajador: 'Juan Pérez',
-      fotoTrabajador: 'https://randomuser.me/api/portraits/men/1.jpg',
-      cargoTrabajador: 'Desarrollador Senior',
-    ),
-    RegistroDiario(
-      id: 5,
-      equipoId: 4,
-      registroBiometricoId: 'bio127',
-      fechaIngreso: DateTime.now(),
-      horaIngreso: const TimeOfDay(hour: 8, minute: 30),
-      estado: true,
-      nombreTrabajador: 'Ana Martínez',
-      fotoTrabajador: 'https://randomuser.me/api/portraits/women/4.jpg',
-      cargoTrabajador: 'Analista de Datos',
-    ),
-    RegistroDiario(
-      id: 9,
-      equipoId: 1,
-      registroBiometricoId: 'bio133',
-      fechaIngreso: DateTime.now().subtract(const Duration(days: 3)),
-      horaIngreso: const TimeOfDay(hour: 8, minute: 0),
-      fechaSalida: DateTime.now().subtract(const Duration(days: 3)),
-      horaSalida: const TimeOfDay(hour: 17, minute: 0),
-      estado: true,
-      nombreTrabajador: 'Juan Pérez',
-      fotoTrabajador: 'https://randomuser.me/api/portraits/men/1.jpg',
-      cargoTrabajador: 'Desarrollador Senior',
-    ),
-    RegistroDiario(
-      id: 10,
-      equipoId: 2,
-      registroBiometricoId: 'bio134',
-      fechaIngreso: DateTime.now().subtract(const Duration(days: 4)),
-      horaIngreso: const TimeOfDay(hour: 8, minute: 15),
-      fechaSalida: DateTime.now().subtract(const Duration(days: 4)),
-      horaSalida: const TimeOfDay(hour: 16, minute: 45),
-      estado: true,
-      nombreTrabajador: 'María González',
-      fotoTrabajador: 'https://randomuser.me/api/portraits/women/2.jpg',
-      cargoTrabajador: 'Diseñadora UX/UI',
-    ),
-    RegistroDiario(
-      id: 11,
-      equipoId: 3,
-      registroBiometricoId: 'bio135',
-      fechaIngreso: DateTime.now().subtract(const Duration(days: 5)),
-      horaIngreso: const TimeOfDay(hour: 9, minute: 0),
-      fechaSalida: DateTime.now().subtract(const Duration(days: 5)),
-      horaSalida: const TimeOfDay(hour: 18, minute: 0),
-      estado: true,
-      nombreTrabajador: 'Carlos Rodríguez',
-      fotoTrabajador: 'https://randomuser.me/api/portraits/men/3.jpg',
-      cargoTrabajador: 'Gerente de Proyecto',
-    ),
-  ];
 
   Future<List<RegistroDiario>> getRegistroDiarioPorUbicacion(
     String ubicacionId,
@@ -162,7 +58,6 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     }
   }
 
-  @override
   Future<List<RegistroDiario>> obtenerRegistrosPorUbicacion(
     String ubicacionId, {
     DateTime? fecha,
@@ -175,7 +70,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     );
 
     if (fecha == null) {
-      return _registrosDemo;
+      return [];
     }
 
     return registrosDiarios.where((registro) {
@@ -185,141 +80,75 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     }).toList();
   }
 
-  @override
-  Future<RegistroDiario?> obtenerRegistroPorId(int id) async {
-    // Simular una llamada a la API
-    await Future.delayed(const Duration(milliseconds: 500));
 
-    try {
-      return _registrosDemo.firstWhere((registro) => registro.id == id);
-    } catch (e) {
-      return null;
+  Future<RegistroDiario> registrarAsistencia(
+    int equipoId,
+    int horaAprobadaId,
+    bool isEntry,
+    DateTime? fechaIngreso,
+    TimeOfDay? horaIngreso,
+    int? registroDiarioId,
+  ) async {
+
+    // Simular una llamada a la API
+
+    final Map<String, dynamic> data = {
+      'horaAprobadaId': horaAprobadaId,
+      'equipoId': equipoId,
+    };
+
+    if (isEntry == true) {
+      data['fechaSalida'] = DateTime.now();
+      data['horaSalida'] = TimeOfDayConverter().toSql(TimeOfDay.now());
+      data['fechaIngreso'] = fechaIngreso;
+      data['horaIngreso'] = TimeOfDayConverter().toSql(horaIngreso!);
+      data['registroDiarioId'] = registroDiarioId;
+    } else {
+      data['fechaIngreso'] = DateTime.now();
+      data['horaIngreso'] = TimeOfDayConverter().toSql(TimeOfDay.now());
+    }
+    
+    final nuevoRegistroFormData = FormData.fromMap(data);
+
+
+     final response = isEntry
+      ? await _client.put(
+          '/UpdateRegistroDiarioByLocal',
+          data: nuevoRegistroFormData,
+        )
+      : await _client.post(
+          '/PostSaveRegistroDiarioByLocal',
+          data: nuevoRegistroFormData,
+        );
+
+    return RegistroDiario.fromJson(response.data);
+  }
+
+  Future<void> insertarRegistroDiario(
+    Map<String, dynamic> registroDiario,
+  ) async {
+
+  final nuevoRegistroFormData = FormData.fromMap(registroDiario);
+
+    // Simular una llamada a la API
+    final nuevoRegistro = await _client.post(
+      '/PostSaveRegistroDiarioByLocal',
+      data: nuevoRegistroFormData,
+    );
+
+    if (nuevoRegistro.statusCode != 200) {
+      throw ApiException();
     }
   }
 
-  @override
-  Future<RegistroDiario> registrarEntrada(
-    int equipoId, {
-    String? registroBiometricoId,
-  }) async {
-    // Simular una llamada a la API
-    await Future.delayed(const Duration(milliseconds: 800));
 
-    // Buscar información del trabajador
-    final trabajador = _registrosDemo.firstWhere(
-      (registro) => registro.equipoId == equipoId,
-      orElse:
-          () => RegistroDiario(
-            equipoId: equipoId,
-            fechaIngreso: DateTime.now(),
-            horaIngreso: TimeOfDay.now(),
-            nombreTrabajador: 'Trabajador #$equipoId',
-          ),
-    );
 
-    // Crear nuevo registro
-    final nuevoRegistro = RegistroDiario(
-      id: _registrosDemo.length + 1,
-      equipoId: equipoId,
-      registroBiometricoId: registroBiometricoId,
-      fechaIngreso: DateTime.now(),
-      horaIngreso: TimeOfDay.now(),
-      estado: true,
-      nombreTrabajador: trabajador.nombreTrabajador,
-      fotoTrabajador: trabajador.fotoTrabajador,
-      cargoTrabajador: trabajador.cargoTrabajador,
-    );
-
-    // En una implementación real, aquí se guardaría en la base de datos
-    _registrosDemo.add(nuevoRegistro);
-
-    return nuevoRegistro;
-  }
-
-  @override
-  Future<RegistroDiario> registrarSalida(
-    int registroId, {
-    String? registroBiometricoId,
-  }) async {
-    // Simular una llamada a la API
-    await Future.delayed(const Duration(milliseconds: 800));
-
-    // Buscar el registro
-    final index = _registrosDemo.indexWhere(
-      (registro) => registro.id == registroId,
-    );
-    if (index == -1) {
-      throw Exception('Registro no encontrado');
-    }
-
-    // Actualizar el registro con la salida
-    final registroActualizado = _registrosDemo[index].copyWith(
-      fechaSalida: DateTime.now(),
-      horaSalida: TimeOfDay.now(),
-      registroBiometricoId:
-          registroBiometricoId ?? _registrosDemo[index].registroBiometricoId,
-    );
-
-    // En una implementación real, aquí se actualizaría en la base de datos
-    _registrosDemo[index] = registroActualizado;
-
-    return registroActualizado;
-  }
-
-  @override
-  Future<List<RegistroDiario>> obtenerRegistrosPorTrabajador(
-    int equipoId, {
-    DateTime? fechaInicio,
-    DateTime? fechaFin,
-  }) async {
-    // Simular una llamada a la API
-    await Future.delayed(const Duration(seconds: 1));
-
-    return _registrosDemo.where((registro) {
-      bool cumpleFiltroTrabajador = registro.equipoId == equipoId;
-
-      if (!cumpleFiltroTrabajador) return false;
-
-      if (fechaInicio != null && fechaFin != null) {
-        return registro.fechaIngreso.isAfter(
-              fechaInicio.subtract(const Duration(days: 1)),
-            ) &&
-            registro.fechaIngreso.isBefore(
-              fechaFin.add(const Duration(days: 1)),
-            );
-      }
-
-      return true;
-    }).toList();
-  }
-
-  @override
-  Future<void> cambiarEstadoRegistro(int registroId, bool estado) async {
-    // Simular una llamada a la API
-    await Future.delayed(const Duration(milliseconds: 800));
-
-    // Buscar el registro
-    final index = _registrosDemo.indexWhere(
-      (registro) => registro.id == registroId,
-    );
-    if (index == -1) {
-      throw Exception('Registro no encontrado');
-    }
-
-    // Actualizar el estado
-    _registrosDemo[index] = _registrosDemo[index].copyWith(estado: estado);
-
-    // En una implementación real, aquí se actualizaría en la base de datos
-  }
-
-  @override
   Future<List<RegistroDiario>> obtenerRegistrosPorRangoFechas(
     String ubicacionId, {
     DateTime? fechaInicio,
     DateTime? fechaFin,
   }) async {
-    print(fechaInicio);
-    print(fechaFin);
+   
 
     // Simular una llamada a la API
     final registrosDiarios = await getRegistroDiarioPorUbicacion(
@@ -329,7 +158,7 @@ class RegistroDiarioRepositoryRemote implements IRegistroDiarioRepository {
     );
 
     if (fechaInicio == null && fechaFin == null) {
-      return _registrosDemo;
+      return [];
     }
 
     return registrosDiarios.where((registro) {

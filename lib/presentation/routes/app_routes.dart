@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../screens/configurar_ubicacion_screen.dart';
+import '../screens/face_recognition_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/reconocimiento_facial_screen.dart';
 import '../screens/registro_asistencia_screen.dart';
@@ -13,6 +14,7 @@ class AppRoutes {
   static const String registroAsistencia = '/registro-asistencia';
   static const String main = '/';
   static const String reconocimientoFacial = '/reconocimiento-facial';
+  static const String faceRecognition = '/face-recognition';
 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
@@ -22,6 +24,7 @@ class AppRoutes {
       configurarUbicacion: (context) => const ConfigurarUbicacionScreen(),
       registroAsistencia: (context) => const RegistroAsistenciaScreen(),
       reconocimientoFacial: (context) => const ReconocimientoFacialScreen(),
+      faceRecognition: (context) => const FaceRecognitionScreen(),
     };
   }
 }

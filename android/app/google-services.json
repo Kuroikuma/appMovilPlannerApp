@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "737218955371",
+    "firebase_url": "https://medicall-ae221.firebaseio.com",
+    "project_id": "medicall-ae221",
+    "storage_bucket": "medicall-ae221.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:737218955371:android:28ea92992b18262bc7892e",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "737218955371-fgrbcfn4ukdh9q88kcibhh51e4cltpbg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4JekcyTzWTAtOzBzzOwWXBfo6_nR7QX8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "737218955371-fgrbcfn4ukdh9q88kcibhh51e4cltpbg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

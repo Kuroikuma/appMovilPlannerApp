@@ -6,6 +6,7 @@ import '../../../domain/entities.dart';
 import '../../../domain/models/reconocimiento_facial.dart';
 import '../../../domain/repositories/i_reconocimiento_facial_repository.dart';
 import '../../../domain/repositories/i_registro_diario_repository.dart';
+import '../../converters/tipo_registro_biometrico.dart';
 
 class ReconocimientoFacialRepository
     implements IReconocimientoFacialRepository {
@@ -17,22 +18,31 @@ class ReconocimientoFacialRepository
       id: '1',
       trabajadorId: '1',
       imagenUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
-      confianza: 0.95,
+      puntajeConfianza: 0.95,
       fechaCreacion: DateTime.now().subtract(const Duration(days: 30)),
+      metodoPruebaVida: TipoRegistroBiometrico.face,
+      pruebaVidaExitosa: true,
+      estado: true,
     ),
     ReconocimientoFacial(
       id: '2',
       trabajadorId: '2',
       imagenUrl: 'https://randomuser.me/api/portraits/women/2.jpg',
-      confianza: 0.92,
+      puntajeConfianza: 0.92,
       fechaCreacion: DateTime.now().subtract(const Duration(days: 25)),
+      metodoPruebaVida: TipoRegistroBiometrico.face,
+      pruebaVidaExitosa: false,
+      estado: false,
     ),
     ReconocimientoFacial(
       id: '3',
       trabajadorId: '3',
       imagenUrl: 'https://randomuser.me/api/portraits/men/3.jpg',
-      confianza: 0.88,
+      puntajeConfianza: 0.88,
       fechaCreacion: DateTime.now().subtract(const Duration(days: 20)),
+      metodoPruebaVida: TipoRegistroBiometrico.face,
+      pruebaVidaExitosa: true,
+      estado: true,
     ),
   ];
 
@@ -106,8 +116,11 @@ class ReconocimientoFacialRepository
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       trabajadorId: trabajadorId,
       imagenUrl: _obtenerUrlTrabajador(trabajadorId),
-      confianza: 0.9 + (Random().nextDouble() * 0.1), // Entre 0.9 y 1.0
+      puntajeConfianza: 0.9 + (Random().nextDouble() * 0.1), // Entre 0.9 y 1.0
       fechaCreacion: DateTime.now(),
+      metodoPruebaVida: TipoRegistroBiometrico.face,
+      pruebaVidaExitosa: true,
+      estado: true,
     );
 
     // En una implementación real, aquí se guardaría en la base de datos
@@ -135,18 +148,12 @@ class ReconocimientoFacialRepository
   }
 
   @override
-  Future<bool> registrarAsistenciaPorReconocimiento(String trabajadorId) async {
+  Future<bool> registrarAsistenciaPorReconocimiento(int equipoId, int horaAprobadaId) async {
     try {
-      // Convertir el ID de string a int
-      final equipoId = int.tryParse(trabajadorId);
-      if (equipoId == null) {
-        return false;
-      }
-
       // Registrar la entrada
-      await _registroDiarioRepository.registrarEntrada(
+      await _registroDiarioRepository.registrarAsistencia(
         equipoId,
-        registroBiometricoId: 'facial_${DateTime.now().millisecondsSinceEpoch}',
+        horaAprobadaId, 
       );
 
       return true;

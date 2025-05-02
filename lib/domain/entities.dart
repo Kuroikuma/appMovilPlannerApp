@@ -1,7 +1,7 @@
 // Enumerado para el método de prueba de vida
 import 'package:flutter/material.dart';
 
-enum MetodoPruebaVida { face, huella, otro }
+import '../data/converters/action_sync.dart';
 
 class Trabajador {
   final int id;
@@ -107,58 +107,10 @@ class Horario {
   });
 }
 
-class RegistroBiometrico {
-  final int id;
-  final String trabajadorId;
-  final String foto;
-  final Map<String, dynamic> datosBiometricos;
-  final bool pruebaVidaExitosa;
-  final MetodoPruebaVida metodoPruebaVida;
-  final double puntajeConfianza;
-  final bool estado;
-
-  RegistroBiometrico({
-    required this.id,
-    required this.trabajadorId,
-    required this.foto,
-    required this.datosBiometricos,
-    required this.pruebaVidaExitosa,
-    required this.metodoPruebaVida,
-    required this.puntajeConfianza,
-    this.estado = true,
-  });
-}
-
-class RegistroDiario {
-  final int id;
-  final String trabajadorId;
-  final String registroBiometricoId;
-  final DateTime fechaIngreso;
-  final TimeOfDay horaIngreso;
-  final DateTime? fechaSalida;
-  final TimeOfDay? horaSalida;
-  final bool ingresofonconizado;
-  final bool salidaforconizada;
-  final bool estado;
-
-  RegistroDiario({
-    required this.id,
-    required this.trabajadorId,
-    required this.registroBiometricoId,
-    required this.fechaIngreso,
-    required this.horaIngreso,
-    this.fechaSalida,
-    this.horaSalida,
-    required this.ingresofonconizado,
-    required this.salidaforconizada,
-    this.estado = true,
-  });
-}
-
 class SyncEntity {
   final int id;
   final String entityTableNameToSync;
-  final String action; // 'CREATE', 'UPDATE', 'DELETE'
+  final TipoAccionesSync action; // 'CREATE', 'UPDATE', 'DELETE'
   final String registerId;
   final DateTime timestamp;
   final bool isSynced;

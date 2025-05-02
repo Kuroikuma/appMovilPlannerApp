@@ -9,17 +9,41 @@ class TrabajadorLocalDataSource {
   TrabajadorLocalDataSource(this._db);
 
   Future<void> insertOrUpdateTrabajador(Trabajador trabajador) async {
-    await _db
-        .into(_db.trabajadores)
-        .insertOnConflictUpdate(
-          TrabajadoresCompanion(
-            nombre: Value(trabajador.nombre),
-            primerApellido: Value(trabajador.primerApellido),
-            segundoApellido: Value(trabajador.segundoApellido),
-            equipoId: Value(trabajador.equipoId),
-            estado: Value(trabajador.faceSync),
-          ),
-        );
+    try {
+      await _db
+          .into(_db.trabajadores)
+          .insertOnConflictUpdate(
+            TrabajadoresCompanion(
+              id: Value(trabajador.id),
+              nombre: Value(trabajador.nombre),
+              primerApellido: Value(trabajador.primerApellido),
+              segundoApellido: Value(trabajador.segundoApellido),
+              equipoId: Value(trabajador.equipoId),
+              estado: Value(trabajador.faceSync),
+              fotoUrl: Value(trabajador.fotoUrl),
+              cargo: Value(trabajador.cargo),
+              identificacion: Value(trabajador.identificacion),
+            ),
+          );
+    } catch (e) {
+      print('Error al insertar o actualizar trabajador: $e');
+    }
+  }
+
+  Future<Trabajador> getTrabajadorById(int id) async {
+    final result =
+        await (_db.select(_db.trabajadores)
+          ..where((tbl) => tbl.id.equals(id))).getSingle();
+
+    return TrabajadorMapper.fromDataModel(result);
+  }
+
+  Future<Trabajador> getTrabajadorByEquipoId(int trabajadorId) async {
+    final result =
+        await (_db.select(_db.trabajadores)
+          ..where((tbl) => tbl.id.equals(trabajadorId))).getSingle();
+
+    return TrabajadorMapper.fromDataModel(result);
   }
 
   Future<List<Trabajador>> getAllTrabajadores() async {

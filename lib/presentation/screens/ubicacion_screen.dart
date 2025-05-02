@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/use_case/horario_notifier.dart';
+import '../providers/use_case/reconocimiento_facial.dart';
+import '../providers/use_case/registro_diario.dart';
+import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../routes/app_routes.dart';
+import '../utils/notification_utils.dart';
+import '../widget/location_deletion_overlay.dart';
 
 class UbicacionScreen extends ConsumerStatefulWidget {
   const UbicacionScreen({super.key});
@@ -11,34 +18,99 @@ class UbicacionScreen extends ConsumerStatefulWidget {
 }
 
 class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
+  bool _isDeleting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Escuchar cambios en el estado de verificación para detectar cuando
+    // la ubicación ha sido eliminada
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initHorarios();
+      _initRegistrosDiarios();
+      _cargarTrabajadores();
+      _cargarRegistrosBiometricos();
+    });
+
+    ref.listenManual(ubicacionNotifierProvider, (previous, next) {
+      // Si estamos eliminando y el estado de verificación cambia a false,
+      // significa que la eliminación se completó
+      if (_isDeleting && next.isVerify == false && !next.isLoading) {
+        Navigator.of(
+          context,
+        ).pushReplacementNamed(AppRoutes.configurarUbicacion);
+      }
+    });
+  }
+
+  void _initHorarios() async {
+    final ubicacionState = ref.read(ubicacionNotifierProvider);
+    ref
+        .read(horarioNotifierProvider.notifier)
+        .cargarHorarios(ubicacionState.ubicacion!.ubicacionId.toString());
+  }
+
+  void _initRegistrosDiarios() async {
+    final ubicacionState = ref.read(ubicacionNotifierProvider);
+    ref
+        .read(registroDiarioNotifierProvider.notifier)
+        .cargarRegistros(ubicacionState.ubicacion!.ubicacionId.toString(), fecha: DateTime.now());
+  }
+
+    void _cargarTrabajadores() {
+    final ubicacionState = ref.read(ubicacionNotifierProvider);
+    if (ubicacionState.ubicacion != null &&
+        ubicacionState.ubicacion!.ubicacionId != null) {
+      ref
+          .read(trabajadorNotifierProvider.notifier)
+          .cargarTrabajadores(ubicacionState.ubicacion!.ubicacionId.toString());
+    } else {
+      NotificationUtils.showSnackBar(
+        context: context,
+        message: 'No se pudo obtener la ID de la ubicación',
+        isError: true,
+      );
+    }
+  }
+  void _cargarRegistrosBiometricos() {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).cargarRegistrosBiometricos();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final ubicacionState = ref.watch(ubicacionNotifierProvider);
-    final ubicacion = ubicacionState.ubicacion!;
     final ubicacionNotifier = ref.read(ubicacionNotifierProvider.notifier);
+    final ubicacion = ubicacionState.ubicacion!;
+
     final theme = Theme.of(context);
+
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor:
+            theme
+                .colorScheme
+                .primary, // Cambia el color de fondo de la barra de estado
+        statusBarIconBrightness:
+            Brightness.light, // Iconos claros si el fondo es oscuro
+      ),
+    );
+
+    if (_isDeleting) {
+      return LocationDeletionOverlay(isDeleting: _isDeleting);
+    }
 
     return Scaffold(
       body: Center(
-        child: Card(
-          elevation: 4,
-          margin: const EdgeInsets.only(top: 40),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+        child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Encabezado con estado de verificación
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
+                decoration: BoxDecoration(color: theme.colorScheme.primary),
                 child: Row(
                   children: [
                     Container(
@@ -135,11 +207,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                     // Información de la ubicación
                     _buildInfoCard(context, [
                       if (ubicacion.ubicacionId != null)
-                        _buildInfoRow(
-                          context,
-                          'Ubicación',
-                          ubicacion.ubicacionId.toString(),
-                        ),
+                        _buildInfoRow(context, 'Ubicación ID', ubicacion.ubicacionId.toString()),
                       if (ubicacion.nombre != null)
                         _buildInfoRow(context, 'Nombre', ubicacion.nombre!),
                     ]),
@@ -165,6 +233,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                   ],
                 ),
               ),
+              // Overlay de eliminación
             ],
           ),
         ),
@@ -485,12 +554,32 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
               child: const Text('Cancelar'),
             ),
             FilledButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                notifier.eliminarUbicacion();
-                Navigator.of(
-                  context,
-                ).pushReplacementNamed(AppRoutes.configurarUbicacion);
+
+                setState(() {
+                  _isDeleting = true;
+                });
+
+                try {
+                  // Eliminar ubicación
+                  await notifier.eliminarUbicacion();
+                } catch (e) {
+                  // Manejar error si es necesario
+                  if (mounted) {
+                    NotificationUtils.showSnackBar(
+                      context: context,
+                      message:
+                          'Error al eliminar la ubicación: ${e.toString()}',
+                      isError: true,
+                    );
+
+                    // Ocultar pantalla de carga en caso de error
+                    setState(() {
+                      _isDeleting = false;
+                    });
+                  }
+                }
               },
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,

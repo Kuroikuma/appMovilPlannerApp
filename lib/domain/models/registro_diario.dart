@@ -5,12 +5,13 @@ import '../../data/database.dart';
 class RegistroDiario {
   final int? id;
   final int equipoId;
-  final String? registroBiometricoId;
+  final String? reconocimientoFacialId;
   final DateTime fechaIngreso;
   final TimeOfDay horaIngreso;
   final DateTime? fechaSalida;
   final TimeOfDay? horaSalida;
   final bool estado;
+  final int horarioId;
 
   // Campos adicionales para la UI
   final String? nombreTrabajador;
@@ -20,7 +21,7 @@ class RegistroDiario {
   RegistroDiario({
     this.id,
     required this.equipoId,
-    this.registroBiometricoId,
+    this.reconocimientoFacialId,
     required this.fechaIngreso,
     required this.horaIngreso,
     this.fechaSalida,
@@ -29,6 +30,7 @@ class RegistroDiario {
     this.nombreTrabajador,
     this.fotoTrabajador,
     this.cargoTrabajador,
+    required this.horarioId,
   });
 
   // Verificar si el registro tiene salida registrada
@@ -72,7 +74,7 @@ class RegistroDiario {
   RegistroDiario copyWith({
     int? id,
     int? equipoId,
-    String? registroBiometricoId,
+    String? reconocimientoFacialId,
     DateTime? fechaIngreso,
     TimeOfDay? horaIngreso,
     DateTime? fechaSalida,
@@ -81,11 +83,13 @@ class RegistroDiario {
     String? nombreTrabajador,
     String? fotoTrabajador,
     String? cargoTrabajador,
+    int? horarioId,
   }) {
     return RegistroDiario(
       id: id ?? this.id,
       equipoId: equipoId ?? this.equipoId,
-      registroBiometricoId: registroBiometricoId ?? this.registroBiometricoId,
+      reconocimientoFacialId:
+          reconocimientoFacialId ?? this.reconocimientoFacialId,
       fechaIngreso: fechaIngreso ?? this.fechaIngreso,
       horaIngreso: horaIngreso ?? this.horaIngreso,
       fechaSalida: fechaSalida ?? this.fechaSalida,
@@ -94,6 +98,7 @@ class RegistroDiario {
       nombreTrabajador: nombreTrabajador ?? this.nombreTrabajador,
       fotoTrabajador: fotoTrabajador ?? this.fotoTrabajador,
       cargoTrabajador: cargoTrabajador ?? this.cargoTrabajador,
+      horarioId: horarioId ?? this.horarioId,
     );
   }
 
@@ -102,15 +107,15 @@ class RegistroDiario {
     return RegistroDiario(
       id: json['registroDiarioId'],
       equipoId: json['equipoId'],
-      registroBiometricoId: json['registroBiometricoId'] ?? '',
+      reconocimientoFacialId: json['reconocimientoFacialId'] ?? '',
       fechaIngreso: DateTime.parse(json['fechaIngreso']),
       horaIngreso: _timeFromString(json['horaIngreso']),
       fechaSalida:
-          json['fechaSalida'] != null
+          json['fechaSalida'] != "0001-01-01T00:00:00"
               ? DateTime.parse(json['fechaSalida'])
               : null,
       horaSalida:
-          json['horaSalida'] != null
+          json['horaSalida'] != "00:00:00"
               ? _timeFromString(json['horaSalida'])
               : null,
       estado: json['estado'] ?? true,
@@ -119,6 +124,7 @@ class RegistroDiario {
           json['trabajadorStringFile'] ??
           'https://randomuser.me/api/portraits/men/1.jpg',
       cargoTrabajador: json['puestoNombre'] ?? 'Desconocido',
+      horarioId: json['horaAprobadaId'],
     );
   }
 
@@ -126,7 +132,6 @@ class RegistroDiario {
     return RegistroDiario(
       id: data.id,
       equipoId: data.equipoId,
-      registroBiometricoId: data.registroBiometricoId,
       fechaIngreso: data.fechaIngreso,
       horaIngreso: data.horaIngreso,
       fechaSalida: data.fechaSalida,
@@ -135,6 +140,7 @@ class RegistroDiario {
       nombreTrabajador: data.nombreTrabajador,
       fotoTrabajador: data.fotoTrabajador,
       cargoTrabajador: data.cargoTrabajador,
+      horarioId: data.horarioId,
     );
   }
 
@@ -143,7 +149,7 @@ class RegistroDiario {
     return {
       'id': id,
       'equipoId': equipoId,
-      'registroBiometricoId': registroBiometricoId,
+      'reconocimientoFacialId': reconocimientoFacialId,
       'fechaIngreso': fechaIngreso.toIso8601String(),
       'horaIngreso': '${horaIngreso.hour}:${horaIngreso.minute}',
       'fechaSalida': fechaSalida?.toIso8601String(),
@@ -155,6 +161,7 @@ class RegistroDiario {
       'nombreTrabajador': nombreTrabajador,
       'fotoTrabajador': fotoTrabajador,
       'cargoTrabajador': cargoTrabajador,
+      'horarioId': horarioId,
     };
   }
 

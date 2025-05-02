@@ -10,6 +10,6 @@ abstract class IReconocimientoFacialRepository {
     String imagenBase64,
   );
   Future<Trabajador?> identificarTrabajador(String imagenBase64);
-  Future<bool> registrarAsistenciaPorReconocimiento(String trabajadorId);
+  Future<bool> registrarAsistenciaPorReconocimiento(int equipoId, int horaAprobadaId);
   Future<bool> eliminarReconocimientoFacial(String reconocimientoId);
 }

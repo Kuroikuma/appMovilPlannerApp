@@ -928,8 +928,26 @@ class $UbicacionesTable extends Ubicaciones
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _codigoUbicacionMeta = const VerificationMeta(
+    'codigoUbicacion',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, nombre, ubicacionId, estado];
+  late final GeneratedColumn<int> codigoUbicacion = GeneratedColumn<int>(
+    'codigo_ubicacion',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    nombre,
+    ubicacionId,
+    estado,
+    codigoUbicacion,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -972,6 +990,17 @@ class $UbicacionesTable extends Ubicaciones
         estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
       );
     }
+    if (data.containsKey('codigo_ubicacion')) {
+      context.handle(
+        _codigoUbicacionMeta,
+        codigoUbicacion.isAcceptableOrUnknown(
+          data['codigo_ubicacion']!,
+          _codigoUbicacionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_codigoUbicacionMeta);
+    }
     return context;
   }
 
@@ -1001,6 +1030,11 @@ class $UbicacionesTable extends Ubicaciones
             DriftSqlType.bool,
             data['${effectivePrefix}estado'],
           )!,
+      codigoUbicacion:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}codigo_ubicacion'],
+          )!,
     );
   }
 
@@ -1015,11 +1049,13 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
   final String nombre;
   final int ubicacionId;
   final bool estado;
+  final int codigoUbicacion;
   const Ubicacione({
     required this.id,
     required this.nombre,
     required this.ubicacionId,
     required this.estado,
+    required this.codigoUbicacion,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1028,6 +1064,7 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
     map['nombre'] = Variable<String>(nombre);
     map['ubicacion_id'] = Variable<int>(ubicacionId);
     map['estado'] = Variable<bool>(estado);
+    map['codigo_ubicacion'] = Variable<int>(codigoUbicacion);
     return map;
   }
 
@@ -1037,6 +1074,7 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
       nombre: Value(nombre),
       ubicacionId: Value(ubicacionId),
       estado: Value(estado),
+      codigoUbicacion: Value(codigoUbicacion),
     );
   }
 
@@ -1050,6 +1088,7 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
       nombre: serializer.fromJson<String>(json['nombre']),
       ubicacionId: serializer.fromJson<int>(json['ubicacionId']),
       estado: serializer.fromJson<bool>(json['estado']),
+      codigoUbicacion: serializer.fromJson<int>(json['codigoUbicacion']),
     );
   }
   @override
@@ -1060,6 +1099,7 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
       'nombre': serializer.toJson<String>(nombre),
       'ubicacionId': serializer.toJson<int>(ubicacionId),
       'estado': serializer.toJson<bool>(estado),
+      'codigoUbicacion': serializer.toJson<int>(codigoUbicacion),
     };
   }
 
@@ -1068,11 +1108,13 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
     String? nombre,
     int? ubicacionId,
     bool? estado,
+    int? codigoUbicacion,
   }) => Ubicacione(
     id: id ?? this.id,
     nombre: nombre ?? this.nombre,
     ubicacionId: ubicacionId ?? this.ubicacionId,
     estado: estado ?? this.estado,
+    codigoUbicacion: codigoUbicacion ?? this.codigoUbicacion,
   );
   Ubicacione copyWithCompanion(UbicacionesCompanion data) {
     return Ubicacione(
@@ -1081,6 +1123,10 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
       ubicacionId:
           data.ubicacionId.present ? data.ubicacionId.value : this.ubicacionId,
       estado: data.estado.present ? data.estado.value : this.estado,
+      codigoUbicacion:
+          data.codigoUbicacion.present
+              ? data.codigoUbicacion.value
+              : this.codigoUbicacion,
     );
   }
 
@@ -1090,13 +1136,15 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
           ..write('id: $id, ')
           ..write('nombre: $nombre, ')
           ..write('ubicacionId: $ubicacionId, ')
-          ..write('estado: $estado')
+          ..write('estado: $estado, ')
+          ..write('codigoUbicacion: $codigoUbicacion')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, nombre, ubicacionId, estado);
+  int get hashCode =>
+      Object.hash(id, nombre, ubicacionId, estado, codigoUbicacion);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1104,7 +1152,8 @@ class Ubicacione extends DataClass implements Insertable<Ubicacione> {
           other.id == this.id &&
           other.nombre == this.nombre &&
           other.ubicacionId == this.ubicacionId &&
-          other.estado == this.estado);
+          other.estado == this.estado &&
+          other.codigoUbicacion == this.codigoUbicacion);
 }
 
 class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
@@ -1112,12 +1161,14 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
   final Value<String> nombre;
   final Value<int> ubicacionId;
   final Value<bool> estado;
+  final Value<int> codigoUbicacion;
   final Value<int> rowid;
   const UbicacionesCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
     this.ubicacionId = const Value.absent(),
     this.estado = const Value.absent(),
+    this.codigoUbicacion = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UbicacionesCompanion.insert({
@@ -1125,15 +1176,18 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
     required String nombre,
     required int ubicacionId,
     this.estado = const Value.absent(),
+    required int codigoUbicacion,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        nombre = Value(nombre),
-       ubicacionId = Value(ubicacionId);
+       ubicacionId = Value(ubicacionId),
+       codigoUbicacion = Value(codigoUbicacion);
   static Insertable<Ubicacione> custom({
     Expression<String>? id,
     Expression<String>? nombre,
     Expression<int>? ubicacionId,
     Expression<bool>? estado,
+    Expression<int>? codigoUbicacion,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1141,6 +1195,7 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
       if (nombre != null) 'nombre': nombre,
       if (ubicacionId != null) 'ubicacion_id': ubicacionId,
       if (estado != null) 'estado': estado,
+      if (codigoUbicacion != null) 'codigo_ubicacion': codigoUbicacion,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1150,6 +1205,7 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
     Value<String>? nombre,
     Value<int>? ubicacionId,
     Value<bool>? estado,
+    Value<int>? codigoUbicacion,
     Value<int>? rowid,
   }) {
     return UbicacionesCompanion(
@@ -1157,6 +1213,7 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
       nombre: nombre ?? this.nombre,
       ubicacionId: ubicacionId ?? this.ubicacionId,
       estado: estado ?? this.estado,
+      codigoUbicacion: codigoUbicacion ?? this.codigoUbicacion,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1176,6 +1233,9 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
     if (estado.present) {
       map['estado'] = Variable<bool>(estado.value);
     }
+    if (codigoUbicacion.present) {
+      map['codigo_ubicacion'] = Variable<int>(codigoUbicacion.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1189,6 +1249,7 @@ class UbicacionesCompanion extends UpdateCompanion<Ubicacione> {
           ..write('nombre: $nombre, ')
           ..write('ubicacionId: $ubicacionId, ')
           ..write('estado: $estado, ')
+          ..write('codigoUbicacion: $codigoUbicacion, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1617,16 +1678,410 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
   $RegistrosBiometricosTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
     'id',
     aliasedName,
     false,
-    hasAutoIncrement: true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _trabajadorIdMeta = const VerificationMeta(
+    'trabajadorId',
+  );
+  @override
+  late final GeneratedColumn<int> trabajadorId = GeneratedColumn<int>(
+    'trabajador_id',
+    aliasedName,
+    false,
     type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES trabajadores (id)',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<double>, String>
+  datosBiometricos = GeneratedColumn<String>(
+    'datos_biometricos',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<List<double>>(
+    $RegistrosBiometricosTable.$converterdatosBiometricos,
+  );
+  static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
+  @override
+  late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
+    'estado',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
+      'CHECK ("estado" IN (0, 1))',
     ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<TipoRegistroBiometrico, String>
+  tipoRegistro = GeneratedColumn<String>(
+    'tipo_registro',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<TipoRegistroBiometrico>(
+    $RegistrosBiometricosTable.$convertertipoRegistro,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    trabajadorId,
+    datosBiometricos,
+    estado,
+    tipoRegistro,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'registros_biometricos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RegistrosBiometrico> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('trabajador_id')) {
+      context.handle(
+        _trabajadorIdMeta,
+        trabajadorId.isAcceptableOrUnknown(
+          data['trabajador_id']!,
+          _trabajadorIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_trabajadorIdMeta);
+    }
+    if (data.containsKey('estado')) {
+      context.handle(
+        _estadoMeta,
+        estado.isAcceptableOrUnknown(data['estado']!, _estadoMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  RegistrosBiometrico map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RegistrosBiometrico(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
+      trabajadorId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}trabajador_id'],
+          )!,
+      datosBiometricos: $RegistrosBiometricosTable.$converterdatosBiometricos
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}datos_biometricos'],
+            )!,
+          ),
+      estado:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}estado'],
+          )!,
+      tipoRegistro: $RegistrosBiometricosTable.$convertertipoRegistro.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}tipo_registro'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $RegistrosBiometricosTable createAlias(String alias) {
+    return $RegistrosBiometricosTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<double>, String> $converterdatosBiometricos =
+      const JsonConverterEmbedding();
+  static TypeConverter<TipoRegistroBiometrico, String> $convertertipoRegistro =
+      const TipoRegistroBiometricoConverter();
+}
+
+class RegistrosBiometrico extends DataClass
+    implements Insertable<RegistrosBiometrico> {
+  final String id;
+  final int trabajadorId;
+  final List<double> datosBiometricos;
+  final bool estado;
+  final TipoRegistroBiometrico tipoRegistro;
+  const RegistrosBiometrico({
+    required this.id,
+    required this.trabajadorId,
+    required this.datosBiometricos,
+    required this.estado,
+    required this.tipoRegistro,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['trabajador_id'] = Variable<int>(trabajadorId);
+    {
+      map['datos_biometricos'] = Variable<String>(
+        $RegistrosBiometricosTable.$converterdatosBiometricos.toSql(
+          datosBiometricos,
+        ),
+      );
+    }
+    map['estado'] = Variable<bool>(estado);
+    {
+      map['tipo_registro'] = Variable<String>(
+        $RegistrosBiometricosTable.$convertertipoRegistro.toSql(tipoRegistro),
+      );
+    }
+    return map;
+  }
+
+  RegistrosBiometricosCompanion toCompanion(bool nullToAbsent) {
+    return RegistrosBiometricosCompanion(
+      id: Value(id),
+      trabajadorId: Value(trabajadorId),
+      datosBiometricos: Value(datosBiometricos),
+      estado: Value(estado),
+      tipoRegistro: Value(tipoRegistro),
+    );
+  }
+
+  factory RegistrosBiometrico.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RegistrosBiometrico(
+      id: serializer.fromJson<String>(json['id']),
+      trabajadorId: serializer.fromJson<int>(json['trabajadorId']),
+      datosBiometricos: serializer.fromJson<List<double>>(
+        json['datosBiometricos'],
+      ),
+      estado: serializer.fromJson<bool>(json['estado']),
+      tipoRegistro: serializer.fromJson<TipoRegistroBiometrico>(
+        json['tipoRegistro'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'trabajadorId': serializer.toJson<int>(trabajadorId),
+      'datosBiometricos': serializer.toJson<List<double>>(datosBiometricos),
+      'estado': serializer.toJson<bool>(estado),
+      'tipoRegistro': serializer.toJson<TipoRegistroBiometrico>(tipoRegistro),
+    };
+  }
+
+  RegistrosBiometrico copyWith({
+    String? id,
+    int? trabajadorId,
+    List<double>? datosBiometricos,
+    bool? estado,
+    TipoRegistroBiometrico? tipoRegistro,
+  }) => RegistrosBiometrico(
+    id: id ?? this.id,
+    trabajadorId: trabajadorId ?? this.trabajadorId,
+    datosBiometricos: datosBiometricos ?? this.datosBiometricos,
+    estado: estado ?? this.estado,
+    tipoRegistro: tipoRegistro ?? this.tipoRegistro,
+  );
+  RegistrosBiometrico copyWithCompanion(RegistrosBiometricosCompanion data) {
+    return RegistrosBiometrico(
+      id: data.id.present ? data.id.value : this.id,
+      trabajadorId:
+          data.trabajadorId.present
+              ? data.trabajadorId.value
+              : this.trabajadorId,
+      datosBiometricos:
+          data.datosBiometricos.present
+              ? data.datosBiometricos.value
+              : this.datosBiometricos,
+      estado: data.estado.present ? data.estado.value : this.estado,
+      tipoRegistro:
+          data.tipoRegistro.present
+              ? data.tipoRegistro.value
+              : this.tipoRegistro,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RegistrosBiometrico(')
+          ..write('id: $id, ')
+          ..write('trabajadorId: $trabajadorId, ')
+          ..write('datosBiometricos: $datosBiometricos, ')
+          ..write('estado: $estado, ')
+          ..write('tipoRegistro: $tipoRegistro')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, trabajadorId, datosBiometricos, estado, tipoRegistro);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RegistrosBiometrico &&
+          other.id == this.id &&
+          other.trabajadorId == this.trabajadorId &&
+          other.datosBiometricos == this.datosBiometricos &&
+          other.estado == this.estado &&
+          other.tipoRegistro == this.tipoRegistro);
+}
+
+class RegistrosBiometricosCompanion
+    extends UpdateCompanion<RegistrosBiometrico> {
+  final Value<String> id;
+  final Value<int> trabajadorId;
+  final Value<List<double>> datosBiometricos;
+  final Value<bool> estado;
+  final Value<TipoRegistroBiometrico> tipoRegistro;
+  final Value<int> rowid;
+  const RegistrosBiometricosCompanion({
+    this.id = const Value.absent(),
+    this.trabajadorId = const Value.absent(),
+    this.datosBiometricos = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.tipoRegistro = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RegistrosBiometricosCompanion.insert({
+    required String id,
+    required int trabajadorId,
+    required List<double> datosBiometricos,
+    this.estado = const Value.absent(),
+    required TipoRegistroBiometrico tipoRegistro,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       trabajadorId = Value(trabajadorId),
+       datosBiometricos = Value(datosBiometricos),
+       tipoRegistro = Value(tipoRegistro);
+  static Insertable<RegistrosBiometrico> custom({
+    Expression<String>? id,
+    Expression<int>? trabajadorId,
+    Expression<String>? datosBiometricos,
+    Expression<bool>? estado,
+    Expression<String>? tipoRegistro,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (trabajadorId != null) 'trabajador_id': trabajadorId,
+      if (datosBiometricos != null) 'datos_biometricos': datosBiometricos,
+      if (estado != null) 'estado': estado,
+      if (tipoRegistro != null) 'tipo_registro': tipoRegistro,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RegistrosBiometricosCompanion copyWith({
+    Value<String>? id,
+    Value<int>? trabajadorId,
+    Value<List<double>>? datosBiometricos,
+    Value<bool>? estado,
+    Value<TipoRegistroBiometrico>? tipoRegistro,
+    Value<int>? rowid,
+  }) {
+    return RegistrosBiometricosCompanion(
+      id: id ?? this.id,
+      trabajadorId: trabajadorId ?? this.trabajadorId,
+      datosBiometricos: datosBiometricos ?? this.datosBiometricos,
+      estado: estado ?? this.estado,
+      tipoRegistro: tipoRegistro ?? this.tipoRegistro,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (trabajadorId.present) {
+      map['trabajador_id'] = Variable<int>(trabajadorId.value);
+    }
+    if (datosBiometricos.present) {
+      map['datos_biometricos'] = Variable<String>(
+        $RegistrosBiometricosTable.$converterdatosBiometricos.toSql(
+          datosBiometricos.value,
+        ),
+      );
+    }
+    if (estado.present) {
+      map['estado'] = Variable<bool>(estado.value);
+    }
+    if (tipoRegistro.present) {
+      map['tipo_registro'] = Variable<String>(
+        $RegistrosBiometricosTable.$convertertipoRegistro.toSql(
+          tipoRegistro.value,
+        ),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RegistrosBiometricosCompanion(')
+          ..write('id: $id, ')
+          ..write('trabajadorId: $trabajadorId, ')
+          ..write('datosBiometricos: $datosBiometricos, ')
+          ..write('estado: $estado, ')
+          ..write('tipoRegistro: $tipoRegistro, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReconocimientosFacialTable extends ReconocimientosFacial
+    with TableInfo<$ReconocimientosFacialTable, ReconocimientosFacialData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReconocimientosFacialTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _trabajadorIdMeta = const VerificationMeta(
     'trabajadorId',
@@ -1642,25 +2097,16 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
       'REFERENCES trabajadores (equipo_id)',
     ),
   );
-  static const VerificationMeta _fotoMeta = const VerificationMeta('foto');
-  @override
-  late final GeneratedColumn<String> foto = GeneratedColumn<String>(
-    'foto',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
+  static const VerificationMeta _imagenUrlMeta = const VerificationMeta(
+    'imagenUrl',
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
-  datosBiometricos = GeneratedColumn<String>(
-    'datos_biometricos',
+  late final GeneratedColumn<String> imagenUrl = GeneratedColumn<String>(
+    'imagen_url',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-  ).withConverter<Map<String, dynamic>>(
-    $RegistrosBiometricosTable.$converterdatosBiometricos,
   );
   static const VerificationMeta _pruebaVidaExitosaMeta = const VerificationMeta(
     'pruebaVidaExitosa',
@@ -1677,15 +2123,15 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
     ),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<MetodoPruebaVida, String>
+  late final GeneratedColumnWithTypeConverter<TipoRegistroBiometrico, String>
   metodoPruebaVida = GeneratedColumn<String>(
     'metodo_prueba_vida',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-  ).withConverter<MetodoPruebaVida>(
-    $RegistrosBiometricosTable.$convertermetodoPruebaVida,
+  ).withConverter<TipoRegistroBiometrico>(
+    $ReconocimientosFacialTable.$convertermetodoPruebaVida,
   );
   static const VerificationMeta _puntajeConfianzaMeta = const VerificationMeta(
     'puntajeConfianza',
@@ -1698,6 +2144,17 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<DateTime, String> fechaCreacion =
+      GeneratedColumn<String>(
+        'fecha_creacion',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<DateTime>(
+        $ReconocimientosFacialTable.$converterfechaCreacion,
+      );
   static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
   @override
   late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
@@ -1715,27 +2172,29 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
   List<GeneratedColumn> get $columns => [
     id,
     trabajadorId,
-    foto,
-    datosBiometricos,
+    imagenUrl,
     pruebaVidaExitosa,
     metodoPruebaVida,
     puntajeConfianza,
+    fechaCreacion,
     estado,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'registros_biometricos';
+  static const String $name = 'reconocimientos_facial';
   @override
   VerificationContext validateIntegrity(
-    Insertable<RegistrosBiometrico> instance, {
+    Insertable<ReconocimientosFacialData> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('trabajador_id')) {
       context.handle(
@@ -1748,13 +2207,13 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
     } else if (isInserting) {
       context.missing(_trabajadorIdMeta);
     }
-    if (data.containsKey('foto')) {
+    if (data.containsKey('imagen_url')) {
       context.handle(
-        _fotoMeta,
-        foto.isAcceptableOrUnknown(data['foto']!, _fotoMeta),
+        _imagenUrlMeta,
+        imagenUrl.isAcceptableOrUnknown(data['imagen_url']!, _imagenUrlMeta),
       );
     } else if (isInserting) {
-      context.missing(_fotoMeta);
+      context.missing(_imagenUrlMeta);
     }
     if (data.containsKey('prueba_vida_exitosa')) {
       context.handle(
@@ -1788,14 +2247,17 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => const {};
   @override
-  RegistrosBiometrico map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ReconocimientosFacialData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return RegistrosBiometrico(
+    return ReconocimientosFacialData(
       id:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
+            DriftSqlType.string,
             data['${effectivePrefix}id'],
           )!,
       trabajadorId:
@@ -1803,24 +2265,17 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
             DriftSqlType.int,
             data['${effectivePrefix}trabajador_id'],
           )!,
-      foto:
+      imagenUrl:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
-            data['${effectivePrefix}foto'],
+            data['${effectivePrefix}imagen_url'],
           )!,
-      datosBiometricos: $RegistrosBiometricosTable.$converterdatosBiometricos
-          .fromSql(
-            attachedDatabase.typeMapping.read(
-              DriftSqlType.string,
-              data['${effectivePrefix}datos_biometricos'],
-            )!,
-          ),
       pruebaVidaExitosa:
           attachedDatabase.typeMapping.read(
             DriftSqlType.bool,
             data['${effectivePrefix}prueba_vida_exitosa'],
           )!,
-      metodoPruebaVida: $RegistrosBiometricosTable.$convertermetodoPruebaVida
+      metodoPruebaVida: $ReconocimientosFacialTable.$convertermetodoPruebaVida
           .fromSql(
             attachedDatabase.typeMapping.read(
               DriftSqlType.string,
@@ -1832,6 +2287,13 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
             DriftSqlType.double,
             data['${effectivePrefix}puntaje_confianza'],
           )!,
+      fechaCreacion: $ReconocimientosFacialTable.$converterfechaCreacion
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}fecha_creacion'],
+            )!,
+          ),
       estado:
           attachedDatabase.typeMapping.read(
             DriftSqlType.bool,
@@ -1841,92 +2303,90 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
   }
 
   @override
-  $RegistrosBiometricosTable createAlias(String alias) {
-    return $RegistrosBiometricosTable(attachedDatabase, alias);
+  $ReconocimientosFacialTable createAlias(String alias) {
+    return $ReconocimientosFacialTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<Map<String, dynamic>, String>
-  $converterdatosBiometricos = const JsonConverter();
-  static TypeConverter<MetodoPruebaVida, String> $convertermetodoPruebaVida =
-      const MetodoPruebaVidaConverter();
+  static TypeConverter<TipoRegistroBiometrico, String>
+  $convertermetodoPruebaVida = const TipoRegistroBiometricoConverter();
+  static TypeConverter<DateTime, String> $converterfechaCreacion =
+      const DateConverter();
 }
 
-class RegistrosBiometrico extends DataClass
-    implements Insertable<RegistrosBiometrico> {
-  final int id;
+class ReconocimientosFacialData extends DataClass
+    implements Insertable<ReconocimientosFacialData> {
+  final String id;
   final int trabajadorId;
-  final String foto;
-  final Map<String, dynamic> datosBiometricos;
+  final String imagenUrl;
   final bool pruebaVidaExitosa;
-  final MetodoPruebaVida metodoPruebaVida;
+  final TipoRegistroBiometrico metodoPruebaVida;
   final double puntajeConfianza;
+  final DateTime fechaCreacion;
   final bool estado;
-  const RegistrosBiometrico({
+  const ReconocimientosFacialData({
     required this.id,
     required this.trabajadorId,
-    required this.foto,
-    required this.datosBiometricos,
+    required this.imagenUrl,
     required this.pruebaVidaExitosa,
     required this.metodoPruebaVida,
     required this.puntajeConfianza,
+    required this.fechaCreacion,
     required this.estado,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
+    map['id'] = Variable<String>(id);
     map['trabajador_id'] = Variable<int>(trabajadorId);
-    map['foto'] = Variable<String>(foto);
-    {
-      map['datos_biometricos'] = Variable<String>(
-        $RegistrosBiometricosTable.$converterdatosBiometricos.toSql(
-          datosBiometricos,
-        ),
-      );
-    }
+    map['imagen_url'] = Variable<String>(imagenUrl);
     map['prueba_vida_exitosa'] = Variable<bool>(pruebaVidaExitosa);
     {
       map['metodo_prueba_vida'] = Variable<String>(
-        $RegistrosBiometricosTable.$convertermetodoPruebaVida.toSql(
+        $ReconocimientosFacialTable.$convertermetodoPruebaVida.toSql(
           metodoPruebaVida,
         ),
       );
     }
     map['puntaje_confianza'] = Variable<double>(puntajeConfianza);
+    {
+      map['fecha_creacion'] = Variable<String>(
+        $ReconocimientosFacialTable.$converterfechaCreacion.toSql(
+          fechaCreacion,
+        ),
+      );
+    }
     map['estado'] = Variable<bool>(estado);
     return map;
   }
 
-  RegistrosBiometricosCompanion toCompanion(bool nullToAbsent) {
-    return RegistrosBiometricosCompanion(
+  ReconocimientosFacialCompanion toCompanion(bool nullToAbsent) {
+    return ReconocimientosFacialCompanion(
       id: Value(id),
       trabajadorId: Value(trabajadorId),
-      foto: Value(foto),
-      datosBiometricos: Value(datosBiometricos),
+      imagenUrl: Value(imagenUrl),
       pruebaVidaExitosa: Value(pruebaVidaExitosa),
       metodoPruebaVida: Value(metodoPruebaVida),
       puntajeConfianza: Value(puntajeConfianza),
+      fechaCreacion: Value(fechaCreacion),
       estado: Value(estado),
     );
   }
 
-  factory RegistrosBiometrico.fromJson(
+  factory ReconocimientosFacialData.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return RegistrosBiometrico(
-      id: serializer.fromJson<int>(json['id']),
+    return ReconocimientosFacialData(
+      id: serializer.fromJson<String>(json['id']),
       trabajadorId: serializer.fromJson<int>(json['trabajadorId']),
-      foto: serializer.fromJson<String>(json['foto']),
-      datosBiometricos: serializer.fromJson<Map<String, dynamic>>(
-        json['datosBiometricos'],
-      ),
+      imagenUrl: serializer.fromJson<String>(json['imagenUrl']),
       pruebaVidaExitosa: serializer.fromJson<bool>(json['pruebaVidaExitosa']),
-      metodoPruebaVida: serializer.fromJson<MetodoPruebaVida>(
+      metodoPruebaVida: serializer.fromJson<TipoRegistroBiometrico>(
         json['metodoPruebaVida'],
       ),
       puntajeConfianza: serializer.fromJson<double>(json['puntajeConfianza']),
+      fechaCreacion: serializer.fromJson<DateTime>(json['fechaCreacion']),
       estado: serializer.fromJson<bool>(json['estado']),
     );
   }
@@ -1934,50 +2394,48 @@ class RegistrosBiometrico extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
+      'id': serializer.toJson<String>(id),
       'trabajadorId': serializer.toJson<int>(trabajadorId),
-      'foto': serializer.toJson<String>(foto),
-      'datosBiometricos': serializer.toJson<Map<String, dynamic>>(
-        datosBiometricos,
-      ),
+      'imagenUrl': serializer.toJson<String>(imagenUrl),
       'pruebaVidaExitosa': serializer.toJson<bool>(pruebaVidaExitosa),
-      'metodoPruebaVida': serializer.toJson<MetodoPruebaVida>(metodoPruebaVida),
+      'metodoPruebaVida': serializer.toJson<TipoRegistroBiometrico>(
+        metodoPruebaVida,
+      ),
       'puntajeConfianza': serializer.toJson<double>(puntajeConfianza),
+      'fechaCreacion': serializer.toJson<DateTime>(fechaCreacion),
       'estado': serializer.toJson<bool>(estado),
     };
   }
 
-  RegistrosBiometrico copyWith({
-    int? id,
+  ReconocimientosFacialData copyWith({
+    String? id,
     int? trabajadorId,
-    String? foto,
-    Map<String, dynamic>? datosBiometricos,
+    String? imagenUrl,
     bool? pruebaVidaExitosa,
-    MetodoPruebaVida? metodoPruebaVida,
+    TipoRegistroBiometrico? metodoPruebaVida,
     double? puntajeConfianza,
+    DateTime? fechaCreacion,
     bool? estado,
-  }) => RegistrosBiometrico(
+  }) => ReconocimientosFacialData(
     id: id ?? this.id,
     trabajadorId: trabajadorId ?? this.trabajadorId,
-    foto: foto ?? this.foto,
-    datosBiometricos: datosBiometricos ?? this.datosBiometricos,
+    imagenUrl: imagenUrl ?? this.imagenUrl,
     pruebaVidaExitosa: pruebaVidaExitosa ?? this.pruebaVidaExitosa,
     metodoPruebaVida: metodoPruebaVida ?? this.metodoPruebaVida,
     puntajeConfianza: puntajeConfianza ?? this.puntajeConfianza,
+    fechaCreacion: fechaCreacion ?? this.fechaCreacion,
     estado: estado ?? this.estado,
   );
-  RegistrosBiometrico copyWithCompanion(RegistrosBiometricosCompanion data) {
-    return RegistrosBiometrico(
+  ReconocimientosFacialData copyWithCompanion(
+    ReconocimientosFacialCompanion data,
+  ) {
+    return ReconocimientosFacialData(
       id: data.id.present ? data.id.value : this.id,
       trabajadorId:
           data.trabajadorId.present
               ? data.trabajadorId.value
               : this.trabajadorId,
-      foto: data.foto.present ? data.foto.value : this.foto,
-      datosBiometricos:
-          data.datosBiometricos.present
-              ? data.datosBiometricos.value
-              : this.datosBiometricos,
+      imagenUrl: data.imagenUrl.present ? data.imagenUrl.value : this.imagenUrl,
       pruebaVidaExitosa:
           data.pruebaVidaExitosa.present
               ? data.pruebaVidaExitosa.value
@@ -1990,20 +2448,24 @@ class RegistrosBiometrico extends DataClass
           data.puntajeConfianza.present
               ? data.puntajeConfianza.value
               : this.puntajeConfianza,
+      fechaCreacion:
+          data.fechaCreacion.present
+              ? data.fechaCreacion.value
+              : this.fechaCreacion,
       estado: data.estado.present ? data.estado.value : this.estado,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('RegistrosBiometrico(')
+    return (StringBuffer('ReconocimientosFacialData(')
           ..write('id: $id, ')
           ..write('trabajadorId: $trabajadorId, ')
-          ..write('foto: $foto, ')
-          ..write('datosBiometricos: $datosBiometricos, ')
+          ..write('imagenUrl: $imagenUrl, ')
           ..write('pruebaVidaExitosa: $pruebaVidaExitosa, ')
           ..write('metodoPruebaVida: $metodoPruebaVida, ')
           ..write('puntajeConfianza: $puntajeConfianza, ')
+          ..write('fechaCreacion: $fechaCreacion, ')
           ..write('estado: $estado')
           ..write(')'))
         .toString();
@@ -2013,103 +2475,111 @@ class RegistrosBiometrico extends DataClass
   int get hashCode => Object.hash(
     id,
     trabajadorId,
-    foto,
-    datosBiometricos,
+    imagenUrl,
     pruebaVidaExitosa,
     metodoPruebaVida,
     puntajeConfianza,
+    fechaCreacion,
     estado,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is RegistrosBiometrico &&
+      (other is ReconocimientosFacialData &&
           other.id == this.id &&
           other.trabajadorId == this.trabajadorId &&
-          other.foto == this.foto &&
-          other.datosBiometricos == this.datosBiometricos &&
+          other.imagenUrl == this.imagenUrl &&
           other.pruebaVidaExitosa == this.pruebaVidaExitosa &&
           other.metodoPruebaVida == this.metodoPruebaVida &&
           other.puntajeConfianza == this.puntajeConfianza &&
+          other.fechaCreacion == this.fechaCreacion &&
           other.estado == this.estado);
 }
 
-class RegistrosBiometricosCompanion
-    extends UpdateCompanion<RegistrosBiometrico> {
-  final Value<int> id;
+class ReconocimientosFacialCompanion
+    extends UpdateCompanion<ReconocimientosFacialData> {
+  final Value<String> id;
   final Value<int> trabajadorId;
-  final Value<String> foto;
-  final Value<Map<String, dynamic>> datosBiometricos;
+  final Value<String> imagenUrl;
   final Value<bool> pruebaVidaExitosa;
-  final Value<MetodoPruebaVida> metodoPruebaVida;
+  final Value<TipoRegistroBiometrico> metodoPruebaVida;
   final Value<double> puntajeConfianza;
+  final Value<DateTime> fechaCreacion;
   final Value<bool> estado;
-  const RegistrosBiometricosCompanion({
+  final Value<int> rowid;
+  const ReconocimientosFacialCompanion({
     this.id = const Value.absent(),
     this.trabajadorId = const Value.absent(),
-    this.foto = const Value.absent(),
-    this.datosBiometricos = const Value.absent(),
+    this.imagenUrl = const Value.absent(),
     this.pruebaVidaExitosa = const Value.absent(),
     this.metodoPruebaVida = const Value.absent(),
     this.puntajeConfianza = const Value.absent(),
+    this.fechaCreacion = const Value.absent(),
     this.estado = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
-  RegistrosBiometricosCompanion.insert({
-    this.id = const Value.absent(),
+  ReconocimientosFacialCompanion.insert({
+    required String id,
     required int trabajadorId,
-    required String foto,
-    required Map<String, dynamic> datosBiometricos,
+    required String imagenUrl,
     required bool pruebaVidaExitosa,
-    required MetodoPruebaVida metodoPruebaVida,
+    required TipoRegistroBiometrico metodoPruebaVida,
     required double puntajeConfianza,
+    required DateTime fechaCreacion,
     this.estado = const Value.absent(),
-  }) : trabajadorId = Value(trabajadorId),
-       foto = Value(foto),
-       datosBiometricos = Value(datosBiometricos),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       trabajadorId = Value(trabajadorId),
+       imagenUrl = Value(imagenUrl),
        pruebaVidaExitosa = Value(pruebaVidaExitosa),
        metodoPruebaVida = Value(metodoPruebaVida),
-       puntajeConfianza = Value(puntajeConfianza);
-  static Insertable<RegistrosBiometrico> custom({
-    Expression<int>? id,
+       puntajeConfianza = Value(puntajeConfianza),
+       fechaCreacion = Value(fechaCreacion);
+  static Insertable<ReconocimientosFacialData> custom({
+    Expression<String>? id,
     Expression<int>? trabajadorId,
-    Expression<String>? foto,
-    Expression<String>? datosBiometricos,
+    Expression<String>? imagenUrl,
     Expression<bool>? pruebaVidaExitosa,
     Expression<String>? metodoPruebaVida,
     Expression<double>? puntajeConfianza,
+    Expression<String>? fechaCreacion,
     Expression<bool>? estado,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (trabajadorId != null) 'trabajador_id': trabajadorId,
-      if (foto != null) 'foto': foto,
-      if (datosBiometricos != null) 'datos_biometricos': datosBiometricos,
+      if (imagenUrl != null) 'imagen_url': imagenUrl,
       if (pruebaVidaExitosa != null) 'prueba_vida_exitosa': pruebaVidaExitosa,
       if (metodoPruebaVida != null) 'metodo_prueba_vida': metodoPruebaVida,
       if (puntajeConfianza != null) 'puntaje_confianza': puntajeConfianza,
+      if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
       if (estado != null) 'estado': estado,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  RegistrosBiometricosCompanion copyWith({
-    Value<int>? id,
+  ReconocimientosFacialCompanion copyWith({
+    Value<String>? id,
     Value<int>? trabajadorId,
-    Value<String>? foto,
-    Value<Map<String, dynamic>>? datosBiometricos,
+    Value<String>? imagenUrl,
     Value<bool>? pruebaVidaExitosa,
-    Value<MetodoPruebaVida>? metodoPruebaVida,
+    Value<TipoRegistroBiometrico>? metodoPruebaVida,
     Value<double>? puntajeConfianza,
+    Value<DateTime>? fechaCreacion,
     Value<bool>? estado,
+    Value<int>? rowid,
   }) {
-    return RegistrosBiometricosCompanion(
+    return ReconocimientosFacialCompanion(
       id: id ?? this.id,
       trabajadorId: trabajadorId ?? this.trabajadorId,
-      foto: foto ?? this.foto,
-      datosBiometricos: datosBiometricos ?? this.datosBiometricos,
+      imagenUrl: imagenUrl ?? this.imagenUrl,
       pruebaVidaExitosa: pruebaVidaExitosa ?? this.pruebaVidaExitosa,
       metodoPruebaVida: metodoPruebaVida ?? this.metodoPruebaVida,
       puntajeConfianza: puntajeConfianza ?? this.puntajeConfianza,
+      fechaCreacion: fechaCreacion ?? this.fechaCreacion,
       estado: estado ?? this.estado,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -2117,27 +2587,20 @@ class RegistrosBiometricosCompanion
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (trabajadorId.present) {
       map['trabajador_id'] = Variable<int>(trabajadorId.value);
     }
-    if (foto.present) {
-      map['foto'] = Variable<String>(foto.value);
-    }
-    if (datosBiometricos.present) {
-      map['datos_biometricos'] = Variable<String>(
-        $RegistrosBiometricosTable.$converterdatosBiometricos.toSql(
-          datosBiometricos.value,
-        ),
-      );
+    if (imagenUrl.present) {
+      map['imagen_url'] = Variable<String>(imagenUrl.value);
     }
     if (pruebaVidaExitosa.present) {
       map['prueba_vida_exitosa'] = Variable<bool>(pruebaVidaExitosa.value);
     }
     if (metodoPruebaVida.present) {
       map['metodo_prueba_vida'] = Variable<String>(
-        $RegistrosBiometricosTable.$convertermetodoPruebaVida.toSql(
+        $ReconocimientosFacialTable.$convertermetodoPruebaVida.toSql(
           metodoPruebaVida.value,
         ),
       );
@@ -2145,23 +2608,34 @@ class RegistrosBiometricosCompanion
     if (puntajeConfianza.present) {
       map['puntaje_confianza'] = Variable<double>(puntajeConfianza.value);
     }
+    if (fechaCreacion.present) {
+      map['fecha_creacion'] = Variable<String>(
+        $ReconocimientosFacialTable.$converterfechaCreacion.toSql(
+          fechaCreacion.value,
+        ),
+      );
+    }
     if (estado.present) {
       map['estado'] = Variable<bool>(estado.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
     }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('RegistrosBiometricosCompanion(')
+    return (StringBuffer('ReconocimientosFacialCompanion(')
           ..write('id: $id, ')
           ..write('trabajadorId: $trabajadorId, ')
-          ..write('foto: $foto, ')
-          ..write('datosBiometricos: $datosBiometricos, ')
+          ..write('imagenUrl: $imagenUrl, ')
           ..write('pruebaVidaExitosa: $pruebaVidaExitosa, ')
           ..write('metodoPruebaVida: $metodoPruebaVida, ')
           ..write('puntajeConfianza: $puntajeConfianza, ')
-          ..write('estado: $estado')
+          ..write('fechaCreacion: $fechaCreacion, ')
+          ..write('estado: $estado, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -2200,18 +2674,18 @@ class $RegistrosDiariosTable extends RegistrosDiarios
       'REFERENCES trabajadores (equipo_id)',
     ),
   );
-  static const VerificationMeta _registroBiometricoIdMeta =
-      const VerificationMeta('registroBiometricoId');
+  static const VerificationMeta _reconocimientoFacialIdMeta =
+      const VerificationMeta('reconocimientoFacialId');
   @override
-  late final GeneratedColumn<String> registroBiometricoId =
+  late final GeneratedColumn<String> reconocimientoFacialId =
       GeneratedColumn<String>(
-        'registro_biometrico_id',
+        'reconocimiento_facial_id',
         aliasedName,
         true,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
         defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES registros_biometricos (id)',
+          'REFERENCES reconocimientos_facial (id)',
         ),
       );
   @override
@@ -2233,23 +2707,23 @@ class $RegistrosDiariosTable extends RegistrosDiarios
         requiredDuringInsert: true,
       ).withConverter<TimeOfDay>($RegistrosDiariosTable.$converterhoraIngreso);
   @override
-  late final GeneratedColumnWithTypeConverter<DateTime, String> fechaSalida =
+  late final GeneratedColumnWithTypeConverter<DateTime?, String> fechaSalida =
       GeneratedColumn<String>(
         'fecha_salida',
         aliasedName,
-        false,
+        true,
         type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<DateTime>($RegistrosDiariosTable.$converterfechaSalida);
+        requiredDuringInsert: false,
+      ).withConverter<DateTime?>($RegistrosDiariosTable.$converterfechaSalidan);
   @override
-  late final GeneratedColumnWithTypeConverter<TimeOfDay, String> horaSalida =
+  late final GeneratedColumnWithTypeConverter<TimeOfDay?, String> horaSalida =
       GeneratedColumn<String>(
         'hora_salida',
         aliasedName,
-        false,
+        true,
         type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<TimeOfDay>($RegistrosDiariosTable.$converterhoraSalida);
+        requiredDuringInsert: false,
+      ).withConverter<TimeOfDay?>($RegistrosDiariosTable.$converterhoraSalidan);
   static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
   @override
   late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
@@ -2296,11 +2770,25 @@ class $RegistrosDiariosTable extends RegistrosDiarios
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _horarioIdMeta = const VerificationMeta(
+    'horarioId',
+  );
+  @override
+  late final GeneratedColumn<int> horarioId = GeneratedColumn<int>(
+    'horario_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES horarios (id)',
+    ),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     equipoId,
-    registroBiometricoId,
+    reconocimientoFacialId,
     fechaIngreso,
     horaIngreso,
     fechaSalida,
@@ -2309,6 +2797,7 @@ class $RegistrosDiariosTable extends RegistrosDiarios
     nombreTrabajador,
     fotoTrabajador,
     cargoTrabajador,
+    horarioId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2333,12 +2822,12 @@ class $RegistrosDiariosTable extends RegistrosDiarios
     } else if (isInserting) {
       context.missing(_equipoIdMeta);
     }
-    if (data.containsKey('registro_biometrico_id')) {
+    if (data.containsKey('reconocimiento_facial_id')) {
       context.handle(
-        _registroBiometricoIdMeta,
-        registroBiometricoId.isAcceptableOrUnknown(
-          data['registro_biometrico_id']!,
-          _registroBiometricoIdMeta,
+        _reconocimientoFacialIdMeta,
+        reconocimientoFacialId.isAcceptableOrUnknown(
+          data['reconocimiento_facial_id']!,
+          _reconocimientoFacialIdMeta,
         ),
       );
     }
@@ -2381,6 +2870,14 @@ class $RegistrosDiariosTable extends RegistrosDiarios
     } else if (isInserting) {
       context.missing(_cargoTrabajadorMeta);
     }
+    if (data.containsKey('horario_id')) {
+      context.handle(
+        _horarioIdMeta,
+        horarioId.isAcceptableOrUnknown(data['horario_id']!, _horarioIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_horarioIdMeta);
+    }
     return context;
   }
 
@@ -2400,9 +2897,9 @@ class $RegistrosDiariosTable extends RegistrosDiarios
             DriftSqlType.int,
             data['${effectivePrefix}equipo_id'],
           )!,
-      registroBiometricoId: attachedDatabase.typeMapping.read(
+      reconocimientoFacialId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}registro_biometrico_id'],
+        data['${effectivePrefix}reconocimiento_facial_id'],
       ),
       fechaIngreso: $RegistrosDiariosTable.$converterfechaIngreso.fromSql(
         attachedDatabase.typeMapping.read(
@@ -2416,17 +2913,17 @@ class $RegistrosDiariosTable extends RegistrosDiarios
           data['${effectivePrefix}hora_ingreso'],
         )!,
       ),
-      fechaSalida: $RegistrosDiariosTable.$converterfechaSalida.fromSql(
+      fechaSalida: $RegistrosDiariosTable.$converterfechaSalidan.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}fecha_salida'],
-        )!,
+        ),
       ),
-      horaSalida: $RegistrosDiariosTable.$converterhoraSalida.fromSql(
+      horaSalida: $RegistrosDiariosTable.$converterhoraSalidan.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}hora_salida'],
-        )!,
+        ),
       ),
       estado:
           attachedDatabase.typeMapping.read(
@@ -2448,6 +2945,11 @@ class $RegistrosDiariosTable extends RegistrosDiarios
             DriftSqlType.string,
             data['${effectivePrefix}cargo_trabajador'],
           )!,
+      horarioId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}horario_id'],
+          )!,
     );
   }
 
@@ -2462,42 +2964,50 @@ class $RegistrosDiariosTable extends RegistrosDiarios
       const TimeOfDayConverter();
   static TypeConverter<DateTime, String> $converterfechaSalida =
       const DateConverter();
+  static TypeConverter<DateTime?, String?> $converterfechaSalidan =
+      NullAwareTypeConverter.wrap($converterfechaSalida);
   static TypeConverter<TimeOfDay, String> $converterhoraSalida =
       const TimeOfDayConverter();
+  static TypeConverter<TimeOfDay?, String?> $converterhoraSalidan =
+      NullAwareTypeConverter.wrap($converterhoraSalida);
 }
 
 class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
   final int id;
   final int equipoId;
-  final String? registroBiometricoId;
+  final String? reconocimientoFacialId;
   final DateTime fechaIngreso;
   final TimeOfDay horaIngreso;
-  final DateTime fechaSalida;
-  final TimeOfDay horaSalida;
+  final DateTime? fechaSalida;
+  final TimeOfDay? horaSalida;
   final bool estado;
   final String nombreTrabajador;
   final String fotoTrabajador;
   final String cargoTrabajador;
+  final int horarioId;
   const RegistrosDiario({
     required this.id,
     required this.equipoId,
-    this.registroBiometricoId,
+    this.reconocimientoFacialId,
     required this.fechaIngreso,
     required this.horaIngreso,
-    required this.fechaSalida,
-    required this.horaSalida,
+    this.fechaSalida,
+    this.horaSalida,
     required this.estado,
     required this.nombreTrabajador,
     required this.fotoTrabajador,
     required this.cargoTrabajador,
+    required this.horarioId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['equipo_id'] = Variable<int>(equipoId);
-    if (!nullToAbsent || registroBiometricoId != null) {
-      map['registro_biometrico_id'] = Variable<String>(registroBiometricoId);
+    if (!nullToAbsent || reconocimientoFacialId != null) {
+      map['reconocimiento_facial_id'] = Variable<String>(
+        reconocimientoFacialId,
+      );
     }
     {
       map['fecha_ingreso'] = Variable<String>(
@@ -2509,20 +3019,21 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
         $RegistrosDiariosTable.$converterhoraIngreso.toSql(horaIngreso),
       );
     }
-    {
+    if (!nullToAbsent || fechaSalida != null) {
       map['fecha_salida'] = Variable<String>(
-        $RegistrosDiariosTable.$converterfechaSalida.toSql(fechaSalida),
+        $RegistrosDiariosTable.$converterfechaSalidan.toSql(fechaSalida),
       );
     }
-    {
+    if (!nullToAbsent || horaSalida != null) {
       map['hora_salida'] = Variable<String>(
-        $RegistrosDiariosTable.$converterhoraSalida.toSql(horaSalida),
+        $RegistrosDiariosTable.$converterhoraSalidan.toSql(horaSalida),
       );
     }
     map['estado'] = Variable<bool>(estado);
     map['nombre_trabajador'] = Variable<String>(nombreTrabajador);
     map['foto_trabajador'] = Variable<String>(fotoTrabajador);
     map['cargo_trabajador'] = Variable<String>(cargoTrabajador);
+    map['horario_id'] = Variable<int>(horarioId);
     return map;
   }
 
@@ -2530,18 +3041,25 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     return RegistrosDiariosCompanion(
       id: Value(id),
       equipoId: Value(equipoId),
-      registroBiometricoId:
-          registroBiometricoId == null && nullToAbsent
+      reconocimientoFacialId:
+          reconocimientoFacialId == null && nullToAbsent
               ? const Value.absent()
-              : Value(registroBiometricoId),
+              : Value(reconocimientoFacialId),
       fechaIngreso: Value(fechaIngreso),
       horaIngreso: Value(horaIngreso),
-      fechaSalida: Value(fechaSalida),
-      horaSalida: Value(horaSalida),
+      fechaSalida:
+          fechaSalida == null && nullToAbsent
+              ? const Value.absent()
+              : Value(fechaSalida),
+      horaSalida:
+          horaSalida == null && nullToAbsent
+              ? const Value.absent()
+              : Value(horaSalida),
       estado: Value(estado),
       nombreTrabajador: Value(nombreTrabajador),
       fotoTrabajador: Value(fotoTrabajador),
       cargoTrabajador: Value(cargoTrabajador),
+      horarioId: Value(horarioId),
     );
   }
 
@@ -2553,17 +3071,18 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     return RegistrosDiario(
       id: serializer.fromJson<int>(json['id']),
       equipoId: serializer.fromJson<int>(json['equipoId']),
-      registroBiometricoId: serializer.fromJson<String?>(
-        json['registroBiometricoId'],
+      reconocimientoFacialId: serializer.fromJson<String?>(
+        json['reconocimientoFacialId'],
       ),
       fechaIngreso: serializer.fromJson<DateTime>(json['fechaIngreso']),
       horaIngreso: serializer.fromJson<TimeOfDay>(json['horaIngreso']),
-      fechaSalida: serializer.fromJson<DateTime>(json['fechaSalida']),
-      horaSalida: serializer.fromJson<TimeOfDay>(json['horaSalida']),
+      fechaSalida: serializer.fromJson<DateTime?>(json['fechaSalida']),
+      horaSalida: serializer.fromJson<TimeOfDay?>(json['horaSalida']),
       estado: serializer.fromJson<bool>(json['estado']),
       nombreTrabajador: serializer.fromJson<String>(json['nombreTrabajador']),
       fotoTrabajador: serializer.fromJson<String>(json['fotoTrabajador']),
       cargoTrabajador: serializer.fromJson<String>(json['cargoTrabajador']),
+      horarioId: serializer.fromJson<int>(json['horarioId']),
     );
   }
   @override
@@ -2572,54 +3091,59 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'equipoId': serializer.toJson<int>(equipoId),
-      'registroBiometricoId': serializer.toJson<String?>(registroBiometricoId),
+      'reconocimientoFacialId': serializer.toJson<String?>(
+        reconocimientoFacialId,
+      ),
       'fechaIngreso': serializer.toJson<DateTime>(fechaIngreso),
       'horaIngreso': serializer.toJson<TimeOfDay>(horaIngreso),
-      'fechaSalida': serializer.toJson<DateTime>(fechaSalida),
-      'horaSalida': serializer.toJson<TimeOfDay>(horaSalida),
+      'fechaSalida': serializer.toJson<DateTime?>(fechaSalida),
+      'horaSalida': serializer.toJson<TimeOfDay?>(horaSalida),
       'estado': serializer.toJson<bool>(estado),
       'nombreTrabajador': serializer.toJson<String>(nombreTrabajador),
       'fotoTrabajador': serializer.toJson<String>(fotoTrabajador),
       'cargoTrabajador': serializer.toJson<String>(cargoTrabajador),
+      'horarioId': serializer.toJson<int>(horarioId),
     };
   }
 
   RegistrosDiario copyWith({
     int? id,
     int? equipoId,
-    Value<String?> registroBiometricoId = const Value.absent(),
+    Value<String?> reconocimientoFacialId = const Value.absent(),
     DateTime? fechaIngreso,
     TimeOfDay? horaIngreso,
-    DateTime? fechaSalida,
-    TimeOfDay? horaSalida,
+    Value<DateTime?> fechaSalida = const Value.absent(),
+    Value<TimeOfDay?> horaSalida = const Value.absent(),
     bool? estado,
     String? nombreTrabajador,
     String? fotoTrabajador,
     String? cargoTrabajador,
+    int? horarioId,
   }) => RegistrosDiario(
     id: id ?? this.id,
     equipoId: equipoId ?? this.equipoId,
-    registroBiometricoId:
-        registroBiometricoId.present
-            ? registroBiometricoId.value
-            : this.registroBiometricoId,
+    reconocimientoFacialId:
+        reconocimientoFacialId.present
+            ? reconocimientoFacialId.value
+            : this.reconocimientoFacialId,
     fechaIngreso: fechaIngreso ?? this.fechaIngreso,
     horaIngreso: horaIngreso ?? this.horaIngreso,
-    fechaSalida: fechaSalida ?? this.fechaSalida,
-    horaSalida: horaSalida ?? this.horaSalida,
+    fechaSalida: fechaSalida.present ? fechaSalida.value : this.fechaSalida,
+    horaSalida: horaSalida.present ? horaSalida.value : this.horaSalida,
     estado: estado ?? this.estado,
     nombreTrabajador: nombreTrabajador ?? this.nombreTrabajador,
     fotoTrabajador: fotoTrabajador ?? this.fotoTrabajador,
     cargoTrabajador: cargoTrabajador ?? this.cargoTrabajador,
+    horarioId: horarioId ?? this.horarioId,
   );
   RegistrosDiario copyWithCompanion(RegistrosDiariosCompanion data) {
     return RegistrosDiario(
       id: data.id.present ? data.id.value : this.id,
       equipoId: data.equipoId.present ? data.equipoId.value : this.equipoId,
-      registroBiometricoId:
-          data.registroBiometricoId.present
-              ? data.registroBiometricoId.value
-              : this.registroBiometricoId,
+      reconocimientoFacialId:
+          data.reconocimientoFacialId.present
+              ? data.reconocimientoFacialId.value
+              : this.reconocimientoFacialId,
       fechaIngreso:
           data.fechaIngreso.present
               ? data.fechaIngreso.value
@@ -2643,6 +3167,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
           data.cargoTrabajador.present
               ? data.cargoTrabajador.value
               : this.cargoTrabajador,
+      horarioId: data.horarioId.present ? data.horarioId.value : this.horarioId,
     );
   }
 
@@ -2651,7 +3176,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     return (StringBuffer('RegistrosDiario(')
           ..write('id: $id, ')
           ..write('equipoId: $equipoId, ')
-          ..write('registroBiometricoId: $registroBiometricoId, ')
+          ..write('reconocimientoFacialId: $reconocimientoFacialId, ')
           ..write('fechaIngreso: $fechaIngreso, ')
           ..write('horaIngreso: $horaIngreso, ')
           ..write('fechaSalida: $fechaSalida, ')
@@ -2659,7 +3184,8 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
           ..write('estado: $estado, ')
           ..write('nombreTrabajador: $nombreTrabajador, ')
           ..write('fotoTrabajador: $fotoTrabajador, ')
-          ..write('cargoTrabajador: $cargoTrabajador')
+          ..write('cargoTrabajador: $cargoTrabajador, ')
+          ..write('horarioId: $horarioId')
           ..write(')'))
         .toString();
   }
@@ -2668,7 +3194,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
   int get hashCode => Object.hash(
     id,
     equipoId,
-    registroBiometricoId,
+    reconocimientoFacialId,
     fechaIngreso,
     horaIngreso,
     fechaSalida,
@@ -2677,6 +3203,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     nombreTrabajador,
     fotoTrabajador,
     cargoTrabajador,
+    horarioId,
   );
   @override
   bool operator ==(Object other) =>
@@ -2684,7 +3211,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
       (other is RegistrosDiario &&
           other.id == this.id &&
           other.equipoId == this.equipoId &&
-          other.registroBiometricoId == this.registroBiometricoId &&
+          other.reconocimientoFacialId == this.reconocimientoFacialId &&
           other.fechaIngreso == this.fechaIngreso &&
           other.horaIngreso == this.horaIngreso &&
           other.fechaSalida == this.fechaSalida &&
@@ -2692,25 +3219,27 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
           other.estado == this.estado &&
           other.nombreTrabajador == this.nombreTrabajador &&
           other.fotoTrabajador == this.fotoTrabajador &&
-          other.cargoTrabajador == this.cargoTrabajador);
+          other.cargoTrabajador == this.cargoTrabajador &&
+          other.horarioId == this.horarioId);
 }
 
 class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
   final Value<int> id;
   final Value<int> equipoId;
-  final Value<String?> registroBiometricoId;
+  final Value<String?> reconocimientoFacialId;
   final Value<DateTime> fechaIngreso;
   final Value<TimeOfDay> horaIngreso;
-  final Value<DateTime> fechaSalida;
-  final Value<TimeOfDay> horaSalida;
+  final Value<DateTime?> fechaSalida;
+  final Value<TimeOfDay?> horaSalida;
   final Value<bool> estado;
   final Value<String> nombreTrabajador;
   final Value<String> fotoTrabajador;
   final Value<String> cargoTrabajador;
+  final Value<int> horarioId;
   const RegistrosDiariosCompanion({
     this.id = const Value.absent(),
     this.equipoId = const Value.absent(),
-    this.registroBiometricoId = const Value.absent(),
+    this.reconocimientoFacialId = const Value.absent(),
     this.fechaIngreso = const Value.absent(),
     this.horaIngreso = const Value.absent(),
     this.fechaSalida = const Value.absent(),
@@ -2719,31 +3248,32 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     this.nombreTrabajador = const Value.absent(),
     this.fotoTrabajador = const Value.absent(),
     this.cargoTrabajador = const Value.absent(),
+    this.horarioId = const Value.absent(),
   });
   RegistrosDiariosCompanion.insert({
     this.id = const Value.absent(),
     required int equipoId,
-    this.registroBiometricoId = const Value.absent(),
+    this.reconocimientoFacialId = const Value.absent(),
     required DateTime fechaIngreso,
     required TimeOfDay horaIngreso,
-    required DateTime fechaSalida,
-    required TimeOfDay horaSalida,
+    this.fechaSalida = const Value.absent(),
+    this.horaSalida = const Value.absent(),
     this.estado = const Value.absent(),
     required String nombreTrabajador,
     required String fotoTrabajador,
     required String cargoTrabajador,
+    required int horarioId,
   }) : equipoId = Value(equipoId),
        fechaIngreso = Value(fechaIngreso),
        horaIngreso = Value(horaIngreso),
-       fechaSalida = Value(fechaSalida),
-       horaSalida = Value(horaSalida),
        nombreTrabajador = Value(nombreTrabajador),
        fotoTrabajador = Value(fotoTrabajador),
-       cargoTrabajador = Value(cargoTrabajador);
+       cargoTrabajador = Value(cargoTrabajador),
+       horarioId = Value(horarioId);
   static Insertable<RegistrosDiario> custom({
     Expression<int>? id,
     Expression<int>? equipoId,
-    Expression<String>? registroBiometricoId,
+    Expression<String>? reconocimientoFacialId,
     Expression<String>? fechaIngreso,
     Expression<String>? horaIngreso,
     Expression<String>? fechaSalida,
@@ -2752,12 +3282,13 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     Expression<String>? nombreTrabajador,
     Expression<String>? fotoTrabajador,
     Expression<String>? cargoTrabajador,
+    Expression<int>? horarioId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (equipoId != null) 'equipo_id': equipoId,
-      if (registroBiometricoId != null)
-        'registro_biometrico_id': registroBiometricoId,
+      if (reconocimientoFacialId != null)
+        'reconocimiento_facial_id': reconocimientoFacialId,
       if (fechaIngreso != null) 'fecha_ingreso': fechaIngreso,
       if (horaIngreso != null) 'hora_ingreso': horaIngreso,
       if (fechaSalida != null) 'fecha_salida': fechaSalida,
@@ -2766,26 +3297,29 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
       if (nombreTrabajador != null) 'nombre_trabajador': nombreTrabajador,
       if (fotoTrabajador != null) 'foto_trabajador': fotoTrabajador,
       if (cargoTrabajador != null) 'cargo_trabajador': cargoTrabajador,
+      if (horarioId != null) 'horario_id': horarioId,
     });
   }
 
   RegistrosDiariosCompanion copyWith({
     Value<int>? id,
     Value<int>? equipoId,
-    Value<String?>? registroBiometricoId,
+    Value<String?>? reconocimientoFacialId,
     Value<DateTime>? fechaIngreso,
     Value<TimeOfDay>? horaIngreso,
-    Value<DateTime>? fechaSalida,
-    Value<TimeOfDay>? horaSalida,
+    Value<DateTime?>? fechaSalida,
+    Value<TimeOfDay?>? horaSalida,
     Value<bool>? estado,
     Value<String>? nombreTrabajador,
     Value<String>? fotoTrabajador,
     Value<String>? cargoTrabajador,
+    Value<int>? horarioId,
   }) {
     return RegistrosDiariosCompanion(
       id: id ?? this.id,
       equipoId: equipoId ?? this.equipoId,
-      registroBiometricoId: registroBiometricoId ?? this.registroBiometricoId,
+      reconocimientoFacialId:
+          reconocimientoFacialId ?? this.reconocimientoFacialId,
       fechaIngreso: fechaIngreso ?? this.fechaIngreso,
       horaIngreso: horaIngreso ?? this.horaIngreso,
       fechaSalida: fechaSalida ?? this.fechaSalida,
@@ -2794,6 +3328,7 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
       nombreTrabajador: nombreTrabajador ?? this.nombreTrabajador,
       fotoTrabajador: fotoTrabajador ?? this.fotoTrabajador,
       cargoTrabajador: cargoTrabajador ?? this.cargoTrabajador,
+      horarioId: horarioId ?? this.horarioId,
     );
   }
 
@@ -2806,9 +3341,9 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     if (equipoId.present) {
       map['equipo_id'] = Variable<int>(equipoId.value);
     }
-    if (registroBiometricoId.present) {
-      map['registro_biometrico_id'] = Variable<String>(
-        registroBiometricoId.value,
+    if (reconocimientoFacialId.present) {
+      map['reconocimiento_facial_id'] = Variable<String>(
+        reconocimientoFacialId.value,
       );
     }
     if (fechaIngreso.present) {
@@ -2823,12 +3358,12 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     }
     if (fechaSalida.present) {
       map['fecha_salida'] = Variable<String>(
-        $RegistrosDiariosTable.$converterfechaSalida.toSql(fechaSalida.value),
+        $RegistrosDiariosTable.$converterfechaSalidan.toSql(fechaSalida.value),
       );
     }
     if (horaSalida.present) {
       map['hora_salida'] = Variable<String>(
-        $RegistrosDiariosTable.$converterhoraSalida.toSql(horaSalida.value),
+        $RegistrosDiariosTable.$converterhoraSalidan.toSql(horaSalida.value),
       );
     }
     if (estado.present) {
@@ -2843,6 +3378,9 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     if (cargoTrabajador.present) {
       map['cargo_trabajador'] = Variable<String>(cargoTrabajador.value);
     }
+    if (horarioId.present) {
+      map['horario_id'] = Variable<int>(horarioId.value);
+    }
     return map;
   }
 
@@ -2851,7 +3389,7 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     return (StringBuffer('RegistrosDiariosCompanion(')
           ..write('id: $id, ')
           ..write('equipoId: $equipoId, ')
-          ..write('registroBiometricoId: $registroBiometricoId, ')
+          ..write('reconocimientoFacialId: $reconocimientoFacialId, ')
           ..write('fechaIngreso: $fechaIngreso, ')
           ..write('horaIngreso: $horaIngreso, ')
           ..write('fechaSalida: $fechaSalida, ')
@@ -2859,7 +3397,8 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
           ..write('estado: $estado, ')
           ..write('nombreTrabajador: $nombreTrabajador, ')
           ..write('fotoTrabajador: $fotoTrabajador, ')
-          ..write('cargoTrabajador: $cargoTrabajador')
+          ..write('cargoTrabajador: $cargoTrabajador, ')
+          ..write('horarioId: $horarioId')
           ..write(')'))
         .toString();
   }
@@ -2895,15 +3434,15 @@ class $SyncsEntitysTable extends SyncsEntitys
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
-  static const VerificationMeta _actionMeta = const VerificationMeta('action');
   @override
-  late final GeneratedColumn<String> action = GeneratedColumn<String>(
-    'action',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<TipoAccionesSync, String> action =
+      GeneratedColumn<String>(
+        'action',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<TipoAccionesSync>($SyncsEntitysTable.$converteraction);
   static const VerificationMeta _registerIdMeta = const VerificationMeta(
     'registerId',
   );
@@ -2987,14 +3526,6 @@ class $SyncsEntitysTable extends SyncsEntitys
     } else if (isInserting) {
       context.missing(_entityTableNameToSyncMeta);
     }
-    if (data.containsKey('action')) {
-      context.handle(
-        _actionMeta,
-        action.isAcceptableOrUnknown(data['action']!, _actionMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_actionMeta);
-    }
     if (data.containsKey('register_id')) {
       context.handle(
         _registerIdMeta,
@@ -3034,11 +3565,12 @@ class $SyncsEntitysTable extends SyncsEntitys
             DriftSqlType.string,
             data['${effectivePrefix}entity_table_name_to_sync'],
           )!,
-      action:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}action'],
-          )!,
+      action: $SyncsEntitysTable.$converteraction.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}action'],
+        )!,
+      ),
       registerId:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
@@ -3068,6 +3600,8 @@ class $SyncsEntitysTable extends SyncsEntitys
     return $SyncsEntitysTable(attachedDatabase, alias);
   }
 
+  static TypeConverter<TipoAccionesSync, String> $converteraction =
+      const TipoAccionesSyncConverter();
   static TypeConverter<Map<String, dynamic>, String> $converterdata =
       const JsonConverter();
 }
@@ -3075,7 +3609,7 @@ class $SyncsEntitysTable extends SyncsEntitys
 class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
   final int id;
   final String entityTableNameToSync;
-  final String action;
+  final TipoAccionesSync action;
   final String registerId;
   final DateTime timestamp;
   final bool isSynced;
@@ -3094,7 +3628,11 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['entity_table_name_to_sync'] = Variable<String>(entityTableNameToSync);
-    map['action'] = Variable<String>(action);
+    {
+      map['action'] = Variable<String>(
+        $SyncsEntitysTable.$converteraction.toSql(action),
+      );
+    }
     map['register_id'] = Variable<String>(registerId);
     map['timestamp'] = Variable<DateTime>(timestamp);
     map['is_synced'] = Variable<bool>(isSynced);
@@ -3128,7 +3666,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
       entityTableNameToSync: serializer.fromJson<String>(
         json['entityTableNameToSync'],
       ),
-      action: serializer.fromJson<String>(json['action']),
+      action: serializer.fromJson<TipoAccionesSync>(json['action']),
       registerId: serializer.fromJson<String>(json['registerId']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
@@ -3141,7 +3679,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'entityTableNameToSync': serializer.toJson<String>(entityTableNameToSync),
-      'action': serializer.toJson<String>(action),
+      'action': serializer.toJson<TipoAccionesSync>(action),
       'registerId': serializer.toJson<String>(registerId),
       'timestamp': serializer.toJson<DateTime>(timestamp),
       'isSynced': serializer.toJson<bool>(isSynced),
@@ -3152,7 +3690,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
   SyncsEntity copyWith({
     int? id,
     String? entityTableNameToSync,
-    String? action,
+    TipoAccionesSync? action,
     String? registerId,
     DateTime? timestamp,
     bool? isSynced,
@@ -3222,7 +3760,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
 class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
   final Value<int> id;
   final Value<String> entityTableNameToSync;
-  final Value<String> action;
+  final Value<TipoAccionesSync> action;
   final Value<String> registerId;
   final Value<DateTime> timestamp;
   final Value<bool> isSynced;
@@ -3239,7 +3777,7 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
   SyncsEntitysCompanion.insert({
     this.id = const Value.absent(),
     required String entityTableNameToSync,
-    required String action,
+    required TipoAccionesSync action,
     required String registerId,
     this.timestamp = const Value.absent(),
     this.isSynced = const Value.absent(),
@@ -3272,7 +3810,7 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
   SyncsEntitysCompanion copyWith({
     Value<int>? id,
     Value<String>? entityTableNameToSync,
-    Value<String>? action,
+    Value<TipoAccionesSync>? action,
     Value<String>? registerId,
     Value<DateTime>? timestamp,
     Value<bool>? isSynced,
@@ -3302,7 +3840,9 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
       );
     }
     if (action.present) {
-      map['action'] = Variable<String>(action.value);
+      map['action'] = Variable<String>(
+        $SyncsEntitysTable.$converteraction.toSql(action.value),
+      );
     }
     if (registerId.present) {
       map['register_id'] = Variable<String>(registerId.value);
@@ -3346,6 +3886,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $HorariosTable horarios = $HorariosTable(this);
   late final $RegistrosBiometricosTable registrosBiometricos =
       $RegistrosBiometricosTable(this);
+  late final $ReconocimientosFacialTable reconocimientosFacial =
+      $ReconocimientosFacialTable(this);
   late final $RegistrosDiariosTable registrosDiarios = $RegistrosDiariosTable(
     this,
   );
@@ -3360,6 +3902,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ubicaciones,
     horarios,
     registrosBiometricos,
+    reconocimientosFacial,
     registrosDiarios,
     syncsEntitys,
   ];
@@ -3404,7 +3947,7 @@ final class $$TrabajadoresTableReferences
       MultiTypedResultKey.fromTable(
         db.registrosBiometricos,
         aliasName: $_aliasNameGenerator(
-          db.trabajadores.equipoId,
+          db.trabajadores.id,
           db.registrosBiometricos.trabajadorId,
         ),
       );
@@ -3414,12 +3957,40 @@ final class $$TrabajadoresTableReferences
     final manager = $$RegistrosBiometricosTableTableManager(
       $_db,
       $_db.registrosBiometricos,
+    ).filter((f) => f.trabajadorId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _registrosBiometricosRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ReconocimientosFacialTable,
+    List<ReconocimientosFacialData>
+  >
+  _reconocimientosFacialRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.reconocimientosFacial,
+        aliasName: $_aliasNameGenerator(
+          db.trabajadores.equipoId,
+          db.reconocimientosFacial.trabajadorId,
+        ),
+      );
+
+  $$ReconocimientosFacialTableProcessedTableManager
+  get reconocimientosFacialRefs {
+    final manager = $$ReconocimientosFacialTableTableManager(
+      $_db,
+      $_db.reconocimientosFacial,
     ).filter(
       (f) => f.trabajadorId.equipoId.sqlEquals($_itemColumn<int>('equipo_id')!),
     );
 
     final cache = $_typedResult.readTableOrNull(
-      _registrosBiometricosRefsTable($_db),
+      _reconocimientosFacialRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -3516,7 +4087,7 @@ class $$TrabajadoresTableFilterComposer
   ) {
     final $$RegistrosBiometricosTableFilterComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.equipoId,
+      getCurrentColumn: (t) => t.id,
       referencedTable: $db.registrosBiometricos,
       getReferencedColumn: (t) => t.trabajadorId,
       builder:
@@ -3533,6 +4104,32 @@ class $$TrabajadoresTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> reconocimientosFacialRefs(
+    Expression<bool> Function($$ReconocimientosFacialTableFilterComposer f) f,
+  ) {
+    final $$ReconocimientosFacialTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.equipoId,
+          referencedTable: $db.reconocimientosFacial,
+          getReferencedColumn: (t) => t.trabajadorId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ReconocimientosFacialTableFilterComposer(
+                $db: $db,
+                $table: $db.reconocimientosFacial,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 
@@ -3673,7 +4270,7 @@ class $$TrabajadoresTableAnnotationComposer
     final $$RegistrosBiometricosTableAnnotationComposer composer =
         $composerBuilder(
           composer: this,
-          getCurrentColumn: (t) => t.equipoId,
+          getCurrentColumn: (t) => t.id,
           referencedTable: $db.registrosBiometricos,
           getReferencedColumn: (t) => t.trabajadorId,
           builder:
@@ -3684,6 +4281,32 @@ class $$TrabajadoresTableAnnotationComposer
               }) => $$RegistrosBiometricosTableAnnotationComposer(
                 $db: $db,
                 $table: $db.registrosBiometricos,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> reconocimientosFacialRefs<T extends Object>(
+    Expression<T> Function($$ReconocimientosFacialTableAnnotationComposer a) f,
+  ) {
+    final $$ReconocimientosFacialTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.equipoId,
+          referencedTable: $db.reconocimientosFacial,
+          getReferencedColumn: (t) => t.trabajadorId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ReconocimientosFacialTableAnnotationComposer(
+                $db: $db,
+                $table: $db.reconocimientosFacial,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -3734,6 +4357,7 @@ class $$TrabajadoresTableTableManager
           Trabajadore,
           PrefetchHooks Function({
             bool registrosBiometricosRefs,
+            bool reconocimientosFacialRefs,
             bool registrosDiariosRefs,
           })
         > {
@@ -3809,12 +4433,14 @@ class $$TrabajadoresTableTableManager
                       .toList(),
           prefetchHooksCallback: ({
             registrosBiometricosRefs = false,
+            reconocimientosFacialRefs = false,
             registrosDiariosRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (registrosBiometricosRefs) db.registrosBiometricos,
+                if (reconocimientosFacialRefs) db.reconocimientosFacial,
                 if (registrosDiariosRefs) db.registrosDiarios,
               ],
               addJoins: null,
@@ -3836,6 +4462,28 @@ class $$TrabajadoresTableTableManager
                                 table,
                                 p0,
                               ).registrosBiometricosRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.trabajadorId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                  if (reconocimientosFacialRefs)
+                    await $_getPrefetchedData<
+                      Trabajadore,
+                      $TrabajadoresTable,
+                      ReconocimientosFacialData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$TrabajadoresTableReferences
+                          ._reconocimientosFacialRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$TrabajadoresTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reconocimientosFacialRefs,
                       referencedItemsForCurrentItem:
                           (item, referencedItems) => referencedItems.where(
                             (e) => e.trabajadorId == item.equipoId,
@@ -3886,6 +4534,7 @@ typedef $$TrabajadoresTableProcessedTableManager =
       Trabajadore,
       PrefetchHooks Function({
         bool registrosBiometricosRefs,
+        bool reconocimientosFacialRefs,
         bool registrosDiariosRefs,
       })
     >;
@@ -4077,6 +4726,7 @@ typedef $$UbicacionesTableCreateCompanionBuilder =
       required String nombre,
       required int ubicacionId,
       Value<bool> estado,
+      required int codigoUbicacion,
       Value<int> rowid,
     });
 typedef $$UbicacionesTableUpdateCompanionBuilder =
@@ -4085,6 +4735,7 @@ typedef $$UbicacionesTableUpdateCompanionBuilder =
       Value<String> nombre,
       Value<int> ubicacionId,
       Value<bool> estado,
+      Value<int> codigoUbicacion,
       Value<int> rowid,
     });
 
@@ -4145,6 +4796,11 @@ class $$UbicacionesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get codigoUbicacion => $composableBuilder(
+    column: $table.codigoUbicacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> horariosRefs(
     Expression<bool> Function($$HorariosTableFilterComposer f) f,
   ) {
@@ -4199,6 +4855,11 @@ class $$UbicacionesTableOrderingComposer
     column: $table.estado,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get codigoUbicacion => $composableBuilder(
+    column: $table.codigoUbicacion,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UbicacionesTableAnnotationComposer
@@ -4223,6 +4884,11 @@ class $$UbicacionesTableAnnotationComposer
 
   GeneratedColumn<bool> get estado =>
       $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<int> get codigoUbicacion => $composableBuilder(
+    column: $table.codigoUbicacion,
+    builder: (column) => column,
+  );
 
   Expression<T> horariosRefs<T extends Object>(
     Expression<T> Function($$HorariosTableAnnotationComposer a) f,
@@ -4283,12 +4949,14 @@ class $$UbicacionesTableTableManager
                 Value<String> nombre = const Value.absent(),
                 Value<int> ubicacionId = const Value.absent(),
                 Value<bool> estado = const Value.absent(),
+                Value<int> codigoUbicacion = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UbicacionesCompanion(
                 id: id,
                 nombre: nombre,
                 ubicacionId: ubicacionId,
                 estado: estado,
+                codigoUbicacion: codigoUbicacion,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4297,12 +4965,14 @@ class $$UbicacionesTableTableManager
                 required String nombre,
                 required int ubicacionId,
                 Value<bool> estado = const Value.absent(),
+                required int codigoUbicacion,
                 Value<int> rowid = const Value.absent(),
               }) => UbicacionesCompanion.insert(
                 id: id,
                 nombre: nombre,
                 ubicacionId: ubicacionId,
                 estado: estado,
+                codigoUbicacion: codigoUbicacion,
                 rowid: rowid,
               ),
           withReferenceMapper:
@@ -4418,6 +5088,29 @@ final class $$HorariosTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<$RegistrosDiariosTable, List<RegistrosDiario>>
+  _registrosDiariosRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.registrosDiarios,
+    aliasName: $_aliasNameGenerator(
+      db.horarios.id,
+      db.registrosDiarios.horarioId,
+    ),
+  );
+
+  $$RegistrosDiariosTableProcessedTableManager get registrosDiariosRefs {
+    final manager = $$RegistrosDiariosTableTableManager(
+      $_db,
+      $_db.registrosDiarios,
+    ).filter((f) => f.horarioId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _registrosDiariosRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$HorariosTableFilterComposer
@@ -4501,6 +5194,31 @@ class $$HorariosTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> registrosDiariosRefs(
+    Expression<bool> Function($$RegistrosDiariosTableFilterComposer f) f,
+  ) {
+    final $$RegistrosDiariosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.registrosDiarios,
+      getReferencedColumn: (t) => t.horarioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RegistrosDiariosTableFilterComposer(
+            $db: $db,
+            $table: $db.registrosDiarios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -4654,6 +5372,31 @@ class $$HorariosTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> registrosDiariosRefs<T extends Object>(
+    Expression<T> Function($$RegistrosDiariosTableAnnotationComposer a) f,
+  ) {
+    final $$RegistrosDiariosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.registrosDiarios,
+      getReferencedColumn: (t) => t.horarioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RegistrosDiariosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.registrosDiarios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$HorariosTableTableManager
@@ -4669,7 +5412,7 @@ class $$HorariosTableTableManager
           $$HorariosTableUpdateCompanionBuilder,
           (Horario, $$HorariosTableReferences),
           Horario,
-          PrefetchHooks Function({bool ubicacionId})
+          PrefetchHooks Function({bool ubicacionId, bool registrosDiariosRefs})
         > {
   $$HorariosTableTableManager(_$AppDatabase db, $HorariosTable table)
     : super(
@@ -4740,10 +5483,15 @@ class $$HorariosTableTableManager
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: ({ubicacionId = false}) {
+          prefetchHooksCallback: ({
+            ubicacionId = false,
+            registrosDiariosRefs = false,
+          }) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [],
+              explicitlyWatchedTables: [
+                if (registrosDiariosRefs) db.registrosDiarios,
+              ],
               addJoins: <
                 T extends TableManagerState<
                   dynamic,
@@ -4777,7 +5525,30 @@ class $$HorariosTableTableManager
                 return state;
               },
               getPrefetchedDataCallback: (items) async {
-                return [];
+                return [
+                  if (registrosDiariosRefs)
+                    await $_getPrefetchedData<
+                      Horario,
+                      $HorariosTable,
+                      RegistrosDiario
+                    >(
+                      currentTable: table,
+                      referencedTable: $$HorariosTableReferences
+                          ._registrosDiariosRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$HorariosTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).registrosDiariosRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.horarioId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
               },
             );
           },
@@ -4797,29 +5568,25 @@ typedef $$HorariosTableProcessedTableManager =
       $$HorariosTableUpdateCompanionBuilder,
       (Horario, $$HorariosTableReferences),
       Horario,
-      PrefetchHooks Function({bool ubicacionId})
+      PrefetchHooks Function({bool ubicacionId, bool registrosDiariosRefs})
     >;
 typedef $$RegistrosBiometricosTableCreateCompanionBuilder =
     RegistrosBiometricosCompanion Function({
-      Value<int> id,
+      required String id,
       required int trabajadorId,
-      required String foto,
-      required Map<String, dynamic> datosBiometricos,
-      required bool pruebaVidaExitosa,
-      required MetodoPruebaVida metodoPruebaVida,
-      required double puntajeConfianza,
+      required List<double> datosBiometricos,
       Value<bool> estado,
+      required TipoRegistroBiometrico tipoRegistro,
+      Value<int> rowid,
     });
 typedef $$RegistrosBiometricosTableUpdateCompanionBuilder =
     RegistrosBiometricosCompanion Function({
-      Value<int> id,
+      Value<String> id,
       Value<int> trabajadorId,
-      Value<String> foto,
-      Value<Map<String, dynamic>> datosBiometricos,
-      Value<bool> pruebaVidaExitosa,
-      Value<MetodoPruebaVida> metodoPruebaVida,
-      Value<double> puntajeConfianza,
+      Value<List<double>> datosBiometricos,
       Value<bool> estado,
+      Value<TipoRegistroBiometrico> tipoRegistro,
+      Value<int> rowid,
     });
 
 final class $$RegistrosBiometricosTableReferences
@@ -4839,7 +5606,7 @@ final class $$RegistrosBiometricosTableReferences
       db.trabajadores.createAlias(
         $_aliasNameGenerator(
           db.registrosBiometricos.trabajadorId,
-          db.trabajadores.equipoId,
+          db.trabajadores.id,
         ),
       );
 
@@ -4849,7 +5616,7 @@ final class $$RegistrosBiometricosTableReferences
     final manager = $$TrabajadoresTableTableManager(
       $_db,
       $_db.trabajadores,
-    ).filter((f) => f.equipoId.sqlEquals($_column));
+    ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_trabajadorIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -4867,40 +5634,15 @@ class $$RegistrosBiometricosTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get foto => $composableBuilder(
-    column: $table.foto,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>,
-    Map<String, dynamic>,
-    String
-  >
+  ColumnWithTypeConverterFilters<List<double>, List<double>, String>
   get datosBiometricos => $composableBuilder(
     column: $table.datosBiometricos,
     builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnFilters<bool> get pruebaVidaExitosa => $composableBuilder(
-    column: $table.pruebaVidaExitosa,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<MetodoPruebaVida, MetodoPruebaVida, String>
-  get metodoPruebaVida => $composableBuilder(
-    column: $table.metodoPruebaVida,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnFilters<double> get puntajeConfianza => $composableBuilder(
-    column: $table.puntajeConfianza,
-    builder: (column) => ColumnFilters(column),
   );
 
   ColumnFilters<bool> get estado => $composableBuilder(
@@ -4908,12 +5650,22 @@ class $$RegistrosBiometricosTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<
+    TipoRegistroBiometrico,
+    TipoRegistroBiometrico,
+    String
+  >
+  get tipoRegistro => $composableBuilder(
+    column: $table.tipoRegistro,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   $$TrabajadoresTableFilterComposer get trabajadorId {
     final $$TrabajadoresTableFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.trabajadorId,
       referencedTable: $db.trabajadores,
-      getReferencedColumn: (t) => t.equipoId,
+      getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
@@ -4941,13 +5693,8 @@ class $$RegistrosBiometricosTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get foto => $composableBuilder(
-    column: $table.foto,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4956,23 +5703,13 @@ class $$RegistrosBiometricosTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get pruebaVidaExitosa => $composableBuilder(
-    column: $table.pruebaVidaExitosa,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get metodoPruebaVida => $composableBuilder(
-    column: $table.metodoPruebaVida,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get puntajeConfianza => $composableBuilder(
-    column: $table.puntajeConfianza,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<bool> get estado => $composableBuilder(
     column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipoRegistro => $composableBuilder(
+    column: $table.tipoRegistro,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4981,7 +5718,7 @@ class $$RegistrosBiometricosTableOrderingComposer
       composer: this,
       getCurrentColumn: (t) => t.trabajadorId,
       referencedTable: $db.trabajadores,
-      getReferencedColumn: (t) => t.equipoId,
+      getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
@@ -5009,43 +5746,30 @@ class $$RegistrosBiometricosTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get foto =>
-      $composableBuilder(column: $table.foto, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
-  get datosBiometricos => $composableBuilder(
-    column: $table.datosBiometricos,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get pruebaVidaExitosa => $composableBuilder(
-    column: $table.pruebaVidaExitosa,
-    builder: (column) => column,
-  );
-
-  GeneratedColumnWithTypeConverter<MetodoPruebaVida, String>
-  get metodoPruebaVida => $composableBuilder(
-    column: $table.metodoPruebaVida,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get puntajeConfianza => $composableBuilder(
-    column: $table.puntajeConfianza,
-    builder: (column) => column,
-  );
+  GeneratedColumnWithTypeConverter<List<double>, String> get datosBiometricos =>
+      $composableBuilder(
+        column: $table.datosBiometricos,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<bool> get estado =>
       $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<TipoRegistroBiometrico, String>
+  get tipoRegistro => $composableBuilder(
+    column: $table.tipoRegistro,
+    builder: (column) => column,
+  );
 
   $$TrabajadoresTableAnnotationComposer get trabajadorId {
     final $$TrabajadoresTableAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.trabajadorId,
       referencedTable: $db.trabajadores,
-      getReferencedColumn: (t) => t.equipoId,
+      getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
@@ -5103,44 +5827,36 @@ class $$RegistrosBiometricosTableTableManager
               ),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
+                Value<String> id = const Value.absent(),
                 Value<int> trabajadorId = const Value.absent(),
-                Value<String> foto = const Value.absent(),
-                Value<Map<String, dynamic>> datosBiometricos =
-                    const Value.absent(),
-                Value<bool> pruebaVidaExitosa = const Value.absent(),
-                Value<MetodoPruebaVida> metodoPruebaVida = const Value.absent(),
-                Value<double> puntajeConfianza = const Value.absent(),
+                Value<List<double>> datosBiometricos = const Value.absent(),
                 Value<bool> estado = const Value.absent(),
+                Value<TipoRegistroBiometrico> tipoRegistro =
+                    const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => RegistrosBiometricosCompanion(
                 id: id,
                 trabajadorId: trabajadorId,
-                foto: foto,
                 datosBiometricos: datosBiometricos,
-                pruebaVidaExitosa: pruebaVidaExitosa,
-                metodoPruebaVida: metodoPruebaVida,
-                puntajeConfianza: puntajeConfianza,
                 estado: estado,
+                tipoRegistro: tipoRegistro,
+                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
+                required String id,
                 required int trabajadorId,
-                required String foto,
-                required Map<String, dynamic> datosBiometricos,
-                required bool pruebaVidaExitosa,
-                required MetodoPruebaVida metodoPruebaVida,
-                required double puntajeConfianza,
+                required List<double> datosBiometricos,
                 Value<bool> estado = const Value.absent(),
+                required TipoRegistroBiometrico tipoRegistro,
+                Value<int> rowid = const Value.absent(),
               }) => RegistrosBiometricosCompanion.insert(
                 id: id,
                 trabajadorId: trabajadorId,
-                foto: foto,
                 datosBiometricos: datosBiometricos,
-                pruebaVidaExitosa: pruebaVidaExitosa,
-                metodoPruebaVida: metodoPruebaVida,
-                puntajeConfianza: puntajeConfianza,
                 estado: estado,
+                tipoRegistro: tipoRegistro,
+                rowid: rowid,
               ),
           withReferenceMapper:
               (p0) =>
@@ -5182,7 +5898,7 @@ class $$RegistrosBiometricosTableTableManager
                             referencedColumn:
                                 $$RegistrosBiometricosTableReferences
                                     ._trabajadorIdTable(db)
-                                    .equipoId,
+                                    .id,
                           )
                           as T;
                 }
@@ -5212,33 +5928,557 @@ typedef $$RegistrosBiometricosTableProcessedTableManager =
       RegistrosBiometrico,
       PrefetchHooks Function({bool trabajadorId})
     >;
+typedef $$ReconocimientosFacialTableCreateCompanionBuilder =
+    ReconocimientosFacialCompanion Function({
+      required String id,
+      required int trabajadorId,
+      required String imagenUrl,
+      required bool pruebaVidaExitosa,
+      required TipoRegistroBiometrico metodoPruebaVida,
+      required double puntajeConfianza,
+      required DateTime fechaCreacion,
+      Value<bool> estado,
+      Value<int> rowid,
+    });
+typedef $$ReconocimientosFacialTableUpdateCompanionBuilder =
+    ReconocimientosFacialCompanion Function({
+      Value<String> id,
+      Value<int> trabajadorId,
+      Value<String> imagenUrl,
+      Value<bool> pruebaVidaExitosa,
+      Value<TipoRegistroBiometrico> metodoPruebaVida,
+      Value<double> puntajeConfianza,
+      Value<DateTime> fechaCreacion,
+      Value<bool> estado,
+      Value<int> rowid,
+    });
+
+final class $$ReconocimientosFacialTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ReconocimientosFacialTable,
+          ReconocimientosFacialData
+        > {
+  $$ReconocimientosFacialTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $TrabajadoresTable _trabajadorIdTable(_$AppDatabase db) =>
+      db.trabajadores.createAlias(
+        $_aliasNameGenerator(
+          db.reconocimientosFacial.trabajadorId,
+          db.trabajadores.equipoId,
+        ),
+      );
+
+  $$TrabajadoresTableProcessedTableManager get trabajadorId {
+    final $_column = $_itemColumn<int>('trabajador_id')!;
+
+    final manager = $$TrabajadoresTableTableManager(
+      $_db,
+      $_db.trabajadores,
+    ).filter((f) => f.equipoId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_trabajadorIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$RegistrosDiariosTable, List<RegistrosDiario>>
+  _registrosDiariosRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.registrosDiarios,
+    aliasName: $_aliasNameGenerator(
+      db.reconocimientosFacial.id,
+      db.registrosDiarios.reconocimientoFacialId,
+    ),
+  );
+
+  $$RegistrosDiariosTableProcessedTableManager get registrosDiariosRefs {
+    final manager = $$RegistrosDiariosTableTableManager(
+      $_db,
+      $_db.registrosDiarios,
+    ).filter(
+      (f) => f.reconocimientoFacialId.id.sqlEquals($_itemColumn<String>('id')!),
+    );
+
+    final cache = $_typedResult.readTableOrNull(
+      _registrosDiariosRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ReconocimientosFacialTableFilterComposer
+    extends Composer<_$AppDatabase, $ReconocimientosFacialTable> {
+  $$ReconocimientosFacialTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagenUrl => $composableBuilder(
+    column: $table.imagenUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pruebaVidaExitosa => $composableBuilder(
+    column: $table.pruebaVidaExitosa,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    TipoRegistroBiometrico,
+    TipoRegistroBiometrico,
+    String
+  >
+  get metodoPruebaVida => $composableBuilder(
+    column: $table.metodoPruebaVida,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<double> get puntajeConfianza => $composableBuilder(
+    column: $table.puntajeConfianza,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, String>
+  get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$TrabajadoresTableFilterComposer get trabajadorId {
+    final $$TrabajadoresTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trabajadorId,
+      referencedTable: $db.trabajadores,
+      getReferencedColumn: (t) => t.equipoId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TrabajadoresTableFilterComposer(
+            $db: $db,
+            $table: $db.trabajadores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> registrosDiariosRefs(
+    Expression<bool> Function($$RegistrosDiariosTableFilterComposer f) f,
+  ) {
+    final $$RegistrosDiariosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.registrosDiarios,
+      getReferencedColumn: (t) => t.reconocimientoFacialId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RegistrosDiariosTableFilterComposer(
+            $db: $db,
+            $table: $db.registrosDiarios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ReconocimientosFacialTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReconocimientosFacialTable> {
+  $$ReconocimientosFacialTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imagenUrl => $composableBuilder(
+    column: $table.imagenUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get pruebaVidaExitosa => $composableBuilder(
+    column: $table.pruebaVidaExitosa,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metodoPruebaVida => $composableBuilder(
+    column: $table.metodoPruebaVida,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get puntajeConfianza => $composableBuilder(
+    column: $table.puntajeConfianza,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$TrabajadoresTableOrderingComposer get trabajadorId {
+    final $$TrabajadoresTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trabajadorId,
+      referencedTable: $db.trabajadores,
+      getReferencedColumn: (t) => t.equipoId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TrabajadoresTableOrderingComposer(
+            $db: $db,
+            $table: $db.trabajadores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReconocimientosFacialTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReconocimientosFacialTable> {
+  $$ReconocimientosFacialTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get imagenUrl =>
+      $composableBuilder(column: $table.imagenUrl, builder: (column) => column);
+
+  GeneratedColumn<bool> get pruebaVidaExitosa => $composableBuilder(
+    column: $table.pruebaVidaExitosa,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<TipoRegistroBiometrico, String>
+  get metodoPruebaVida => $composableBuilder(
+    column: $table.metodoPruebaVida,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get puntajeConfianza => $composableBuilder(
+    column: $table.puntajeConfianza,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<DateTime, String> get fechaCreacion =>
+      $composableBuilder(
+        column: $table.fechaCreacion,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<bool> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  $$TrabajadoresTableAnnotationComposer get trabajadorId {
+    final $$TrabajadoresTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trabajadorId,
+      referencedTable: $db.trabajadores,
+      getReferencedColumn: (t) => t.equipoId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TrabajadoresTableAnnotationComposer(
+            $db: $db,
+            $table: $db.trabajadores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> registrosDiariosRefs<T extends Object>(
+    Expression<T> Function($$RegistrosDiariosTableAnnotationComposer a) f,
+  ) {
+    final $$RegistrosDiariosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.registrosDiarios,
+      getReferencedColumn: (t) => t.reconocimientoFacialId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RegistrosDiariosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.registrosDiarios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ReconocimientosFacialTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReconocimientosFacialTable,
+          ReconocimientosFacialData,
+          $$ReconocimientosFacialTableFilterComposer,
+          $$ReconocimientosFacialTableOrderingComposer,
+          $$ReconocimientosFacialTableAnnotationComposer,
+          $$ReconocimientosFacialTableCreateCompanionBuilder,
+          $$ReconocimientosFacialTableUpdateCompanionBuilder,
+          (ReconocimientosFacialData, $$ReconocimientosFacialTableReferences),
+          ReconocimientosFacialData,
+          PrefetchHooks Function({bool trabajadorId, bool registrosDiariosRefs})
+        > {
+  $$ReconocimientosFacialTableTableManager(
+    _$AppDatabase db,
+    $ReconocimientosFacialTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$ReconocimientosFacialTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer:
+              () => $$ReconocimientosFacialTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer:
+              () => $$ReconocimientosFacialTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> trabajadorId = const Value.absent(),
+                Value<String> imagenUrl = const Value.absent(),
+                Value<bool> pruebaVidaExitosa = const Value.absent(),
+                Value<TipoRegistroBiometrico> metodoPruebaVida =
+                    const Value.absent(),
+                Value<double> puntajeConfianza = const Value.absent(),
+                Value<DateTime> fechaCreacion = const Value.absent(),
+                Value<bool> estado = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReconocimientosFacialCompanion(
+                id: id,
+                trabajadorId: trabajadorId,
+                imagenUrl: imagenUrl,
+                pruebaVidaExitosa: pruebaVidaExitosa,
+                metodoPruebaVida: metodoPruebaVida,
+                puntajeConfianza: puntajeConfianza,
+                fechaCreacion: fechaCreacion,
+                estado: estado,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int trabajadorId,
+                required String imagenUrl,
+                required bool pruebaVidaExitosa,
+                required TipoRegistroBiometrico metodoPruebaVida,
+                required double puntajeConfianza,
+                required DateTime fechaCreacion,
+                Value<bool> estado = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReconocimientosFacialCompanion.insert(
+                id: id,
+                trabajadorId: trabajadorId,
+                imagenUrl: imagenUrl,
+                pruebaVidaExitosa: pruebaVidaExitosa,
+                metodoPruebaVida: metodoPruebaVida,
+                puntajeConfianza: puntajeConfianza,
+                fechaCreacion: fechaCreacion,
+                estado: estado,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $$ReconocimientosFacialTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({
+            trabajadorId = false,
+            registrosDiariosRefs = false,
+          }) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (registrosDiariosRefs) db.registrosDiarios,
+              ],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (trabajadorId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.trabajadorId,
+                            referencedTable:
+                                $$ReconocimientosFacialTableReferences
+                                    ._trabajadorIdTable(db),
+                            referencedColumn:
+                                $$ReconocimientosFacialTableReferences
+                                    ._trabajadorIdTable(db)
+                                    .equipoId,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (registrosDiariosRefs)
+                    await $_getPrefetchedData<
+                      ReconocimientosFacialData,
+                      $ReconocimientosFacialTable,
+                      RegistrosDiario
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ReconocimientosFacialTableReferences
+                          ._registrosDiariosRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$ReconocimientosFacialTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).registrosDiariosRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.reconocimientoFacialId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ReconocimientosFacialTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReconocimientosFacialTable,
+      ReconocimientosFacialData,
+      $$ReconocimientosFacialTableFilterComposer,
+      $$ReconocimientosFacialTableOrderingComposer,
+      $$ReconocimientosFacialTableAnnotationComposer,
+      $$ReconocimientosFacialTableCreateCompanionBuilder,
+      $$ReconocimientosFacialTableUpdateCompanionBuilder,
+      (ReconocimientosFacialData, $$ReconocimientosFacialTableReferences),
+      ReconocimientosFacialData,
+      PrefetchHooks Function({bool trabajadorId, bool registrosDiariosRefs})
+    >;
 typedef $$RegistrosDiariosTableCreateCompanionBuilder =
     RegistrosDiariosCompanion Function({
       Value<int> id,
       required int equipoId,
-      Value<String?> registroBiometricoId,
+      Value<String?> reconocimientoFacialId,
       required DateTime fechaIngreso,
       required TimeOfDay horaIngreso,
-      required DateTime fechaSalida,
-      required TimeOfDay horaSalida,
+      Value<DateTime?> fechaSalida,
+      Value<TimeOfDay?> horaSalida,
       Value<bool> estado,
       required String nombreTrabajador,
       required String fotoTrabajador,
       required String cargoTrabajador,
+      required int horarioId,
     });
 typedef $$RegistrosDiariosTableUpdateCompanionBuilder =
     RegistrosDiariosCompanion Function({
       Value<int> id,
       Value<int> equipoId,
-      Value<String?> registroBiometricoId,
+      Value<String?> reconocimientoFacialId,
       Value<DateTime> fechaIngreso,
       Value<TimeOfDay> horaIngreso,
-      Value<DateTime> fechaSalida,
-      Value<TimeOfDay> horaSalida,
+      Value<DateTime?> fechaSalida,
+      Value<TimeOfDay?> horaSalida,
       Value<bool> estado,
       Value<String> nombreTrabajador,
       Value<String> fotoTrabajador,
       Value<String> cargoTrabajador,
+      Value<int> horarioId,
     });
 
 final class $$RegistrosDiariosTableReferences
@@ -5266,6 +6506,51 @@ final class $$RegistrosDiariosTableReferences
       $_db.trabajadores,
     ).filter((f) => f.equipoId.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_equipoIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ReconocimientosFacialTable _reconocimientoFacialIdTable(
+    _$AppDatabase db,
+  ) => db.reconocimientosFacial.createAlias(
+    $_aliasNameGenerator(
+      db.registrosDiarios.reconocimientoFacialId,
+      db.reconocimientosFacial.id,
+    ),
+  );
+
+  $$ReconocimientosFacialTableProcessedTableManager?
+  get reconocimientoFacialId {
+    final $_column = $_itemColumn<String>('reconocimiento_facial_id');
+    if ($_column == null) return null;
+    final manager = $$ReconocimientosFacialTableTableManager(
+      $_db,
+      $_db.reconocimientosFacial,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _reconocimientoFacialIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $HorariosTable _horarioIdTable(_$AppDatabase db) =>
+      db.horarios.createAlias(
+        $_aliasNameGenerator(db.registrosDiarios.horarioId, db.horarios.id),
+      );
+
+  $$HorariosTableProcessedTableManager get horarioId {
+    final $_column = $_itemColumn<int>('horario_id')!;
+
+    final manager = $$HorariosTableTableManager(
+      $_db,
+      $_db.horarios,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_horarioIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -5299,17 +6584,17 @@ class $$RegistrosDiariosTableFilterComposer
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<DateTime, DateTime, String> get fechaSalida =>
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, String> get fechaSalida =>
       $composableBuilder(
         column: $table.fechaSalida,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  ColumnWithTypeConverterFilters<TimeOfDay, TimeOfDay, String> get horaSalida =>
-      $composableBuilder(
-        column: $table.horaSalida,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
+  ColumnWithTypeConverterFilters<TimeOfDay?, TimeOfDay, String>
+  get horaSalida => $composableBuilder(
+    column: $table.horaSalida,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 
   ColumnFilters<bool> get estado => $composableBuilder(
     column: $table.estado,
@@ -5345,6 +6630,53 @@ class $$RegistrosDiariosTableFilterComposer
           }) => $$TrabajadoresTableFilterComposer(
             $db: $db,
             $table: $db.trabajadores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ReconocimientosFacialTableFilterComposer get reconocimientoFacialId {
+    final $$ReconocimientosFacialTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.reconocimientoFacialId,
+          referencedTable: $db.reconocimientosFacial,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ReconocimientosFacialTableFilterComposer(
+                $db: $db,
+                $table: $db.reconocimientosFacial,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$HorariosTableFilterComposer get horarioId {
+    final $$HorariosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.horarioId,
+      referencedTable: $db.horarios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HorariosTableFilterComposer(
+            $db: $db,
+            $table: $db.horarios,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5431,6 +6763,53 @@ class $$RegistrosDiariosTableOrderingComposer
     );
     return composer;
   }
+
+  $$ReconocimientosFacialTableOrderingComposer get reconocimientoFacialId {
+    final $$ReconocimientosFacialTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.reconocimientoFacialId,
+          referencedTable: $db.reconocimientosFacial,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ReconocimientosFacialTableOrderingComposer(
+                $db: $db,
+                $table: $db.reconocimientosFacial,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$HorariosTableOrderingComposer get horarioId {
+    final $$HorariosTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.horarioId,
+      referencedTable: $db.horarios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HorariosTableOrderingComposer(
+            $db: $db,
+            $table: $db.horarios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$RegistrosDiariosTableAnnotationComposer
@@ -5457,13 +6836,13 @@ class $$RegistrosDiariosTableAnnotationComposer
         builder: (column) => column,
       );
 
-  GeneratedColumnWithTypeConverter<DateTime, String> get fechaSalida =>
+  GeneratedColumnWithTypeConverter<DateTime?, String> get fechaSalida =>
       $composableBuilder(
         column: $table.fechaSalida,
         builder: (column) => column,
       );
 
-  GeneratedColumnWithTypeConverter<TimeOfDay, String> get horaSalida =>
+  GeneratedColumnWithTypeConverter<TimeOfDay?, String> get horaSalida =>
       $composableBuilder(
         column: $table.horaSalida,
         builder: (column) => column,
@@ -5509,6 +6888,53 @@ class $$RegistrosDiariosTableAnnotationComposer
     );
     return composer;
   }
+
+  $$ReconocimientosFacialTableAnnotationComposer get reconocimientoFacialId {
+    final $$ReconocimientosFacialTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.reconocimientoFacialId,
+          referencedTable: $db.reconocimientosFacial,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ReconocimientosFacialTableAnnotationComposer(
+                $db: $db,
+                $table: $db.reconocimientosFacial,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$HorariosTableAnnotationComposer get horarioId {
+    final $$HorariosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.horarioId,
+      referencedTable: $db.horarios,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HorariosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.horarios,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$RegistrosDiariosTableTableManager
@@ -5524,7 +6950,11 @@ class $$RegistrosDiariosTableTableManager
           $$RegistrosDiariosTableUpdateCompanionBuilder,
           (RegistrosDiario, $$RegistrosDiariosTableReferences),
           RegistrosDiario,
-          PrefetchHooks Function({bool equipoId})
+          PrefetchHooks Function({
+            bool equipoId,
+            bool reconocimientoFacialId,
+            bool horarioId,
+          })
         > {
   $$RegistrosDiariosTableTableManager(
     _$AppDatabase db,
@@ -5550,19 +6980,20 @@ class $$RegistrosDiariosTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<int> equipoId = const Value.absent(),
-                Value<String?> registroBiometricoId = const Value.absent(),
+                Value<String?> reconocimientoFacialId = const Value.absent(),
                 Value<DateTime> fechaIngreso = const Value.absent(),
                 Value<TimeOfDay> horaIngreso = const Value.absent(),
-                Value<DateTime> fechaSalida = const Value.absent(),
-                Value<TimeOfDay> horaSalida = const Value.absent(),
+                Value<DateTime?> fechaSalida = const Value.absent(),
+                Value<TimeOfDay?> horaSalida = const Value.absent(),
                 Value<bool> estado = const Value.absent(),
                 Value<String> nombreTrabajador = const Value.absent(),
                 Value<String> fotoTrabajador = const Value.absent(),
                 Value<String> cargoTrabajador = const Value.absent(),
+                Value<int> horarioId = const Value.absent(),
               }) => RegistrosDiariosCompanion(
                 id: id,
                 equipoId: equipoId,
-                registroBiometricoId: registroBiometricoId,
+                reconocimientoFacialId: reconocimientoFacialId,
                 fechaIngreso: fechaIngreso,
                 horaIngreso: horaIngreso,
                 fechaSalida: fechaSalida,
@@ -5571,24 +7002,26 @@ class $$RegistrosDiariosTableTableManager
                 nombreTrabajador: nombreTrabajador,
                 fotoTrabajador: fotoTrabajador,
                 cargoTrabajador: cargoTrabajador,
+                horarioId: horarioId,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required int equipoId,
-                Value<String?> registroBiometricoId = const Value.absent(),
+                Value<String?> reconocimientoFacialId = const Value.absent(),
                 required DateTime fechaIngreso,
                 required TimeOfDay horaIngreso,
-                required DateTime fechaSalida,
-                required TimeOfDay horaSalida,
+                Value<DateTime?> fechaSalida = const Value.absent(),
+                Value<TimeOfDay?> horaSalida = const Value.absent(),
                 Value<bool> estado = const Value.absent(),
                 required String nombreTrabajador,
                 required String fotoTrabajador,
                 required String cargoTrabajador,
+                required int horarioId,
               }) => RegistrosDiariosCompanion.insert(
                 id: id,
                 equipoId: equipoId,
-                registroBiometricoId: registroBiometricoId,
+                reconocimientoFacialId: reconocimientoFacialId,
                 fechaIngreso: fechaIngreso,
                 horaIngreso: horaIngreso,
                 fechaSalida: fechaSalida,
@@ -5597,6 +7030,7 @@ class $$RegistrosDiariosTableTableManager
                 nombreTrabajador: nombreTrabajador,
                 fotoTrabajador: fotoTrabajador,
                 cargoTrabajador: cargoTrabajador,
+                horarioId: horarioId,
               ),
           withReferenceMapper:
               (p0) =>
@@ -5608,7 +7042,11 @@ class $$RegistrosDiariosTableTableManager
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: ({equipoId = false}) {
+          prefetchHooksCallback: ({
+            equipoId = false,
+            reconocimientoFacialId = false,
+            horarioId = false,
+          }) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -5641,6 +7079,34 @@ class $$RegistrosDiariosTableTableManager
                           )
                           as T;
                 }
+                if (reconocimientoFacialId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.reconocimientoFacialId,
+                            referencedTable: $$RegistrosDiariosTableReferences
+                                ._reconocimientoFacialIdTable(db),
+                            referencedColumn:
+                                $$RegistrosDiariosTableReferences
+                                    ._reconocimientoFacialIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+                if (horarioId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.horarioId,
+                            referencedTable: $$RegistrosDiariosTableReferences
+                                ._horarioIdTable(db),
+                            referencedColumn:
+                                $$RegistrosDiariosTableReferences
+                                    ._horarioIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
 
                 return state;
               },
@@ -5665,13 +7131,17 @@ typedef $$RegistrosDiariosTableProcessedTableManager =
       $$RegistrosDiariosTableUpdateCompanionBuilder,
       (RegistrosDiario, $$RegistrosDiariosTableReferences),
       RegistrosDiario,
-      PrefetchHooks Function({bool equipoId})
+      PrefetchHooks Function({
+        bool equipoId,
+        bool reconocimientoFacialId,
+        bool horarioId,
+      })
     >;
 typedef $$SyncsEntitysTableCreateCompanionBuilder =
     SyncsEntitysCompanion Function({
       Value<int> id,
       required String entityTableNameToSync,
-      required String action,
+      required TipoAccionesSync action,
       required String registerId,
       Value<DateTime> timestamp,
       Value<bool> isSynced,
@@ -5681,7 +7151,7 @@ typedef $$SyncsEntitysTableUpdateCompanionBuilder =
     SyncsEntitysCompanion Function({
       Value<int> id,
       Value<String> entityTableNameToSync,
-      Value<String> action,
+      Value<TipoAccionesSync> action,
       Value<String> registerId,
       Value<DateTime> timestamp,
       Value<bool> isSynced,
@@ -5707,9 +7177,10 @@ class $$SyncsEntitysTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get action => $composableBuilder(
+  ColumnWithTypeConverterFilters<TipoAccionesSync, TipoAccionesSync, String>
+  get action => $composableBuilder(
     column: $table.action,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<String> get registerId => $composableBuilder(
@@ -5800,7 +7271,7 @@ class $$SyncsEntitysTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get action =>
+  GeneratedColumnWithTypeConverter<TipoAccionesSync, String> get action =>
       $composableBuilder(column: $table.action, builder: (column) => column);
 
   GeneratedColumn<String> get registerId => $composableBuilder(
@@ -5852,7 +7323,7 @@ class $$SyncsEntitysTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> entityTableNameToSync = const Value.absent(),
-                Value<String> action = const Value.absent(),
+                Value<TipoAccionesSync> action = const Value.absent(),
                 Value<String> registerId = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
@@ -5870,7 +7341,7 @@ class $$SyncsEntitysTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required String entityTableNameToSync,
-                required String action,
+                required TipoAccionesSync action,
                 required String registerId,
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
@@ -5930,6 +7401,8 @@ class $AppDatabaseManager {
       $$HorariosTableTableManager(_db, _db.horarios);
   $$RegistrosBiometricosTableTableManager get registrosBiometricos =>
       $$RegistrosBiometricosTableTableManager(_db, _db.registrosBiometricos);
+  $$ReconocimientosFacialTableTableManager get reconocimientosFacial =>
+      $$ReconocimientosFacialTableTableManager(_db, _db.reconocimientosFacial);
   $$RegistrosDiariosTableTableManager get registrosDiarios =>
       $$RegistrosDiariosTableTableManager(_db, _db.registrosDiarios);
   $$SyncsEntitysTableTableManager get syncsEntitys =>

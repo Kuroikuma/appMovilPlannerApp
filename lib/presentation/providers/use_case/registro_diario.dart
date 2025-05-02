@@ -212,10 +212,8 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
     }
   }
 
-  Future<void> registrarEntrada(
-    int equipoId, {
-    String? registroBiometricoId,
-  }) async {
+  Future<void> registrarAsistencia(
+    int equipoId, int horaAprobadaId) async {
     state = state.copyWith(isLoading: true).clearErrors();
 
     // Verificar conexión a internet
@@ -229,93 +227,13 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
     }
 
     try {
-      final nuevoRegistro = await _repository.registrarEntrada(
+      final nuevoRegistro = await _repository.registrarAsistencia(
         equipoId,
-        registroBiometricoId: registroBiometricoId,
+        horaAprobadaId,
       );
 
       // Actualizar la lista de registros
       final registrosActualizados = [...state.registros, nuevoRegistro];
-
-      state = state.copyWith(
-        registros: registrosActualizados,
-        isLoading: false,
-      );
-
-      // Aplicar filtros actuales
-      _aplicarFiltros();
-    } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
-    }
-  }
-
-  Future<void> registrarSalida(
-    int registroId, {
-    String? registroBiometricoId,
-  }) async {
-    state = state.copyWith(isLoading: true).clearErrors();
-
-    // Verificar conexión a internet
-    final hasInternet = await networkInfo.isConnected;
-    if (!hasInternet) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'No hay conexión a internet',
-      );
-      return;
-    }
-
-    try {
-      final registroActualizado = await _repository.registrarSalida(
-        registroId,
-        registroBiometricoId: registroBiometricoId,
-      );
-
-      // Actualizar el registro en la lista
-      final registrosActualizados =
-          state.registros.map((registro) {
-            if (registro.id == registroId) {
-              return registroActualizado;
-            }
-            return registro;
-          }).toList();
-
-      state = state.copyWith(
-        registros: registrosActualizados,
-        isLoading: false,
-      );
-
-      // Aplicar filtros actuales
-      _aplicarFiltros();
-    } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
-    }
-  }
-
-  Future<void> cambiarEstadoRegistro(int registroId, bool estado) async {
-    state = state.copyWith(isLoading: true).clearErrors();
-
-    // Verificar conexión a internet
-    final hasInternet = await networkInfo.isConnected;
-    if (!hasInternet) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'No hay conexión a internet',
-      );
-      return;
-    }
-
-    try {
-      await _repository.cambiarEstadoRegistro(registroId, estado);
-
-      // Actualizar el estado del registro en la lista local
-      final registrosActualizados =
-          state.registros.map((registro) {
-            if (registro.id == registroId) {
-              return registro.copyWith(estado: estado);
-            }
-            return registro;
-          }).toList();
 
       state = state.copyWith(
         registros: registrosActualizados,

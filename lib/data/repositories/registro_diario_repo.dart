@@ -1,7 +1,12 @@
+import 'package:drift/drift.dart';
+
 import '../../../core/error/exceptions.dart';
 import '../../../domain/models/registro_diario.dart';
 import '../../../domain/repositories/i_registro_diario_repository.dart';
 import '../../core/network/network_info.dart';
+import '../../domain/repositories.dart';
+import '../converters/action_sync.dart';
+import '../database.dart';
 import 'local/registro_diario_repository_local.dart';
 import 'remote/registro_diario_repository_remote.dart';
 
@@ -9,11 +14,13 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
   final RegistroDiarioRepositoryLocal localDataSource;
   final RegistroDiarioRepositoryRemote remoteDataSource;
   final NetworkInfo networkInfo;
+  final ISyncEntityRepository syncEntityRepository;
 
   RegistroDiarioRepository({
     required this.localDataSource,
     required this.remoteDataSource,
     required this.networkInfo,
+    required this.syncEntityRepository,
   });
 
   // Datos de ejemplo para demostración
@@ -77,29 +84,71 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
   }
 
   @override
-  Future<RegistroDiario> registrarEntrada(
-    int equipoId, {
-    String? registroBiometricoId,
-  }) async {
-    final registro = await remoteDataSource.registrarEntrada(
+  Future<RegistroDiario> registrarAsistencia(
+    int equipoId,
+    int horaAprobadaId,
+  ) async {
+    final isEntry = await localDataSource.isEntry(equipoId);
+    final registroAsistencia = await localDataSource.registrarAsistencia(
       equipoId,
-      registroBiometricoId: registroBiometricoId,
+      horaAprobadaId,
     );
 
-    return registro;
+    final isConnected = await networkInfo.isConnected;
+
+    if (isConnected) {
+      try {
+        final remoteData = await remoteDataSource.registrarAsistencia(
+          equipoId,
+          horaAprobadaId,
+          isEntry,
+          isEntry ? registroAsistencia.fechaIngreso : null,
+          isEntry ? registroAsistencia.horaIngreso : null,
+          isEntry ? registroAsistencia.id : null,
+        );
+
+        await localDataSource.actualizarRegistroLocal(remoteData);
+        return remoteData;
+      } catch (e) {
+        throw ApiException();
+      }
+    } else {
+      if (isEntry) {
+        await insertQueuSyncRegistroDiario(
+          registroAsistencia,
+          TipoAccionesSync.update,
+        );
+      } else {
+        await insertQueuSyncRegistroDiario(
+          registroAsistencia,
+          TipoAccionesSync.create,
+        );
+      }
+
+      return registroAsistencia;
+    }
   }
 
-  @override
-  Future<RegistroDiario> registrarSalida(
-    int registroId, {
-    String? registroBiometricoId,
-  }) async {
-    final registroActualizado = await remoteDataSource.registrarSalida(
-      registroId,
-      registroBiometricoId: registroBiometricoId,
+  Future<void> insertQueuSyncRegistroDiario(
+    RegistroDiario registroAsistencia,
+    TipoAccionesSync accion,
+  ) async {
+    syncEntityRepository.insertSyncEntity(
+      SyncsEntitysCompanion(
+        entityTableNameToSync: Value('registroDiario'),
+        action: Value(accion),
+        registerId: Value("${registroAsistencia.id}"),
+        timestamp: Value(DateTime.now()),
+        isSynced: Value(false),
+        data: Value(registroAsistencia.toJson()),
+      ),
     );
+  }
 
-    return registroActualizado;
+  Future<void> updateQueuSyncRegistroDiario(
+    SyncsEntitysCompanion registroAsistencia,
+  ) async {
+    syncEntityRepository.updateSyncEntity(registroAsistencia);
   }
 
   @override
@@ -130,11 +179,6 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
 
       return true;
     }).toList();
-  }
-
-  @override
-  Future<void> cambiarEstadoRegistro(int registroId, bool estado) async {
-    await remoteDataSource.cambiarEstadoRegistro(registroId, estado);
   }
 
   @override

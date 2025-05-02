@@ -15,4 +15,5 @@ abstract class IUbicacionRepository {
     String codigoUbicacion,
   );
   Future<void> eliminarUbicacion(int ubicacionId);
+  Future<String> obtenerCodigoUbicacion(int ubicacionId);
 }

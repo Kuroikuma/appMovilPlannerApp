@@ -1,12 +1,24 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
+import 'dart:math' as math;
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../providers/use_case/horario_notifier.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
+import '../providers/use_case/trabajador.dart';
+import '../providers/use_case/ubicacion.dart';
+import '../utils/facial_recognition_utils_dos.dart';
 import '../utils/notification_utils.dart';
+import '../widget/face_detector_painter.dart';
+import '../widget/reconocimiento_facial/build_procesando.dart';
+import '../widget/reconocimiento_facial/trabajador_card.dart';
 
 class ReconocimientoFacialScreen extends ConsumerStatefulWidget {
   const ReconocimientoFacialScreen({super.key});
@@ -18,7 +30,7 @@ class ReconocimientoFacialScreen extends ConsumerStatefulWidget {
 
 class _ReconocimientoFacialScreenState
     extends ConsumerState<ReconocimientoFacialScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _isCameraInitialized = false;
@@ -26,28 +38,110 @@ class _ReconocimientoFacialScreenState
   File? _imageFile;
   bool _isFlashOn = false;
   bool _isPermissionGranted = false;
+  CustomPaint? customPaint;
+  bool _isBusy = false;
+
+  // Animation controller for the loading screen
+  late AnimationController _animationController;
+
+  // Timer para detectar inactividad
+  Timer? _inactivityTimer;
+  // Duración de inactividad antes de mostrar la pantalla (5 minutos)
+  final Duration _inactivityDuration = const Duration(minutes: 5);
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkPermissionsAndInitCamera();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+
+    _searchController.addListener(_onSearchChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
+      _checkPermissionsAndInitCamera();
+      _initFaceRecognition();
+      _startInactivityTimer();
     });
+  }
+
+  void _initFaceRecognition() async {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
+    await ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
+  }
+
+  void _onSearchChanged() {
+    print('buscando: ${_searchController.text}');
+    setState(() {
+      _searchQuery = _searchController.text;
+      _isSearching = _searchQuery.isNotEmpty;
+    });
+  }
+
+  void _disposeFaceRecognition() {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).dispose();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _disposeFaceRecognition();
+    _cameraController?.stopImageStream();
     _cameraController?.dispose();
+    _animationController.dispose();
+    _inactivityTimer?.cancel();
+    _searchController.dispose();
+
+    print('dispose de la camara');
     super.dispose();
+  }
+
+  // Iniciar el temporizador de inactividad
+  void _startInactivityTimer() {
+    _inactivityTimer?.cancel();
+    _inactivityTimer = Timer(_inactivityDuration, _onInactivity);
+  }
+
+  // Reiniciar el temporizador de inactividad
+  void _resetInactivityTimer() {
+    _startInactivityTimer();
+  }
+
+  // Función que se ejecuta cuando se detecta inactividad
+  Future<void> _onInactivity() async {
+    final currentState = ref.read(reconocimientoFacialNotifierProvider).estado;
+    // Solo cambiar a inactivo si estamos en el estado inicial (cámara activa)
+    if (currentState == ReconocimientoFacialEstado.inicial) {
+      ref
+          .read(reconocimientoFacialNotifierProvider.notifier)
+          .cambiarEstado(ReconocimientoFacialEstado.inactivo);
+
+      await _cameraController?.stopImageStream();
+    }
+  }
+
+  // Reanudar la actividad
+  Future<void> _resumeActivity() async {
+    ref
+        .read(reconocimientoFacialNotifierProvider.notifier)
+        .cambiarEstado(ReconocimientoFacialEstado.inicial);
+
+    await _cameraController?.startImageStream(_processCameraImage);
+
+    _resetInactivityTimer();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final CameraController? cameraController = _cameraController;
+
+    print('dispose de la camara');
 
     // App state changed before we got the chance to initialize.
     if (cameraController == null || !cameraController.value.isInitialized) {
@@ -56,8 +150,10 @@ class _ReconocimientoFacialScreenState
 
     if (state == AppLifecycleState.inactive) {
       cameraController.dispose();
+      _inactivityTimer?.cancel();
     } else if (state == AppLifecycleState.resumed) {
       _initCamera();
+      _resetInactivityTimer();
     }
   }
 
@@ -107,6 +203,7 @@ class _ReconocimientoFacialScreenState
       );
 
       await _cameraController!.initialize();
+      _cameraController!.startImageStream(_processCameraImage);
 
       if (mounted) {
         setState(() {
@@ -146,7 +243,7 @@ class _ReconocimientoFacialScreenState
         _cameras![newCameraIndex],
         ResolutionPreset.high,
         enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.jpeg,
+        imageFormatGroup: ImageFormatGroup.nv21,
       );
 
       await _cameraController!.initialize();
@@ -156,6 +253,142 @@ class _ReconocimientoFacialScreenState
           _isCameraInitialized = true;
         });
       }
+
+      // Reiniciar el temporizador de inactividad al cambiar la cámara
+      _resetInactivityTimer();
+    }
+  }
+
+  Future<void> _processCameraImage(CameraImage image) async {
+    if (!mounted) return;
+    final state = ref.watch(reconocimientoFacialNotifierProvider);
+
+    if (state.estado == ReconocimientoFacialEstado.exito ||
+        state.estado == ReconocimientoFacialEstado.inactivo) {
+      return;
+    }
+
+    if (_isBusy) return;
+
+    final reconocimientoNotifier = ref.read(
+      reconocimientoFacialNotifierProvider.notifier,
+    );
+
+    _isBusy = true;
+
+    try {
+      // Prepare input image
+      final orientations = {
+        DeviceOrientation.portraitUp: 0,
+        DeviceOrientation.landscapeLeft: 90,
+        DeviceOrientation.portraitDown: 180,
+        DeviceOrientation.landscapeRight: 270,
+      };
+
+      final newCameraIndex =
+          _isFrontCameraSelected
+              ? _cameras!.indexWhere(
+                (camera) => camera.lensDirection == CameraLensDirection.front,
+              )
+              : _cameras!.indexWhere(
+                (camera) => camera.lensDirection == CameraLensDirection.back,
+              );
+
+      final camera = _cameras![newCameraIndex];
+
+      InputImageRotation? rotation;
+      if (Platform.isIOS) {
+        rotation = InputImageRotationValue.fromRawValue(
+          camera.sensorOrientation,
+        );
+      } else {
+        var rotationCompensation =
+            orientations[_cameraController!.value.deviceOrientation];
+        if (rotationCompensation == null) return;
+        if (camera.lensDirection == CameraLensDirection.front) {
+          rotationCompensation =
+              (camera.sensorOrientation + rotationCompensation) % 360;
+        } else {
+          rotationCompensation =
+              (camera.sensorOrientation - rotationCompensation + 360) % 360;
+        }
+        rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
+      }
+      if (rotation == null) return;
+      final format = InputImageFormatValue.fromRawValue(image.format.raw);
+      if (format == null) return;
+
+      final yPlane = image.planes[0].bytes;
+      final uvPlane = image.planes[1].bytes;
+
+      final buffer = Uint8List(yPlane.length + uvPlane.length);
+      buffer.setRange(0, yPlane.length, yPlane);
+      buffer.setRange(yPlane.length, buffer.length, uvPlane);
+
+      InputImage inputImage = InputImage.fromBytes(
+        bytes: buffer,
+        metadata: InputImageMetadata(
+          size: Size(image.width.toDouble(), image.height.toDouble()),
+          rotation: rotation,
+          format: InputImageFormat.nv21,
+          bytesPerRow: image.planes[0].bytesPerRow,
+        ),
+      );
+
+      // Detect faces
+      final faces = await reconocimientoNotifier.detectFaces(inputImage);
+      if (faces.isEmpty) {
+        if (mounted) {
+          setState(() => customPaint = null);
+        }
+        _isBusy = false;
+
+        return;
+      }
+
+      // Reiniciar el temporizador de inactividad
+      _resetInactivityTimer();
+
+      final nv21Data = FacialRecognitionUtilsDos.yuv420ToNv21(image);
+
+      // Prepare input list
+      List input =
+          await compute(FacialRecognitionUtilsDos.prepareInputFromNV21, {
+            'nv21Data': nv21Data,
+            'width': image.width,
+            'height': image.height,
+            'isFrontCamera': camera.lensDirection == CameraLensDirection.front,
+            'face': faces.first,
+          });
+
+      // Get embedding
+      final embedding = reconocimientoNotifier.getEmbedding(input);
+      // Identify the face
+      final name = await reconocimientoNotifier.identifyFace(embedding);
+      // Update UI
+      if (mounted) {
+        setState(() {
+          customPaint = CustomPaint(
+            painter: FaceDetectorPainter(
+              faces,
+              inputImage.metadata!.size,
+              inputImage.metadata!.rotation,
+              camera.lensDirection,
+              name,
+            ),
+          );
+        });
+      }
+
+      await Future.delayed(const Duration(seconds: 5));
+
+      if (name != 'No Registrado') {
+        ref
+            .read(reconocimientoFacialNotifierProvider.notifier)
+            .cambiarEstado(ReconocimientoFacialEstado.inicial);
+      }
+    } finally {
+      _isBusy = false;
     }
   }
 
@@ -173,6 +406,9 @@ class _ReconocimientoFacialScreenState
       setState(() {
         _isFlashOn = !_isFlashOn;
       });
+
+      // Reiniciar el temporizador de inactividad al cambiar el flash
+      _resetInactivityTimer();
     } catch (e) {
       NotificationUtils.showSnackBar(
         context: context,
@@ -203,6 +439,9 @@ class _ReconocimientoFacialScreenState
 
       // Procesar la imagen
       await _procesarImagen(base64Image);
+
+      // Cancelar el temporizador de inactividad al capturar una imagen
+      _inactivityTimer?.cancel();
     } catch (e) {
       ref
           .read(reconocimientoFacialNotifierProvider.notifier)
@@ -239,11 +478,17 @@ class _ReconocimientoFacialScreenState
 
         // Procesar la imagen
         await _procesarImagen(base64Image);
+        // Cancelar el temporizador de inactividad al seleccionar una imagen
+        _inactivityTimer?.cancel();
       } else {
         // El usuario canceló la selección
         ref
             .read(reconocimientoFacialNotifierProvider.notifier)
             .cambiarEstado(ReconocimientoFacialEstado.inicial);
+
+        // Reiniciar el temporizador de inactividad
+        _resetInactivityTimer();
+        print('_seleccionarImagen');
       }
     } catch (e) {
       ref
@@ -277,6 +522,9 @@ class _ReconocimientoFacialScreenState
     });
 
     ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
+
+    // Reiniciar el temporizador de inactividad
+    _resetInactivityTimer();
   }
 
   @override
@@ -297,24 +545,39 @@ class _ReconocimientoFacialScreenState
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reconocimiento Facial'),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.photo_library),
-            onPressed:
-                state.estado == ReconocimientoFacialEstado.inicial
-                    ? _seleccionarImagen
-                    : null,
-            tooltip: 'Seleccionar de galería',
-          ),
-        ],
+    return PopScope(
+      onPopInvokedWithResult: _onPopInvokedWithResult,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Reconocimiento Facial'),
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.photo_library),
+              onPressed:
+                  state.estado == ReconocimientoFacialEstado.inicial ||
+                          state.estado == ReconocimientoFacialEstado.inactivo
+                      ? _seleccionarImagen
+                      : null,
+              tooltip: 'Seleccionar de galería',
+            ),
+          ],
+        ),
+        body: _buildBody(context, state),
       ),
-      body: _buildBody(context, state),
     );
+  }
+
+  Future<void> _onPopInvokedWithResult(bool didPop, dynamic result) async {
+    if (!didPop) return;
+
+    if (_cameraController?.value.isStreamingImages == true) {
+      await _cameraController?.stopImageStream();
+    }
+
+    await _cameraController?.dispose();
+    _inactivityTimer?.cancel();
   }
 
   Widget _buildBody(BuildContext context, ReconocimientoFacialStateData state) {
@@ -322,16 +585,188 @@ class _ReconocimientoFacialScreenState
       case ReconocimientoFacialEstado.inicial:
         return _buildCameraPreview(context);
       case ReconocimientoFacialEstado.capturando:
-        return _buildCapturando(context);
+        return buildProcesandoRegistroBiometrico(context, _animationController);
       case ReconocimientoFacialEstado.procesando:
         return _buildProcesando(context);
       case ReconocimientoFacialEstado.exito:
         return _buildExito(context, state);
       case ReconocimientoFacialEstado.error:
         return _buildError(context, state.errorMessage ?? 'Error desconocido');
+      case ReconocimientoFacialEstado.inactivo:
+        return _buildInactivo(context);
       default:
         return _buildCameraPreview(context);
     }
+  }
+
+  // Nueva pantalla para el estado de inactividad
+  Widget _buildInactivo(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      color: theme.colorScheme.primary,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.hourglass_empty,
+                    color: theme.colorScheme.onPrimary,
+                    size: 32,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Sistema en Espera',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Main content
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.background,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Animated icon
+                    AnimatedBuilder(
+                      animation: _animationController,
+                      builder: (context, child) {
+                        return Transform.rotate(
+                          angle: _animationController.value * 2 * math.pi,
+                          child: Icon(
+                            Icons.timelapse,
+                            size: 100,
+                            color: theme.colorScheme.primary.withOpacity(0.7),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Mensaje de inactividad
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'Sistema en espera por inactividad',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Descripción
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'No se ha detectado actividad en los últimos 5 minutos. El sistema de reconocimiento facial está en pausa.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: theme.colorScheme.onBackground.withOpacity(
+                            0.7,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Botón para reanudar
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: FilledButton.icon(
+                        onPressed: _resumeActivity,
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Reanudar Reconocimiento Facial'),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 56),
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Consejos
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 32),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.lightbulb_outline,
+                                color: theme.colorScheme.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Consejos',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Para un mejor reconocimiento facial, asegúrate de estar en un lugar bien iluminado y mantener tu rostro centrado en la pantalla.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: theme.colorScheme.onBackground.withOpacity(
+                                0.7,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildCameraPreview(BuildContext context) {
@@ -361,14 +796,19 @@ class _ReconocimientoFacialScreenState
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             color: theme.colorScheme.primary,
-            child: Text(
-              'Coloca tu rostro dentro del marco y presiona el botón para capturar',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: theme.colorScheme.onPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Column(
+              children: [
+                Text(
+                  'Coloca tu rostro dentro del marco y presiona el botón para capturar',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: theme.colorScheme.onPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                
+              ],
             ),
           ),
 
@@ -386,7 +826,12 @@ class _ReconocimientoFacialScreenState
                     Transform.scale(
                       scale: scale,
                       alignment: Alignment.center,
-                      child: Center(child: Icon(Icons.face, size: 100)),
+                      child: Center(
+                        child: CameraPreview(
+                          _cameraController!,
+                          child: customPaint,
+                        ),
+                      ),
                     ),
 
                     // Guía para el rostro
@@ -400,51 +845,66 @@ class _ReconocimientoFacialScreenState
           ),
 
           // Controles de cámara
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-            color: theme.colorScheme.primary,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Botón de flash
-                _buildControlButton(
-                  icon: _isFlashOn ? Icons.flash_on : Icons.flash_off,
-                  onPressed: _toggleFlash,
-                  label: _isFlashOn ? 'Flash On' : 'Flash Off',
-                ),
+          // Container(
+          //   padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          //   color: theme.colorScheme.primary,
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //     children: [
+          //       // Botón de flash
+          //       _buildControlButton(
+          //         icon: _isFlashOn ? Icons.flash_on : Icons.flash_off,
+          //         onPressed: _toggleFlash,
+          //         label: _isFlashOn ? 'Flash On' : 'Flash Off',
+          //       ),
 
-                // Botón de captura
-                GestureDetector(
-                  onTap: _captureImage,
-                  child: Container(
-                    height: 70,
-                    width: 70,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: theme.colorScheme.onPrimary,
-                        width: 3,
-                      ),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                      margin: const EdgeInsets.all(8),
+          //       // Botón de captura
+          //       GestureDetector(
+          //         onTap: _captureImage,
+          //         child: Container(
+          //           height: 70,
+          //           width: 70,
+          //           decoration: BoxDecoration(
+          //             shape: BoxShape.circle,
+          //             border: Border.all(
+          //               color: theme.colorScheme.onPrimary,
+          //               width: 3,
+          //             ),
+          //           ),
+          //           child: Container(
+          //             decoration: BoxDecoration(
+          //               shape: BoxShape.circle,
+          //               color: theme.colorScheme.onPrimary,
+          //             ),
+          //             margin: const EdgeInsets.all(8),
+          //           ),
+          //         ),
+          //       ),
+
+          //       // Botón para cambiar de cámara
+          //       _buildControlButton(
+          //         icon: Icons.flip_camera_ios,
+          //         onPressed: _toggleCamera,
+          //         label: 'Cambiar',
+          //       ),
+          //     ],
+          //   ),
+          // ),
+
+          const SizedBox(height: 32),
+
+                // Botón principal
+                FilledButton.icon(
+                  onPressed: () => _buildDraggableSearchSheet(context),
+                  icon: const Icon(Icons.face),
+                  label: const Text('Añadir registro facial'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
-
-                // Botón para cambiar de cámara
-                _buildControlButton(
-                  icon: Icons.flip_camera_ios,
-                  onPressed: _toggleCamera,
-                  label: 'Cambiar',
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -606,6 +1066,7 @@ class _ReconocimientoFacialScreenState
   ) {
     final theme = Theme.of(context);
     final trabajador = state.trabajadorIdentificado;
+    final size = MediaQuery.of(context).size;
 
     return Container(
       color: theme.colorScheme.primary.withOpacity(0.1),
@@ -644,7 +1105,7 @@ class _ReconocimientoFacialScreenState
                 backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
                 backgroundImage:
                     trabajador.fotoUrl != null
-                        ? NetworkImage(trabajador.fotoUrl!)
+                        ? FileImage(File(trabajador.fotoUrl))
                         : null,
                 child:
                     trabajador.fotoUrl == null
@@ -741,45 +1202,55 @@ class _ReconocimientoFacialScreenState
               ),
             ],
 
-            const SizedBox(height: 32),
-
-            if (!state.registroExitoso) ...[
-              FilledButton.icon(
-                onPressed: _registrarAsistencia,
-                icon: const Icon(Icons.check),
-                label: const Text('Registrar Asistencia'),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: theme.colorScheme.onPrimary,
-                ),
+            Container(
+              width: size.width * 0.7,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: LinearProgressIndicator(
+                backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+                color: theme.colorScheme.primary,
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(4),
               ),
-            ] else ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green[700]),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Asistencia registrada correctamente',
-                        style: TextStyle(
-                          color: Colors.green[700],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
 
+            // const SizedBox(height: 32),
+            //
+            // if (!state.registroExitoso) ...[
+            //   FilledButton.icon(
+            //     onPressed: _registrarAsistencia,
+            //     icon: const Icon(Icons.check),
+            //     label: const Text('Registrar Asistencia'),
+            //     style: FilledButton.styleFrom(
+            //       minimumSize: const Size(double.infinity, 50),
+            //       backgroundColor: theme.colorScheme.primary,
+            //       foregroundColor: theme.colorScheme.onPrimary,
+            //     ),
+            //   ),
+            // ] else ...[
+            //   Container(
+            //     padding: const EdgeInsets.all(16),
+            //     decoration: BoxDecoration(
+            //       color: Colors.green[50],
+            //       borderRadius: BorderRadius.circular(12),
+            //       border: Border.all(color: Colors.green),
+            //     ),
+            //     child: Row(
+            //       children: [
+            //         Icon(Icons.check_circle, color: Colors.green[700]),
+            //         const SizedBox(width: 12),
+            //         Expanded(
+            //           child: Text(
+            //             'Asistencia registrada correctamente',
+            //             style: TextStyle(
+            //               color: Colors.green[700],
+            //               fontWeight: FontWeight.bold,
+            //             ),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ],
             const SizedBox(height: 16),
 
             OutlinedButton.icon(
@@ -848,6 +1319,188 @@ class _ReconocimientoFacialScreenState
           ),
         ),
       ),
+    );
+  }
+
+  void _buildDraggableSearchSheet(BuildContext context) async {
+    final theme = Theme.of(context);
+
+    final notifier = ref.read(reconocimientoFacialNotifierProvider.notifier);
+    notifier.cambiarEstado(ReconocimientoFacialEstado.pausado);
+    await _cameraController?.stopImageStream();
+    _inactivityTimer?.cancel();
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => DraggableScrollableSheet(
+            initialChildSize: 0.9,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    // Indicador de arrastre
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.onSurface.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+
+                    // Título
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'Buscar Trabajador',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+
+                    // Campo de búsqueda
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Buscar por nombre...',
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon:
+                              _searchQuery.isNotEmpty
+                                  ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                    },
+                                  )
+                                  : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Resultados de búsqueda
+                    Expanded(child: _buildSearchResults(scrollController)),
+                  ],
+                ),
+              );
+            },
+          ),
+    );
+
+    print('Modal bottom sheet closed');
+    notifier.cambiarEstado(ReconocimientoFacialEstado.inicial);
+    _searchController.clear();
+    _searchQuery = '';
+    _isSearching = false;
+    await _cameraController?.startImageStream(_processCameraImage);
+    _resetInactivityTimer();
+  }
+
+  Widget _buildSearchResults(ScrollController scrollController) {
+    // Usar el provider de trabajadores para obtener la lista
+    final trabajadoresState = ref.watch(trabajadorNotifierProvider);
+    final theme = Theme.of(context);
+
+    // Si está cargando
+    if (trabajadoresState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Si hay un error
+    if (trabajadoresState.errorMessage != null) {
+      return Center(
+        child: Text(
+          'Error: ${trabajadoresState.errorMessage}',
+          style: TextStyle(color: theme.colorScheme.error),
+        ),
+      );
+    }
+
+    // Si no hay trabajadores
+    if (trabajadoresState.trabajadores.isEmpty) {
+      return const Center(child: Text('No hay trabajadores registrados'));
+    }
+
+    // Filtrar trabajadores por nombre si hay una búsqueda
+    final filteredTrabajadores =
+        _searchQuery.isEmpty
+            ? trabajadoresState.trabajadores
+            : trabajadoresState.trabajadores.where((t) {
+              final query = _searchQuery.toLowerCase();
+              final nombreCompleto = '${t.nombre} ${t.primerApellido} ${t.segundoApellido}'.toLowerCase();
+              final identificacion = t.identificacion.toLowerCase();
+              final id = t.id.toString();
+
+              return nombreCompleto.contains(query) ||
+                  identificacion.contains(query) ||
+                  id.contains(query);
+            }).toList();
+
+
+    // Si no hay resultados de búsqueda
+    if (_isSearching && filteredTrabajadores.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 48,
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No se encontraron trabajadores con ese nombre',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Mostrar resultados
+    return ListView.builder(
+      controller: scrollController,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: filteredTrabajadores.length,
+      itemBuilder: (context, index) {
+        final trabajador = filteredTrabajadores[index];
+
+        return TrabajadorCard(trabajador: trabajador);
+      },
     );
   }
 }
