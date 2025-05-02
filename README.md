@@ -72,9 +72,6 @@ flutter pub get
 flutter run
 Para generar código con drift:
 
-bash
-Copiar
-Editar
 flutter pub run build_runner build --delete-conflicting-outputs
 🚨 Mantenimiento
 Ver MANUAL DE MANTENIMIENTO para:
