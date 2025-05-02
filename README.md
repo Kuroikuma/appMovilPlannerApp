@@ -1,9 +1,3 @@
-Aquí tienes un README.md profesional y adaptado para tu proyecto PlannerApp. Está enfocado en desarrolladores y mantenimiento, destacando arquitectura, tecnologías usadas y procesos clave como la sincronización offline.
-
-✅ README.md
-markdown
-Copiar
-Editar
 # 📱 PlannerApp - Aplicación de Control de Asistencia
 
 PlannerApp es una aplicación móvil desarrollada con **Flutter**, diseñada para gestionar el control de asistencia de trabajadores utilizando **reconocimiento facial**, registro de **ingresos/salidas** y sincronización automática de datos, incluso en escenarios offline.
