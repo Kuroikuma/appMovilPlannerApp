@@ -4,6 +4,7 @@ import 'package:flutter_application_1/data/database.dart';
 import '../../../domain/models/registro_diario.dart';
 import '../../converters/date_converter.dart';
 import '../../converters/time_converter.dart';
+import '../../mappers/registro_diario_mapper.dart';
 
 class RegistroDiarioRepositoryLocal {
   final AppDatabase _db;
@@ -233,22 +234,7 @@ class RegistroDiarioRepositoryLocal {
       horarioId: horaAprobadaId,
     );
 
-    // En una implementación real, aquí se actualizaría en la base de datos
-    // Guardar el registro actualizado en la base de datos
-    await (_db.update(_db.registrosDiarios)
-      ..where((tbl) => tbl.id.equals(registroActualizado.id!))).write(
-      RegistrosDiariosCompanion(
-        equipoId: Value(registroActualizado.equipoId),
-        fechaIngreso: Value(registroActualizado.fechaIngreso),
-        horaIngreso: Value(registroActualizado.horaIngreso),
-        fechaSalida: Value(registroActualizado.fechaSalida!),
-        horaSalida: Value(registroActualizado.horaSalida!),
-        estado: Value(registroActualizado.estado),
-        nombreTrabajador: Value(registroActualizado.nombreTrabajador!),
-        fotoTrabajador: Value(registroActualizado.fotoTrabajador!),
-        cargoTrabajador: Value(registroActualizado.cargoTrabajador!),
-      ),
-    );
+    await _db.update(_db.registrosDiarios).replace(RegistroDiarioMapper.toDataModel(registroActualizado));
 
     return registroActualizado;
   }
@@ -358,6 +344,7 @@ class RegistroDiarioRepositoryLocal {
         fotoTrabajador: Value(registro.fotoTrabajador ?? ""),
         cargoTrabajador: Value(registro.cargoTrabajador ?? "Desconocido"),
         horarioId: Value(registro.horarioId),
+        id: Value(registro.id!),
       ),
     );
   }

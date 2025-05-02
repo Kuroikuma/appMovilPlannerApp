@@ -9,11 +9,11 @@ class TipoAccionesSyncConverter
   @override
   TipoAccionesSync fromSql(String fromDb) {
     switch (fromDb) {
-      case 'CREATE':
+      case 'create':
         return TipoAccionesSync.create;
-      case 'UPDATE':
+      case 'update':
         return TipoAccionesSync.update;
-      case 'DELETE':
+      case 'delete':
         return TipoAccionesSync.delete;
       default:
         return TipoAccionesSync.create;

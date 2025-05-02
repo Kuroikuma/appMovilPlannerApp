@@ -320,8 +320,24 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
     final create =
         cambios.where((op) => op.action == TipoAccionesSync.create).toList();
 
-    final registrosDiarios = create.map((op) => json.encode(op.data)).toList();
-    final updatesRegistrosDiarios = updates.map((op) => op.data).toList();
+    final registrosDiarios =
+        create.map((op) {
+          final dataConHoraAprobada = {
+            ...op.data, // Copia las propiedades originales
+            'horaAprobadaId': op.data["horarioId"], // Agrega la nueva propiedad
+          };
+          return json.encode(dataConHoraAprobada);
+        }).toList();
+
+    final updatesRegistrosDiarios =
+        updates.map((op) {
+          final dataConHoraAprobada = {
+            ...op.data, // Copia las propiedades originales
+            'horaAprobadaId': op.data["horarioId"], // Agrega la nueva propiedad
+            'RegistroDiarioId': op.data["id"], // Agrega la nueva propiedad
+          };
+          return json.encode(dataConHoraAprobada);
+        }).toList();
 
     if (registrosDiarios.isEmpty && updatesRegistrosDiarios.isEmpty) {
       print('No hay registros diarios para sincronizar.');
@@ -357,26 +373,5 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
         'Registros diarios actualizados: ${updatesRegistrosDiarios.length}',
       );
     }
-
-    // for (final cambio in cambios) {
-    //   try {
-    //     final dataJson = cambio.data; // El JSON ya mapeado
-
-    //     if (cambio.action == TipoAccionesSync.create) {
-    //       await registroDiarioRepositoryRemote.insertarRegistroDiario(dataJson);
-    //     }
-    //     //  else if (cambio.action == TipoAccionesSync.update) {
-    //     //   await dio.put('/registros_diarios/${cambio.registerId}', data: parsedData);
-    //     // } else if (cambio.action == TipoAccionesSync.delete) {
-    //     //   await dio.delete('/registros_diarios/${cambio.registerId}');
-    //     // }
-
-    //     await markSyncedByRegisterId(cambio.registerId.toString(), cambio.action);
-    //     print('✅ Cambio sincronizado exitosamente: ${cambio.id}');
-    //   } catch (e) {
-    //     print('❌ Error sincronizando cambio ${cambio.id}: $e');
-    //     // Podrías aquí agregar retries o logs especiales
-    //   }
-    // }
   }
 }
