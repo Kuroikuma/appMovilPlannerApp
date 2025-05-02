@@ -14,6 +14,7 @@ class Trabajador {
   final String fotoUrl;
   final String cargo;
   final String identificacion;
+  final bool? isEntry;
 
   Trabajador({
     this.id = 0,
@@ -26,6 +27,7 @@ class Trabajador {
     required this.fotoUrl,
     required this.cargo,
     required this.identificacion,
+    this.isEntry = false,
   });
 
   Trabajador copyWith({
@@ -39,6 +41,7 @@ class Trabajador {
     String? fotoUrl,
     String? cargo,
     String? identificacion,
+    bool? isEntry,
   }) {
     return Trabajador(
       id: id ?? this.id,
@@ -51,6 +54,7 @@ class Trabajador {
       fotoUrl: fotoUrl ?? this.fotoUrl,
       cargo: cargo ?? this.cargo,
       identificacion: identificacion ?? this.identificacion,
+      isEntry: isEntry ?? this.isEntry,
     );
   }
 }

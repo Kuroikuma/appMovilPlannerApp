@@ -121,7 +121,7 @@ class _RegistroAsistenciaScreenState
                 _buildRegistrosTab(context, registroDiarioState),
 
                 // Pestaña de registro de asistencia
-                _buildRegistrarAsistenciaTab(context, trabajadorState),
+                _buildRegistrarAsistenciaTab(context, trabajadorState, registroDiarioState),
               ],
             ),
           ),
@@ -372,6 +372,7 @@ class _RegistroAsistenciaScreenState
   Widget _buildRegistrarAsistenciaTab(
     BuildContext context,
     TrabajadorState state,
+    RegistroDiarioState registroDiarioState,
   ) {
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -386,7 +387,22 @@ class _RegistroAsistenciaScreenState
       );
     }
 
-    if (state.trabajadores.isEmpty) {
+    final now = DateTime.now();
+
+    final trabajadoresRegistrados = state.trabajadores.map((trabajador) {
+      return trabajador.copyWith(
+        faceSync: true,
+        isEntry: registroDiarioState.registrosFiltrados.any(
+          (registro) =>
+              registro.equipoId == trabajador.equipoId &&
+              registro.fechaIngreso.year == now.year &&
+              registro.fechaIngreso.month == now.month &&
+              registro.fechaIngreso.day == now.day,
+        ),
+      );
+    }).toList();
+
+    if (trabajadoresRegistrados.isEmpty) {
       return const Center(child: Text('No hay trabajadores disponibles'));
     }
 
@@ -404,9 +420,9 @@ class _RegistroAsistenciaScreenState
           // Lista de trabajadores
           Expanded(
             child: ListView.builder(
-              itemCount: state.trabajadores.length,
+              itemCount: trabajadoresRegistrados.length,
               itemBuilder: (context, index) {
-                final trabajador = state.trabajadores[index];
+                final trabajador = trabajadoresRegistrados[index];
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(
@@ -423,9 +439,9 @@ class _RegistroAsistenciaScreenState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.login, color: Colors.blue),
+                          icon: trabajador.isEntry == true ? const Icon(Icons.logout, color: Colors.red) : const Icon(Icons.login, color: Colors.blue),
                           onPressed:
-                              () => _registrarEntrada(trabajador.equipoId, 36825),
+                              () => _registrarAsistencia(trabajador.equipoId, 36825),
                           tooltip: 'Registrar entrada',
                         ),
                         IconButton(
@@ -452,7 +468,7 @@ class _RegistroAsistenciaScreenState
               Navigator.of(context).pushNamed(AppRoutes.reconocimientoFacial);
             },
             icon: const Icon(Icons.face),
-            label: const Text('Registrar asistencia con reconocimiento facial'),
+            label: const Text('Reconocimiento facial'),
             style: FilledButton.styleFrom(
               minimumSize: const Size(double.infinity, 50),
               backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -574,7 +590,7 @@ class _RegistroAsistenciaScreenState
     );
   }
 
-  void _registrarEntrada(int equipoId, int horaAprobadaId) {
+  void _registrarAsistencia(int equipoId, int horaAprobadaId) {
     ref
         .read(registroDiarioNotifierProvider.notifier)
         .registrarAsistencia(equipoId, horaAprobadaId)
