@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_application_1/core/error/exceptions.dart';
 import 'package:flutter_application_1/data/database.dart';
@@ -222,7 +223,7 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
   @override
   Future<List<SyncEntity>> getPendingRemoteSyncOperations() async {
     final operations = await _client.get(
-      '/IntegracionExternaHoras/GetListRegistroSyncsEntityByTableName?tableName=RegistroDiario',
+      '/GetListRegistroSyncsEntityByTableName?tableName=RegistroDiario',
     );
 
     if (operations.data is List) {
@@ -268,6 +269,11 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
   Future<void> fetchUpdatesFromServerRegistroDiario(
     List<SyncEntity> operations,
   ) async {
+    if (operations.isEmpty) {
+      print('No hay cambios pendientes para sincronizar.');
+      return;
+    }
+
     try {
       for (var op in operations) {
         final registroJson = op.data;
@@ -303,24 +309,54 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
 
   Future<void> syncPendingChanges(List<SyncEntity> cambios) async {
     print('📦 Cambios locales pendientes: ${cambios.length}');
+
+    if (cambios.isEmpty) {
+      print('No hay cambios pendientes para sincronizar.');
+      return;
+    }
     final updates =
         cambios.where((op) => op.action == TipoAccionesSync.update).toList();
 
     final create =
         cambios.where((op) => op.action == TipoAccionesSync.create).toList();
 
-    final registrosDiarios = create.map((op) => op.data).toList();
+    final registrosDiarios = create.map((op) => json.encode(op.data)).toList();
     final updatesRegistrosDiarios = updates.map((op) => op.data).toList();
 
-    await _client.post(
-      'PostSaveMultipleRegistroDiarioByLocal',
-      data: registrosDiarios.toString(),
-    );
+    if (registrosDiarios.isEmpty && updatesRegistrosDiarios.isEmpty) {
+      print('No hay registros diarios para sincronizar.');
+      return;
+    }
 
-    await _client.put(
-      'PostUpdateMultipleRegistroDiarioByLocal',
-      data: updatesRegistrosDiarios.toString(),
-    );
+    if (registrosDiarios.isNotEmpty) {
+      final Map<String, dynamic> data = {
+        'listRegistroDiaro': registrosDiarios.toString(),
+      };
+
+      final createData = FormData.fromMap(data);
+
+      await _client.post(
+        '/PostSaveMultipleRegistroDiarioByLocal',
+        data: createData,
+      );
+      print('Registros diarios insertados: ${registrosDiarios.length}');
+    }
+
+    if (updatesRegistrosDiarios.isNotEmpty) {
+      final Map<String, dynamic> data = {
+        'listRegistroDiaro': updatesRegistrosDiarios.toString(),
+      };
+
+      final updateData = FormData.fromMap(data);
+
+      await _client.put(
+        '/UpdateMultipleRegistroDiarioByLocal',
+        data: updateData,
+      );
+      print(
+        'Registros diarios actualizados: ${updatesRegistrosDiarios.length}',
+      );
+    }
 
     // for (final cambio in cambios) {
     //   try {

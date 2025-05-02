@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/use_case/horario_notifier.dart';
+import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/registro_diario.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
@@ -29,6 +30,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
       _initHorarios();
       _initRegistrosDiarios();
       _cargarTrabajadores();
+      _cargarRegistrosBiometricos();
     });
 
     ref.listenManual(ubicacionNotifierProvider, (previous, next) {
@@ -71,6 +73,10 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
       );
     }
   }
+  void _cargarRegistrosBiometricos() {
+    ref.read(reconocimientoFacialNotifierProvider.notifier).cargarRegistrosBiometricos();
+  }
+
 
   @override
   Widget build(BuildContext context) {
