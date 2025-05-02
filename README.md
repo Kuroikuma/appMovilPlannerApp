@@ -22,9 +22,6 @@ lib/
 ├── presentation/ # UI: Providers, Screens, Widgets
 └── main.dart # Entry point
 
-yaml
-Copiar
-Editar
 
 ---
 
