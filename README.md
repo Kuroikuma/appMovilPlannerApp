@@ -14,7 +14,7 @@ PlannerApp es una aplicación móvil desarrollada con **Flutter**, diseñada par
 
 lib/                                                                                                                                                                                                                                                                        
  ├── core/ # Converters, mappers y lógica reutilizable                                                                                                                                                                                                                      
- ├── data/ # Repositorios, acceso a base de datos (local y remoto)
+ ├── data/ # Repositorios, acceso a base de datos (local y remoto)                                                                                                                                                                                                            
  │ ├── repositories/
  │ ├── local/
  │ └── remote/
