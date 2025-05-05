@@ -79,7 +79,7 @@ class RegistroBiometricoRepository extends IRegistroBiometricoRepository {
     } else {
       await insertQueuSyncRegistroBiometrico(
         registroBiometrico,
-        TipoAccionesSync.create,
+        TipoAccionesSync.post,
       );
       return registroBiometrico;
     }

@@ -40,7 +40,7 @@ class TrabajadorRepository
         final localTrabajador = await localDataSource.insertOfflineTrabajador(
           trabajador,
         );
-        insertQueuTrabajador(localTrabajador, TipoAccionesSync.create);
+        insertQueuTrabajador(localTrabajador, TipoAccionesSync.post);
         return localTrabajador.copyWith(id: localTrabajador.id);
       }
     } on SocketException {

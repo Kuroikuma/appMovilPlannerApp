@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-enum TipoAccionesSync { create, update, delete }
+enum TipoAccionesSync { post, update, delete }
 
 class TipoAccionesSyncConverter
     extends TypeConverter<TipoAccionesSync, String> {
@@ -9,14 +9,14 @@ class TipoAccionesSyncConverter
   @override
   TipoAccionesSync fromSql(String fromDb) {
     switch (fromDb) {
-      case 'create':
-        return TipoAccionesSync.create;
+      case 'post':
+        return TipoAccionesSync.post;
       case 'update':
         return TipoAccionesSync.update;
       case 'delete':
         return TipoAccionesSync.delete;
       default:
-        return TipoAccionesSync.create;
+        return TipoAccionesSync.post;
     }
   }
 

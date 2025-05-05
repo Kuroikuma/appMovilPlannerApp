@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/error/exceptions.dart';
 import '../../../domain/models/registro_diario.dart';
@@ -121,7 +122,7 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
       } else {
         await insertQueuSyncRegistroDiario(
           registroAsistencia,
-          TipoAccionesSync.create,
+          TipoAccionesSync.post,
         );
       }
 
@@ -133,6 +134,8 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
     RegistroDiario registroAsistencia,
     TipoAccionesSync accion,
   ) async {
+    final uuid = const Uuid();
+    final id = uuid.v4();
     syncEntityRepository.insertSyncEntity(
       SyncsEntitysCompanion(
         entityTableNameToSync: Value('registroDiario'),
@@ -141,6 +144,7 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
         timestamp: Value(DateTime.now()),
         isSynced: Value(false),
         data: Value(registroAsistencia.toJson()),
+        id: Value(id),
       ),
     );
   }

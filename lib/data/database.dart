@@ -187,7 +187,7 @@ class RegistrosDiarios extends Table {
 }
 
 class SyncsEntitys extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  TextColumn get id => text()();
   TextColumn get entityTableNameToSync => text()();
   // TextColumn get action => text()();
   TextColumn get action => text().map(const TipoAccionesSyncConverter())();

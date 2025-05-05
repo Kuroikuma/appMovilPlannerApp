@@ -344,7 +344,6 @@ class RegistroDiarioRepositoryLocal {
         fotoTrabajador: Value(registro.fotoTrabajador ?? ""),
         cargoTrabajador: Value(registro.cargoTrabajador ?? "Desconocido"),
         horarioId: Value(registro.horarioId),
-        id: Value(registro.id!),
       ),
     );
   }

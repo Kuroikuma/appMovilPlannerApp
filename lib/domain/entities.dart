@@ -112,7 +112,7 @@ class Horario {
 }
 
 class SyncEntity {
-  final int id;
+  final String id;
   final String entityTableNameToSync;
   final TipoAccionesSync action; // 'CREATE', 'UPDATE', 'DELETE'
   final String registerId;

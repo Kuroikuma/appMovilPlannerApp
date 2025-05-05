@@ -105,8 +105,8 @@ class RegistroDiario {
   // Crear un objeto desde un mapa (JSON)
   factory RegistroDiario.fromJson(Map<String, dynamic> json) {
     return RegistroDiario(
-      id: json['registroDiarioId'],
-      equipoId: json['equipoId'],
+      id: int.parse(json['registroDiarioId']),
+      equipoId: int.parse(json['equipoId']),
       reconocimientoFacialId: json['reconocimientoFacialId'] ?? '',
       fechaIngreso: DateTime.parse(json['fechaIngreso']),
       horaIngreso: _timeFromString(json['horaIngreso']),
@@ -124,7 +124,7 @@ class RegistroDiario {
           json['trabajadorStringFile'] ??
           'https://randomuser.me/api/portraits/men/1.jpg',
       cargoTrabajador: json['puestoNombre'] ?? 'Desconocido',
-      horarioId: json['horaAprobadaId'],
+      horarioId: int.parse(json['horaAprobadaId']),
     );
   }
 

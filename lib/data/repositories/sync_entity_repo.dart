@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_application_1/core/error/exceptions.dart';
+import 'package:flutter_application_1/data/converters/date_converter.dart';
 import 'package:flutter_application_1/data/database.dart';
 import 'package:flutter_application_1/data/mappers/trabajador_mappers.dart';
 import 'package:flutter_application_1/domain/entities.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_application_1/domain/entities.dart';
 import '../../domain/models/registro_diario.dart';
 import '../../domain/repositories.dart';
 import '../converters/action_sync.dart';
+import '../converters/json_converter.dart';
 import 'local/registro_diario_repository_local.dart';
 import 'local/trabajador_local.dart';
 import 'remote/api_client.dart';
@@ -190,7 +192,7 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
             break;
         }
 
-        if (entity == 'registroDiario') {
+        if (entity == 'RegistroDiario') {
           await fetchUpdatesFromServerRegistroDiario(entry.value);
         }
       } catch (e) {
@@ -226,20 +228,39 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
       '/GetListRegistroSyncsEntityByTableName?tableName=RegistroDiario',
     );
 
+    List<SyncEntity> listSyncEntity = [];
+
     if (operations.data is List) {
-      return operations.data
-          .map(
-            (op) => SyncEntity(
-              id: op['id'],
-              entityTableNameToSync: op['entityTableNameToSync'],
-              action: op['action'],
-              registerId: op['registerId'],
-              timestamp: DateTime.parse(op['timestamp']),
-              isSynced: op['isSynced'],
-              data: op['data'],
-            ),
-          )
-          .toList();
+      operations.data.map((op) {
+        final dataJson = JsonConverter().fromSql(op['data']);
+        final registroDiarioJson = {
+          'registroDiarioId': dataJson["Id"],
+          'horaAprobadaId': dataJson["HoraAprobadaId"],
+          'equipoId': dataJson["EquipoId"],
+          'fechaIngreso': DateConverter().fromSqlFormat(dataJson["Fecha"]).toIso8601String(),
+          'horaIngreso': dataJson["HoraIngreso"],
+          'fechaSalida': DateConverter().fromSqlFormat(dataJson["FechaSalida"]).toIso8601String(),
+          'horaSalida': dataJson["HoraSalida"],
+          'estado': true,
+        };
+
+        final syncEntity = SyncEntity(
+          id: op['id'],
+          entityTableNameToSync: op['entityTableNameToSync'],
+          action: TipoAccionesSyncConverter().fromSql(op['action']),
+          registerId: dataJson["Id"],
+          timestamp: DateTime.parse(op['timestamp']),
+          isSynced: op['isSynced'],
+          data: registroDiarioJson, // Convertir a JSON
+        );
+
+        listSyncEntity.add(syncEntity);
+        // Aquí puedes hacer lo que necesites con el syncEntity
+
+        return syncEntity;
+      }).toList();
+
+      return listSyncEntity;
     } else {
       print('Unexpected response data type: ${operations.data.runtimeType}');
       throw ApiException();
@@ -318,13 +339,13 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
         cambios.where((op) => op.action == TipoAccionesSync.update).toList();
 
     final create =
-        cambios.where((op) => op.action == TipoAccionesSync.create).toList();
+        cambios.where((op) => op.action == TipoAccionesSync.post).toList();
 
     final registrosDiarios =
         create.map((op) {
           final dataConHoraAprobada = {
             ...op.data, // Copia las propiedades originales
-            'horaAprobadaId': op.data["horarioId"], // Agrega la nueva propiedad
+            'horaAprobadaId': op.data["horarioId"],
           };
           return json.encode(dataConHoraAprobada);
         }).toList();
@@ -333,8 +354,8 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
         updates.map((op) {
           final dataConHoraAprobada = {
             ...op.data, // Copia las propiedades originales
-            'horaAprobadaId': op.data["horarioId"], // Agrega la nueva propiedad
-            'RegistroDiarioId': op.data["id"], // Agrega la nueva propiedad
+            'horaAprobadaId': op.data["horarioId"],
+            'RegistroDiarioId': op.data["id"],
           };
           return json.encode(dataConHoraAprobada);
         }).toList();
@@ -355,6 +376,9 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
         '/PostSaveMultipleRegistroDiarioByLocal',
         data: createData,
       );
+
+      await markMultipleAsSynced(create);
+
       print('Registros diarios insertados: ${registrosDiarios.length}');
     }
 
@@ -369,6 +393,8 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
         '/UpdateMultipleRegistroDiarioByLocal',
         data: updateData,
       );
+
+      await markMultipleAsSynced(updates);
       print(
         'Registros diarios actualizados: ${updatesRegistrosDiarios.length}',
       );

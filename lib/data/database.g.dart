@@ -3412,16 +3412,12 @@ class $SyncsEntitysTable extends SyncsEntitys
   $SyncsEntitysTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
     'id',
     aliasedName,
     false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _entityTableNameToSyncMeta =
       const VerificationMeta('entityTableNameToSync');
@@ -3514,6 +3510,8 @@ class $SyncsEntitysTable extends SyncsEntitys
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('entity_table_name_to_sync')) {
       context.handle(
@@ -3550,14 +3548,14 @@ class $SyncsEntitysTable extends SyncsEntitys
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => const {};
   @override
   SyncsEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SyncsEntity(
       id:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
+            DriftSqlType.string,
             data['${effectivePrefix}id'],
           )!,
       entityTableNameToSync:
@@ -3607,7 +3605,7 @@ class $SyncsEntitysTable extends SyncsEntitys
 }
 
 class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
-  final int id;
+  final String id;
   final String entityTableNameToSync;
   final TipoAccionesSync action;
   final String registerId;
@@ -3626,7 +3624,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
+    map['id'] = Variable<String>(id);
     map['entity_table_name_to_sync'] = Variable<String>(entityTableNameToSync);
     {
       map['action'] = Variable<String>(
@@ -3662,7 +3660,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SyncsEntity(
-      id: serializer.fromJson<int>(json['id']),
+      id: serializer.fromJson<String>(json['id']),
       entityTableNameToSync: serializer.fromJson<String>(
         json['entityTableNameToSync'],
       ),
@@ -3677,7 +3675,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
+      'id': serializer.toJson<String>(id),
       'entityTableNameToSync': serializer.toJson<String>(entityTableNameToSync),
       'action': serializer.toJson<TipoAccionesSync>(action),
       'registerId': serializer.toJson<String>(registerId),
@@ -3688,7 +3686,7 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
   }
 
   SyncsEntity copyWith({
-    int? id,
+    String? id,
     String? entityTableNameToSync,
     TipoAccionesSync? action,
     String? registerId,
@@ -3758,13 +3756,14 @@ class SyncsEntity extends DataClass implements Insertable<SyncsEntity> {
 }
 
 class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
-  final Value<int> id;
+  final Value<String> id;
   final Value<String> entityTableNameToSync;
   final Value<TipoAccionesSync> action;
   final Value<String> registerId;
   final Value<DateTime> timestamp;
   final Value<bool> isSynced;
   final Value<Map<String, dynamic>> data;
+  final Value<int> rowid;
   const SyncsEntitysCompanion({
     this.id = const Value.absent(),
     this.entityTableNameToSync = const Value.absent(),
@@ -3773,27 +3772,31 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
     this.timestamp = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.data = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   SyncsEntitysCompanion.insert({
-    this.id = const Value.absent(),
+    required String id,
     required String entityTableNameToSync,
     required TipoAccionesSync action,
     required String registerId,
     this.timestamp = const Value.absent(),
     this.isSynced = const Value.absent(),
     required Map<String, dynamic> data,
-  }) : entityTableNameToSync = Value(entityTableNameToSync),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       entityTableNameToSync = Value(entityTableNameToSync),
        action = Value(action),
        registerId = Value(registerId),
        data = Value(data);
   static Insertable<SyncsEntity> custom({
-    Expression<int>? id,
+    Expression<String>? id,
     Expression<String>? entityTableNameToSync,
     Expression<String>? action,
     Expression<String>? registerId,
     Expression<DateTime>? timestamp,
     Expression<bool>? isSynced,
     Expression<String>? data,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3804,17 +3807,19 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
       if (timestamp != null) 'timestamp': timestamp,
       if (isSynced != null) 'is_synced': isSynced,
       if (data != null) 'data': data,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   SyncsEntitysCompanion copyWith({
-    Value<int>? id,
+    Value<String>? id,
     Value<String>? entityTableNameToSync,
     Value<TipoAccionesSync>? action,
     Value<String>? registerId,
     Value<DateTime>? timestamp,
     Value<bool>? isSynced,
     Value<Map<String, dynamic>>? data,
+    Value<int>? rowid,
   }) {
     return SyncsEntitysCompanion(
       id: id ?? this.id,
@@ -3825,6 +3830,7 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
       timestamp: timestamp ?? this.timestamp,
       isSynced: isSynced ?? this.isSynced,
       data: data ?? this.data,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -3832,7 +3838,7 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (entityTableNameToSync.present) {
       map['entity_table_name_to_sync'] = Variable<String>(
@@ -3858,6 +3864,9 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
         $SyncsEntitysTable.$converterdata.toSql(data.value),
       );
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -3870,7 +3879,8 @@ class SyncsEntitysCompanion extends UpdateCompanion<SyncsEntity> {
           ..write('registerId: $registerId, ')
           ..write('timestamp: $timestamp, ')
           ..write('isSynced: $isSynced, ')
-          ..write('data: $data')
+          ..write('data: $data, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -7139,23 +7149,25 @@ typedef $$RegistrosDiariosTableProcessedTableManager =
     >;
 typedef $$SyncsEntitysTableCreateCompanionBuilder =
     SyncsEntitysCompanion Function({
-      Value<int> id,
+      required String id,
       required String entityTableNameToSync,
       required TipoAccionesSync action,
       required String registerId,
       Value<DateTime> timestamp,
       Value<bool> isSynced,
       required Map<String, dynamic> data,
+      Value<int> rowid,
     });
 typedef $$SyncsEntitysTableUpdateCompanionBuilder =
     SyncsEntitysCompanion Function({
-      Value<int> id,
+      Value<String> id,
       Value<String> entityTableNameToSync,
       Value<TipoAccionesSync> action,
       Value<String> registerId,
       Value<DateTime> timestamp,
       Value<bool> isSynced,
       Value<Map<String, dynamic>> data,
+      Value<int> rowid,
     });
 
 class $$SyncsEntitysTableFilterComposer
@@ -7167,7 +7179,7 @@ class $$SyncsEntitysTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
@@ -7218,7 +7230,7 @@ class $$SyncsEntitysTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => ColumnOrderings(column),
   );
@@ -7263,7 +7275,7 @@ class $$SyncsEntitysTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get entityTableNameToSync => $composableBuilder(
@@ -7321,13 +7333,14 @@ class $$SyncsEntitysTableTableManager
                   $$SyncsEntitysTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
+                Value<String> id = const Value.absent(),
                 Value<String> entityTableNameToSync = const Value.absent(),
                 Value<TipoAccionesSync> action = const Value.absent(),
                 Value<String> registerId = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<Map<String, dynamic>> data = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
               }) => SyncsEntitysCompanion(
                 id: id,
                 entityTableNameToSync: entityTableNameToSync,
@@ -7336,16 +7349,18 @@ class $$SyncsEntitysTableTableManager
                 timestamp: timestamp,
                 isSynced: isSynced,
                 data: data,
+                rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                Value<int> id = const Value.absent(),
+                required String id,
                 required String entityTableNameToSync,
                 required TipoAccionesSync action,
                 required String registerId,
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 required Map<String, dynamic> data,
+                Value<int> rowid = const Value.absent(),
               }) => SyncsEntitysCompanion.insert(
                 id: id,
                 entityTableNameToSync: entityTableNameToSync,
@@ -7354,6 +7369,7 @@ class $$SyncsEntitysTableTableManager
                 timestamp: timestamp,
                 isSynced: isSynced,
                 data: data,
+                rowid: rowid,
               ),
           withReferenceMapper:
               (p0) =>
