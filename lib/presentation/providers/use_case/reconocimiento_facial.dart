@@ -6,7 +6,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter_application_1/domain/repositories/i_registro_biometrico_repository.dart';
 import 'package:flutter_application_1/presentation/providers/use_case/trabajador.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 import '../../../core/network/network_info.dart';
