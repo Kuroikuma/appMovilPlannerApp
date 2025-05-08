@@ -346,10 +346,12 @@ class ReconocimientoFacialNotifier
         horaAprobadaId,
       );
 
+      final exitoBool = exito == 'Asistencia registrada';
+
       state = state.copyWith(
         isLoading: false,
-        registroExitoso: exito,
-        errorMessage: exito ? null : 'No se pudo registrar la asistencia',
+        registroExitoso: exitoBool,
+        errorMessage: exitoBool ? null : exito,
       );
     } catch (e) {
       state = state.copyWith(

@@ -234,9 +234,9 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
       operations.data.map((op) {
         final dataJson = JsonConverter().fromSql(op['data']);
         final registroDiarioJson = {
-          'registroDiarioId': dataJson["Id"],
-          'horaAprobadaId': dataJson["HoraAprobadaId"],
-          'equipoId': dataJson["EquipoId"],
+          'registroDiarioId': int.parse(dataJson["Id"]),
+          'horaAprobadaId': int.parse(dataJson["HoraAprobadaId"]),
+          'equipoId':  int.parse(dataJson["EquipoId"]),
           'fechaIngreso': DateConverter().fromSqlFormat(dataJson["Fecha"]).toIso8601String(),
           'horaIngreso': dataJson["HoraIngreso"],
           'fechaSalida': DateConverter().fromSqlFormat(dataJson["FechaSalida"]).toIso8601String(),

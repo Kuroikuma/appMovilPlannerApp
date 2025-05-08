@@ -234,21 +234,27 @@ class RegistroDiarioRepositoryLocal {
       horarioId: horaAprobadaId,
     );
 
-    await _db.update(_db.registrosDiarios).replace(RegistroDiarioMapper.toDataModel(registroActualizado));
+    await _db
+        .update(_db.registrosDiarios)
+        .replace(RegistroDiarioMapper.toDataModel(registroActualizado));
 
     return registroActualizado;
   }
 
-  Future<bool> isEntry(int equipoId) async {
+  Future<RegistroDiario?> isEntry(int equipoId) async {
     final registrosDiarios = await getRegistroDiario();
     final hoy = DateTime.now();
 
-    return registrosDiarios.any((registro) {
-      return registro.equipoId == equipoId &&
-          registro.fechaIngreso.year == hoy.year &&
-          registro.fechaIngreso.month == hoy.month &&
-          registro.fechaIngreso.day == hoy.day;
-    });
+    try {
+      return registrosDiarios.firstWhere((registro) {
+        return registro.equipoId == equipoId &&
+            registro.fechaIngreso.year == hoy.year &&
+            registro.fechaIngreso.month == hoy.month &&
+            registro.fechaIngreso.day == hoy.day;
+      });
+    } catch (e) {
+      return null; // No encontrado
+    }
   }
 
   Future<RegistroDiario> registrarAsistencia(

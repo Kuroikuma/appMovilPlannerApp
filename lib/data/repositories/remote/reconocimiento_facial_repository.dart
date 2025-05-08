@@ -148,7 +148,7 @@ class ReconocimientoFacialRepository
   }
 
   @override
-  Future<bool> registrarAsistenciaPorReconocimiento(int equipoId, int horaAprobadaId) async {
+  Future<String> registrarAsistenciaPorReconocimiento(int equipoId, int horaAprobadaId) async {
     try {
       // Registrar la entrada
       await _registroDiarioRepository.registrarAsistencia(
@@ -156,9 +156,9 @@ class ReconocimientoFacialRepository
         horaAprobadaId, 
       );
 
-      return true;
+      return 'Asistencia registrada';
     } catch (e) {
-      return false;
+      return e.toString();
     }
   }
 

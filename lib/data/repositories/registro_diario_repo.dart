@@ -89,7 +89,18 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
     int equipoId,
     int horaAprobadaId,
   ) async {
-    final isEntry = await localDataSource.isEntry(equipoId);
+    final registroDiarioEntrada = await localDataSource.isEntry(equipoId);
+
+    if (registroDiarioEntrada != null) {
+      if (!registroDiarioEntrada.puedeRegistrarSalida) {
+        final tiempoRestante = registroDiarioEntrada.tiempoRestanteFormateado;
+        throw Exception(
+          'Debe esperar $tiempoRestante antes de registrar la salida',
+        );
+      }
+    }
+
+    final isEntry = registroDiarioEntrada != null;
     final registroAsistencia = await localDataSource.registrarAsistencia(
       equipoId,
       horaAprobadaId,

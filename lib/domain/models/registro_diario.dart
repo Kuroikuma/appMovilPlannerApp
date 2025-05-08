@@ -105,8 +105,8 @@ class RegistroDiario {
   // Crear un objeto desde un mapa (JSON)
   factory RegistroDiario.fromJson(Map<String, dynamic> json) {
     return RegistroDiario(
-      id: int.parse(json['registroDiarioId']),
-      equipoId: int.parse(json['equipoId']),
+      id: json['registroDiarioId'],
+      equipoId: json['equipoId'],
       reconocimientoFacialId: json['reconocimientoFacialId'] ?? '',
       fechaIngreso: DateTime.parse(json['fechaIngreso']),
       horaIngreso: _timeFromString(json['horaIngreso']),
@@ -124,7 +124,7 @@ class RegistroDiario {
           json['trabajadorStringFile'] ??
           'https://randomuser.me/api/portraits/men/1.jpg',
       cargoTrabajador: json['puestoNombre'] ?? 'Desconocido',
-      horarioId: int.parse(json['horaAprobadaId']),
+      horarioId: json['horaAprobadaId'],
     );
   }
 
@@ -169,5 +169,60 @@ class RegistroDiario {
   static TimeOfDay _timeFromString(String timeStr) {
     final parts = timeStr.split(':');
     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+  }
+
+    // Método para obtener el tiempo transcurrido desde el ingreso
+  Duration get tiempoTranscurridoDesdeIngreso {
+    final ahora = DateTime.now();
+    
+    // Convertir TimeOfDay a DateTime para cálculos precisos
+    final fechaHoraIngreso = DateTime(
+      fechaIngreso.year,
+      fechaIngreso.month,
+      fechaIngreso.day,
+      horaIngreso.hour,
+      horaIngreso.minute,
+    );
+    
+    return ahora.difference(fechaHoraIngreso);
+  }
+
+  // Verificar si ha pasado el tiempo mínimo para registrar salida (5 minutos)
+  bool get puedeRegistrarSalida {
+    // Si ya tiene salida registrada, no puede registrar otra
+    if (tieneSalida) return false;
+    
+    // Verificar si han pasado al menos 5 minutos desde el ingreso
+    return tiempoTranscurridoDesdeIngreso.inMinutes >= 5;
+  }
+
+  // Obtener el tiempo restante antes de poder registrar salida
+  Duration get tiempoRestanteParaSalida {
+    final tiempoMinimo = const Duration(minutes: 5);
+    final tiempoTranscurrido = tiempoTranscurridoDesdeIngreso;
+    
+    if (tiempoTranscurrido >= tiempoMinimo) {
+      return Duration.zero;
+    }
+    
+    return tiempoMinimo - tiempoTranscurrido;
+  }
+
+  // Formato legible del tiempo restante
+  String get tiempoRestanteFormateado {
+    final restante = tiempoRestanteParaSalida;
+    
+    if (restante.inSeconds <= 0) {
+      return "Puede registrar salida";
+    }
+    
+    final minutos = restante.inMinutes;
+    final segundos = restante.inSeconds % 60;
+    
+    if (minutos > 0) {
+      return "$minutos min $segundos seg";
+    } else {
+      return "$segundos segundos";
+    }
   }
 }
