@@ -9,6 +9,7 @@ import '../providers/use_case/ubicacion.dart';
 import '../routes/app_routes.dart';
 import '../utils/notification_utils.dart';
 import '../widget/location_deletion_overlay.dart';
+import '../widget/ubicacion/location_deletion_confirmation_modal.dart';
 
 class UbicacionScreen extends ConsumerStatefulWidget {
   const UbicacionScreen({super.key});
@@ -55,10 +56,13 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
     final ubicacionState = ref.read(ubicacionNotifierProvider);
     ref
         .read(registroDiarioNotifierProvider.notifier)
-        .cargarRegistros(ubicacionState.ubicacion!.ubicacionId.toString(), fecha: DateTime.now());
+        .cargarRegistros(
+          ubicacionState.ubicacion!.ubicacionId.toString(),
+          fecha: DateTime.now(),
+        );
   }
 
-    void _cargarTrabajadores() {
+  void _cargarTrabajadores() {
     final ubicacionState = ref.read(ubicacionNotifierProvider);
     if (ubicacionState.ubicacion != null &&
         ubicacionState.ubicacion!.ubicacionId != null) {
@@ -73,10 +77,75 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
       );
     }
   }
+
   void _cargarRegistrosBiometricos() {
-    ref.read(reconocimientoFacialNotifierProvider.notifier).cargarRegistrosBiometricos();
+    ref
+        .read(reconocimientoFacialNotifierProvider.notifier)
+        .cargarRegistrosBiometricos();
   }
 
+  void _showDeletionConfirmationModal() {
+    final ubicacionState = ref.watch(ubicacionNotifierProvider);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => LocationDeletionConfirmationModal(
+            currentLocationName: ubicacionState.ubicacionNombre,
+            onConfirmDeletion: (String verificationCode) {
+              // Aquí puedes validar el código de verificación si es necesario
+              _startDeletionProcess(verificationCode);
+            },
+          ),
+    );
+  }
+
+  void _startDeletionProcess(String verificationCode) async {
+    final notifier = ref.read(ubicacionNotifierProvider.notifier);
+    final ubicacionState = ref.read(ubicacionNotifierProvider);
+
+    setState(() {
+      _isDeleting = true;
+    });
+
+    try {
+      // Eliminar ubicación
+      final success = await notifier.eliminarUbicacion(
+        int.parse(verificationCode),
+      );
+      if (success) {
+        // Navigator.of(context).pop();
+      } else {
+        setState(() {
+          _isDeleting = false;
+        });
+
+        NotificationUtils.showSnackBar(
+          context: context,
+          message:
+              ubicacionState.errorMessage ?? 'Error al eliminar la ubicación',
+          icon: Icons.error,
+          isError: true,
+        );
+      }
+    } catch (e) {
+      // Manejar error si es necesario
+      if (mounted) {
+        NotificationUtils.showSnackBar(
+          context: context,
+          message: 'Error al eliminar la ubicación: ${e.toString()}',
+          isError: true,
+        );
+
+        // Ocultar pantalla de carga en caso de error
+        setState(() {
+          _isDeleting = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,147 +166,159 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
       ),
     );
 
-    if (_isDeleting) {
-      return LocationDeletionOverlay(isDeleting: _isDeleting);
-    }
-
     return Scaffold(
-      body: Center(
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Encabezado con estado de verificación
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: theme.colorScheme.primary),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.verified_user,
-                        color: Colors.green[700],
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.green[100],
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.green,
-                                    width: 1,
+      body:
+          _isDeleting
+              ? const LocationDeletionOverlay(isDeleting: true)
+              : Center(
+                child: SafeArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Encabezado con estado de verificación
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
                                   ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle,
-                                      color: Colors.green[700],
-                                      size: 14,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Verificada',
-                                      style: TextStyle(
-                                        color: Colors.green[700],
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            ubicacion.nombre ?? 'Sin nombre',
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              child: Icon(
+                                Icons.verified_user,
+                                color: Colors.green[700],
+                                size: 28,
+                              ),
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green[100],
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.green,
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.check_circle,
+                                              color: Colors.green[700],
+                                              size: 14,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              'Verificada',
+                                              style: TextStyle(
+                                                color: Colors.green[700],
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    ubicacion.nombre ?? 'Sin nombre',
+                                    style: theme.textTheme.headlineSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+
+                      // Detalles de la ubicación
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Detalles de la ubicación',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Información de la ubicación
+                            _buildInfoCard(context, [
+                              if (ubicacion.ubicacionId != null)
+                                _buildInfoRow(
+                                  context,
+                                  'Ubicación ID',
+                                  ubicacion.ubicacionId.toString(),
+                                ),
+                              if (ubicacion.nombre != null)
+                                _buildInfoRow(
+                                  context,
+                                  'Nombre',
+                                  ubicacion.nombre!,
+                                ),
+                            ]),
+
+                            const SizedBox(height: 24),
+
+                            // Sección "¿Qué puedes hacer ahora?"
+                            Text(
+                              '¿Qué puedes hacer ahora?',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Tarjetas de funcionalidades
+                            _buildFunctionalityCards(context),
+
+                            const SizedBox(height: 24),
+
+                            // Botones de acción
+                            _buildActionButtons(context, ubicacionNotifier),
+                          ],
+                        ),
+                      ),
+                      // Overlay de eliminación
+                    ],
+                  ),
                 ),
               ),
-
-              // Detalles de la ubicación
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Detalles de la ubicación',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Información de la ubicación
-                    _buildInfoCard(context, [
-                      if (ubicacion.ubicacionId != null)
-                        _buildInfoRow(context, 'Ubicación ID', ubicacion.ubicacionId.toString()),
-                      if (ubicacion.nombre != null)
-                        _buildInfoRow(context, 'Nombre', ubicacion.nombre!),
-                    ]),
-
-                    const SizedBox(height: 24),
-
-                    // Sección "¿Qué puedes hacer ahora?"
-                    Text(
-                      '¿Qué puedes hacer ahora?',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Tarjetas de funcionalidades
-                    _buildFunctionalityCards(context),
-
-                    const SizedBox(height: 24),
-
-                    // Botones de acción
-                    _buildActionButtons(context, ubicacionNotifier),
-                  ],
-                ),
-              ),
-              // Overlay de eliminación
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -521,7 +602,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
         Expanded(
           child: FilledButton.tonalIcon(
             onPressed: () {
-              _mostrarDialogoConfirmacion(context, notifier);
+              _showDeletionConfirmationModal();
             },
             icon: const Icon(Icons.delete_outline),
             label: const Text('Eliminar'),
@@ -533,63 +614,6 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  void _mostrarDialogoConfirmacion(
-    BuildContext context,
-    UbicacionNotifier notifier,
-  ) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Eliminar Ubicación'),
-          content: const Text(
-            '¿Estás seguro de que deseas eliminar esta ubicación? Esta acción no se puede deshacer.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-
-                setState(() {
-                  _isDeleting = true;
-                });
-
-                try {
-                  // Eliminar ubicación
-                  await notifier.eliminarUbicacion();
-                } catch (e) {
-                  // Manejar error si es necesario
-                  if (mounted) {
-                    NotificationUtils.showSnackBar(
-                      context: context,
-                      message:
-                          'Error al eliminar la ubicación: ${e.toString()}',
-                      isError: true,
-                    );
-
-                    // Ocultar pantalla de carga en caso de error
-                    setState(() {
-                      _isDeleting = false;
-                    });
-                  }
-                }
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.error,
-                foregroundColor: Theme.of(context).colorScheme.onError,
-              ),
-              child: const Text('Eliminar'),
-            ),
-          ],
-        );
-      },
     );
   }
 }

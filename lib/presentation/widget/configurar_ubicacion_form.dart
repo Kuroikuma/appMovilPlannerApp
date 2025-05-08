@@ -100,7 +100,7 @@ class _ConfiurarUbicacionFormScreenState
                 controller: _codigoUbicacionController,
                 decoration: InputDecoration(
                   labelText: 'Código de Ubicación',
-                  hintText: 'Ej: UBI-12345',
+                  hintText: 'Ej: 475985',
                   prefixIcon: const Icon(Icons.qr_code),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -126,7 +126,7 @@ class _ConfiurarUbicacionFormScreenState
                 textInputAction: TextInputAction.done,
                 autocorrect: false,
                 enableSuggestions: false,
-                keyboardType: TextInputType.visiblePassword,
+                keyboardType: TextInputType.number,
                 inputFormatters: [
                   // Opcional: Formatear el código según tus necesidades
                   FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\-]')),
@@ -221,6 +221,8 @@ class _ConfiurarUbicacionFormScreenState
       });
 
       final hasInternet = await ref.watch(networkInfoProvider).isConnected;
+      final ubicacionState = ref.watch(ubicacionNotifierProvider);
+      final notifier = ref.read(ubicacionNotifierProvider.notifier);
 
       if (!hasInternet) {
         NotificationUtils.showSnackBar(
@@ -238,25 +240,33 @@ class _ConfiurarUbicacionFormScreenState
 
       try {
         // Obtener el ID de ubicación
-        await ref
-            .read(ubicacionNotifierProvider.notifier)
-            .handleSubmitConfiguracionUbicacion(
-              _codigoUbicacionController.text,
-            );
+        final isVerify = await notifier.handleSubmitConfiguracionUbicacion(
+          _codigoUbicacionController.text,
+        );
 
         // Mostrar notificación de éxito
         if (mounted) {
-          NotificationUtils.showSnackBar(
-            context: context,
-            message: 'Ubicación configurada correctamente',
-            isError: false,
-            icon: Icons.check_circle,
-          );
+          if (isVerify == true) {
+            NotificationUtils.showSnackBar(
+              context: context,
+              message: 'Ubicación configurada correctamente',
+              isError: false,
+              icon: Icons.check_circle,
+            );
 
-          Navigator.of(context).pushNamed(AppRoutes.ubicacion);
+            Navigator.of(context).pushNamed(AppRoutes.ubicacion);
+          }
         } else {
-          // Manejar el caso en el que la pantalla no esté montada
-          // Puedes mostrar un mensaje de error o realizar alguna acción adicional
+          if (mounted) {
+            NotificationUtils.showSnackBar(
+              context: context,
+              message:
+                  ubicacionState.errorMessage ??
+                  'Error al configurar ubicación',
+              isError: true,
+              icon: Icons.error_outline,
+            );
+          }
         }
       } catch (e) {
         // El error ya se maneja en el provider y se muestra en el build

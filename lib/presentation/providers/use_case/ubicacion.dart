@@ -112,6 +112,16 @@ class UbicacionNotifier extends StateNotifier<UbicacionState> {
     final ubicacionId = state.ubicacionId;
     final ubicacionNombre = state.ubicacionNombre;
 
+    if (ubicacionId.isEmpty || ubicacionNombre.isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        errorType: UbicacionErrorType.notFound,
+        errorMessage: 'Ubicación no encontrada',
+      );
+      return;
+      
+    }
+
     try {
       final ubicacionData = await _repository.configurarUbicacion(
         codigoUbicacion,
@@ -220,7 +230,7 @@ class UbicacionNotifier extends StateNotifier<UbicacionState> {
     }
   }
 
-  Future<void> eliminarUbicacion() async {
+  Future<bool> eliminarUbicacion(int codigoUbicacion) async {
     state = state.copyWith(isLoading: true).clearErrors();
 
     final hasInternet = await networkInfo.isConnected;
@@ -231,7 +241,20 @@ class UbicacionNotifier extends StateNotifier<UbicacionState> {
         errorType: UbicacionErrorType.noInternet,
         errorMessage: 'No hay conexión a internet',
       );
-      return;
+      return false;
+    }
+
+    final codigoUbicacionLocal = state.ubicacion?.codigoUbicacion;
+
+    print(codigoUbicacionLocal);
+
+    if (codigoUbicacion != codigoUbicacionLocal) {
+      state = state.copyWith(
+        isLoading: false,
+        errorType: UbicacionErrorType.notFound,
+        errorMessage: 'Código de verificación erróneo',
+      );
+      return false;
     }
 
     await _repository.eliminarUbicacion(int.parse(state.ubicacionId));
@@ -242,13 +265,15 @@ class UbicacionNotifier extends StateNotifier<UbicacionState> {
       isLoading: false,
       ubicacionNombre: '',
     );
+
+    return true;
   }
 
   void clearErrors() {
     state = state.clearErrors();
   }
 
-  Future<void> handleSubmitConfiguracionUbicacion(
+  Future<bool> handleSubmitConfiguracionUbicacion(
     String codigoUbicacion,
   ) async {
     state = state.copyWith(isLoading: true).clearErrors();
@@ -261,11 +286,13 @@ class UbicacionNotifier extends StateNotifier<UbicacionState> {
         errorType: UbicacionErrorType.noInternet,
         errorMessage: 'No hay conexión a internet',
       );
-      return;
+      return false;
     }
 
     await getUbicacionByCodigoUbicacion(codigoUbicacion);
     await configurarUbicacion(codigoUbicacion);
     await verificarUbicacionConfiguradaLocal();
+
+    return state.isVerify ?? false;
   }
 }

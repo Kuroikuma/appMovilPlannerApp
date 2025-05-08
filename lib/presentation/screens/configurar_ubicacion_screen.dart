@@ -18,7 +18,7 @@ class ConfigurarUbicacionScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: size.height * 0.05),
+                SizedBox(height: size.height * 0.04),
 
                 // Logo o ícono de la aplicación
                 Container(
@@ -28,10 +28,14 @@ class ConfigurarUbicacionScreen extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.primaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.location_searching,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.primary,
+                  child: Padding(
+                    padding: const EdgeInsets.all(
+                      20,
+                    ), // Ajusta este valor si quieres más/menos espacio
+                    child: Image.asset(
+                      'assets/Subtract.png',
+                      fit: BoxFit.contain, // Esto asegura que no se estire
+                    ),
                   ),
                 ),
 
@@ -44,6 +48,17 @@ class ConfigurarUbicacionScreen extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.primary,
                   ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 4),
+
+                // Subtítulo
+                Text(
+                  'App de registro biometrico.',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
                   textAlign: TextAlign.center,
                 ),
 
@@ -215,12 +230,7 @@ class ConfigurarUbicacionScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      // Título
-                      Text(
-                        'Configurar Ubicación',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
+
                       const SizedBox(height: 16),
                       // Formulario
                       const Expanded(child: ConfiurarUbicacionFormScreen()),
