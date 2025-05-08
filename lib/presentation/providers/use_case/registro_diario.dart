@@ -6,6 +6,7 @@ import '../providers.dart';
 import '../repositories.dart';
 
 enum RegistroFilterType { todos, soloEntrada, conSalida, inactivos }
+enum RegistroType { entrada, salida }
 
 class RegistroDiarioState {
   final List<RegistroDiario> registros;
@@ -17,6 +18,7 @@ class RegistroDiarioState {
   final DateTime? fechaFin;
   final int? trabajadorSeleccionadoId;
   final RegistroFilterType filterType;
+  final RegistroType tipoRegistro;
 
   const RegistroDiarioState({
     this.registros = const [],
@@ -28,6 +30,7 @@ class RegistroDiarioState {
     this.fechaFin,
     this.trabajadorSeleccionadoId,
     this.filterType = RegistroFilterType.todos,
+    this.tipoRegistro = RegistroType.entrada,
   });
 
   RegistroDiarioState copyWith({
@@ -40,6 +43,7 @@ class RegistroDiarioState {
     DateTime? fechaFin,
     int? trabajadorSeleccionadoId,
     RegistroFilterType? filterType,
+    RegistroType? tipoRegistro,
   }) {
     return RegistroDiarioState(
       registros: registros ?? this.registros,
@@ -52,6 +56,7 @@ class RegistroDiarioState {
       trabajadorSeleccionadoId:
           trabajadorSeleccionadoId ?? this.trabajadorSeleccionadoId,
       filterType: filterType ?? this.filterType,
+      tipoRegistro: tipoRegistro ?? this.tipoRegistro,
     );
   }
 
@@ -105,6 +110,22 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
       _aplicarFiltros();
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
+    }
+  }
+
+  Future<RegistroDiario?> obtenerRegistroPorEquipo(int equipoId) async {
+    final registroDiarioEntrada = await _repository.obtenerRegistroPorEquipo(equipoId);
+
+    return registroDiarioEntrada;
+  }
+
+  Future<void> tipoRegistroAsistencia(int equipoId) async {
+    final registroDiarioEntrada = await _repository.obtenerRegistroPorEquipo(equipoId);
+
+    if (registroDiarioEntrada != null) {
+    state = state.copyWith(tipoRegistro: RegistroType.salida);
+    } else {
+      state = state.copyWith(tipoRegistro: RegistroType.entrada);
     }
   }
 

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter_application_1/domain/repositories/i_registro_biometrico_repository.dart';
+import 'package:flutter_application_1/presentation/providers/use_case/registro_diario.dart';
 import 'package:flutter_application_1/presentation/providers/use_case/trabajador.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
@@ -447,6 +448,9 @@ class ReconocimientoFacialNotifier
     );
 
     if (trabajador != null) {
+
+      await ref.read(registroDiarioNotifierProvider.notifier).tipoRegistroAsistencia(trabajador.equipoId);
+
       state = state.copyWith(
         trabajadorIdentificado: trabajador,
         isLoading: false,
@@ -472,10 +476,10 @@ class ReconocimientoFacialNotifier
 
   Future<void> deleteFace(int equipoId, String registroBiometricoId) async {
     await _biometricoRepository.deleteFace(equipoId, registroBiometricoId);
-    final codigo = ref.read(ubicacionNotifierProvider).ubicacion!.id;
+    final ubicacionId = ref.read(ubicacionNotifierProvider).ubicacion!.id;
 
     state = state.copyWith(
-      cachedFaces: await _biometricoRepository.getFaces(codigo),
+      cachedFaces: await _biometricoRepository.getFaces(ubicacionId),
     );
   }
 

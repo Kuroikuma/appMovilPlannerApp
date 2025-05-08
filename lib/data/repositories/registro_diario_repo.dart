@@ -74,6 +74,13 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
   }
 
   @override
+  Future<RegistroDiario?> obtenerRegistroPorEquipo(int equipoId) async {
+    final registroDiarioEntrada = await localDataSource.isEntry(equipoId);
+
+    return registroDiarioEntrada;
+  }
+
+  @override
   Future<RegistroDiario?> obtenerRegistroPorId(int id) async {
     final registrosDiarios = await localDataSource.getRegistroDiario();
 

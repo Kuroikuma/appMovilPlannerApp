@@ -6,6 +6,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/presentation/providers/use_case/registro_diario.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:image_picker/image_picker.dart';
@@ -82,14 +83,11 @@ class _ReconocimientoFacialScreenState
     });
   }
 
-  void _disposeFaceRecognition() {
-    ref.read(reconocimientoFacialNotifierProvider.notifier).dispose();
-  }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _disposeFaceRecognition();
+    // _disposeFaceRecognition();
     _cameraController?.stopImageStream();
     _cameraController?.dispose();
     _animationController.dispose();
@@ -805,7 +803,6 @@ class _ReconocimientoFacialScreenState
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                
               ],
             ),
           ),
@@ -821,16 +818,15 @@ class _ReconocimientoFacialScreenState
                   alignment: Alignment.center,
                   children: [
                     // Vista previa de la cámara con ajuste de escala
-                    Transform.scale(
-                      scale: scale,
+                    Transform(
                       alignment: Alignment.center,
-                      child: Center(
-                        child: CameraPreview(
-                          _cameraController!,
-                          child: customPaint,
-                        ),
-                      ),
+                      transform: Matrix4.identity()..scale(-scale, scale, 1.0),
+                      child: CameraPreview(_cameraController!),
                     ),
+                    if (customPaint != null)
+                      Positioned.fill(
+                        child: CustomPaint(painter: customPaint!.painter),
+                      ),
 
                     // Guía para el rostro
                     Positioned.fill(
@@ -888,21 +884,20 @@ class _ReconocimientoFacialScreenState
           //     ],
           //   ),
           // ),
-
           const SizedBox(height: 32),
 
-                // Botón principal
-                FilledButton.icon(
-                  onPressed: () => _buildDraggableSearchSheet(context),
-                  icon: const Icon(Icons.face),
-                  label: const Text('Añadir registro facial'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
+          // Botón principal
+          FilledButton.icon(
+            onPressed: () => _buildDraggableSearchSheet(context),
+            icon: const Icon(Icons.face),
+            label: const Text('Añadir registro facial'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1065,6 +1060,8 @@ class _ReconocimientoFacialScreenState
     final theme = Theme.of(context);
     final trabajador = state.trabajadorIdentificado;
     final size = MediaQuery.of(context).size;
+    final tipoRegistro =
+        ref.watch(registroDiarioNotifierProvider).tipoRegistro.name;
 
     return Container(
       color: theme.colorScheme.primary.withOpacity(0.1),
@@ -1078,18 +1075,31 @@ class _ReconocimientoFacialScreenState
               decoration: BoxDecoration(
                 color: Colors.green[50],
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.green),
+                border:
+                    tipoRegistro == 'entrada'
+                        ? Border.all(color: Colors.green)
+                        : Border.all(color: Colors.red),
               ),
               child: Column(
                 children: [
-                  Icon(Icons.check_circle, size: 64, color: Colors.green[700]),
+                  Icon(
+                    Icons.check_circle,
+                    size: 64,
+                    color:
+                        tipoRegistro == 'entrada'
+                            ? Colors.green[700]
+                            : Colors.red[700],
+                  ),
                   const SizedBox(height: 16),
                   Text(
-                    '¡Reconocimiento Exitoso!',
+                    '¡Registro de $tipoRegistro!',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green[700],
+                      color:
+                          tipoRegistro == 'entrada'
+                              ? Colors.green[700]
+                              : Colors.red[700],
                     ),
                   ),
                 ],
@@ -1455,7 +1465,9 @@ class _ReconocimientoFacialScreenState
             ? trabajadoresState.trabajadores
             : trabajadoresState.trabajadores.where((t) {
               final query = _searchQuery.toLowerCase();
-              final nombreCompleto = '${t.nombre} ${t.primerApellido} ${t.segundoApellido}'.toLowerCase();
+              final nombreCompleto =
+                  '${t.nombre} ${t.primerApellido} ${t.segundoApellido}'
+                      .toLowerCase();
               final identificacion = t.identificacion.toLowerCase();
               final id = t.id.toString();
 
@@ -1463,7 +1475,6 @@ class _ReconocimientoFacialScreenState
                   identificacion.contains(query) ||
                   id.contains(query);
             }).toList();
-
 
     // Si no hay resultados de búsqueda
     if (_isSearching && filteredTrabajadores.isEmpty) {

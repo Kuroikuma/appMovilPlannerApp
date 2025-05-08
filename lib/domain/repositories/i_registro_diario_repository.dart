@@ -20,4 +20,6 @@ abstract class IRegistroDiarioRepository {
     DateTime? fechaInicio,
     DateTime? fechaFin,
   });
+
+  Future<RegistroDiario?> obtenerRegistroPorEquipo(int equipoId);
 }

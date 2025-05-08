@@ -279,17 +279,21 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
 
                             // Información de la ubicación
                             _buildInfoCard(context, [
-                              if (ubicacion.ubicacionId != null)
                                 _buildInfoRow(
                                   context,
                                   'Ubicación ID',
                                   ubicacion.ubicacionId.toString(),
                                 ),
-                              if (ubicacion.nombre != null)
                                 _buildInfoRow(
                                   context,
                                   'Nombre',
-                                  ubicacion.nombre!,
+                                  ubicacion.nombre,
+                                ),
+
+                                _buildInfoRow(
+                                  context,
+                                  'Código',
+                                  ubicacion.codigoUbicacion.toString(),
                                 ),
                             ]),
 
