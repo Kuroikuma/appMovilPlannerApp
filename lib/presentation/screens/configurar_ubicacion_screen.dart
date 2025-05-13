@@ -55,7 +55,7 @@ class ConfigurarUbicacionScreen extends ConsumerWidget {
 
                 // Subtítulo
                 Text(
-                  'App de registro biometrico.',
+                  'App de registro biométrico.',
                   style: Theme.of(
                     context,
                   ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
