@@ -39,6 +39,7 @@ class _ReconocimientoFacialScreenState
   bool _isPermissionGranted = false;
   CustomPaint? customPaint;
   bool _isBusy = false;
+  Uint8List? _ultimaFoto;
 
   // Animation controller for the loading screen
   late AnimationController _animationController;
@@ -82,7 +83,6 @@ class _ReconocimientoFacialScreenState
       _isSearching = _searchQuery.isNotEmpty;
     });
   }
-
 
   @override
   void dispose() {
@@ -340,6 +340,19 @@ class _ReconocimientoFacialScreenState
         _isBusy = false;
 
         return;
+      } else {
+        if (mounted) {
+          final file = await _cameraController?.takePicture();
+          final image = await file?.readAsBytes();
+
+          setState(() {
+            _ultimaFoto = image;
+          });
+
+          print('Ultima foto');
+
+          await _cameraController?.stopImageStream();
+        }
       }
 
       // Reiniciar el temporizador de inactividad
@@ -363,6 +376,8 @@ class _ReconocimientoFacialScreenState
       final name = await reconocimientoNotifier.identifyFace(embedding);
       // Update UI
       if (mounted) {
+        await _cameraController?.startImageStream(_processCameraImage);
+
         setState(() {
           customPaint = CustomPaint(
             painter: FaceDetectorPainter(
@@ -373,6 +388,7 @@ class _ReconocimientoFacialScreenState
               name,
             ),
           );
+          _ultimaFoto = null;
         });
       }
 
@@ -823,6 +839,18 @@ class _ReconocimientoFacialScreenState
                       transform: Matrix4.identity()..scale(-scale, scale, 1.0),
                       child: CameraPreview(_cameraController!),
                     ),
+                    if (_ultimaFoto != null)
+                      Transform(
+                        alignment: Alignment.center,
+                        transform:
+                            Matrix4.identity()..scale(-scale, scale, 1.0),
+                        child: Image.memory(
+                          _ultimaFoto!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
+                      ),
                     if (customPaint != null)
                       Positioned.fill(
                         child: CustomPaint(painter: customPaint!.painter),

@@ -133,16 +133,6 @@ class ReconocimientoFacialNotifier
   }
 
   Future<void> initialize() async {
-    // final codigoUbicacon =
-    //     ref.read(ubicacionNotifierProvider).ubicacion!.codigoUbicacion;
-    final codigoLocal = ref.read(ubicacionNotifierProvider).ubicacion!.id;
-
-    final faces = await _biometricoRepository.getFaces(codigoLocal);
-
-    print('faces: $faces');
-
-    state = state.copyWith(cachedFaces: faces);
-
     if (state.isInitialized) return;
     final interpreterOptions = InterpreterOptions();
 
