@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../utils/facial_recognition_utils_dos.dart';
@@ -68,11 +69,12 @@ class _ReconocimientoFacialScreenState
       _checkPermissionsAndInitCamera();
       _initFaceRecognition();
       _startInactivityTimer();
+      WakelockPlus.enable();
     });
   }
 
   void _initFaceRecognition() async {
-    ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
+    // ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
     await ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
   }
 
@@ -587,6 +589,8 @@ class _ReconocimientoFacialScreenState
     if (_cameraController?.value.isStreamingImages == true) {
       await _cameraController?.stopImageStream();
     }
+
+    WakelockPlus.disable();
 
     await _cameraController?.dispose();
     _inactivityTimer?.cancel();

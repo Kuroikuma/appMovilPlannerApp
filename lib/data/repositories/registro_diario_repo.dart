@@ -99,6 +99,11 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
     final registroDiarioEntrada = await localDataSource.isEntry(equipoId);
 
     if (registroDiarioEntrada != null) {
+
+      if (registroDiarioEntrada.tieneSalida) {
+        throw Exception('Ya se registró la salida');
+      }
+
       if (!registroDiarioEntrada.puedeRegistrarSalida) {
         final tiempoRestante = registroDiarioEntrada.tiempoRestanteFormateado;
         throw Exception(

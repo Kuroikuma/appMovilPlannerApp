@@ -133,6 +133,7 @@ class ReconocimientoFacialNotifier
   }
 
   Future<void> initialize() async {
+    print(state.cachedFaces);
     if (state.isInitialized) return;
     final interpreterOptions = InterpreterOptions();
 
@@ -149,6 +150,7 @@ class ReconocimientoFacialNotifier
 
     try {
       final registros = await _biometricoRepository.getFaces(ubicacionId);
+      print("registros");
 
       state = state.copyWith(cachedFaces: registros);
     } catch (e) {
@@ -420,6 +422,8 @@ class ReconocimientoFacialNotifier
     int trabajadorId = 0;
 
     final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
+
+    print(state.cachedFaces);
 
     for (var face in state.cachedFaces) {
       final distance = _euclideanDistance(embedding, face.datosBiometricos);
