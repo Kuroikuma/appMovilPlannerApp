@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/injection_container.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,7 +10,11 @@ import 'presentation/providers/use_case/internet_status_provider.dart';
 import 'presentation/routes/app_routes.dart';
 
 void main() async {
+  // WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   WidgetsFlutterBinding.ensureInitialized();
+
   await setupDependencies(); // 👈 Inicializa las dependencias
   await initializeDateFormatting('es_ES', null);
 

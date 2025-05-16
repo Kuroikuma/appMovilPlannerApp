@@ -250,7 +250,7 @@ class RegistroDiarioRepositoryLocal {
         return registro.equipoId == equipoId &&
             registro.fechaIngreso.year == hoy.year &&
             registro.fechaIngreso.month == hoy.month &&
-            registro.fechaIngreso.day == hoy.day;
+            registro.fechaIngreso.day == hoy.day && !registro.tieneSalida;
       });
     } catch (e) {
       return null; // No encontrado
@@ -268,7 +268,7 @@ class RegistroDiarioRepositoryLocal {
           return registro.equipoId == equipoId &&
               registro.fechaIngreso.year == hoy.year &&
               registro.fechaIngreso.month == hoy.month &&
-              registro.fechaIngreso.day == hoy.day;
+              registro.fechaIngreso.day == hoy.day && !registro.tieneSalida;
         }).toList();
 
     if (registrosHoy.isEmpty) {
