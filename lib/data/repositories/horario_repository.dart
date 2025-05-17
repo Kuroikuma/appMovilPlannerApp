@@ -29,7 +29,7 @@ class HorarioRepository implements IHorarioRepository {
   }
 
   @override
-  Future<Horario> obtenerTodos(String ubicacionId) async {
+  Future<Horario?> obtenerTodos(String ubicacionId) async {
     final localData = await _db.select(_db.horarios).get();
 
     final isConnected = await networkInfo.isConnected;
@@ -39,6 +39,10 @@ class HorarioRepository implements IHorarioRepository {
         final remoteData = await _client.get(
           '/GetListHorarioByUbicacionId?ubicacionId=$ubicacionId&fechaInicio=$now&fechaFin=$now',
         );
+
+        if (remoteData.data.isEmpty) {
+          return null;
+        }
 
         final remoteHorario = remoteData.data[0];
 
@@ -102,5 +106,12 @@ class HorarioRepository implements IHorarioRepository {
   @override
   Future<int> eliminar(int id) {
     return (_db.delete(_db.horarios)..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  @override
+  Future<Horario> obtenerTodosLocal() async {
+    final localData = await _db.select(_db.horarios).get();
+
+    return localData[0];
   }
 }

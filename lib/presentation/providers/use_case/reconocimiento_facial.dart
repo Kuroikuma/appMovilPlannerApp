@@ -331,7 +331,18 @@ class ReconocimientoFacialNotifier
 
     state = state.copyWith(isLoading: true).clearErrors();
 
-    final horaAprobadaId = ref.read(horarioNotifierProvider).horario!.id;
+    final horario = ref.read(horarioNotifierProvider).horario;
+
+    if (horario == null) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'No hay horario disponible',
+        estado: ReconocimientoFacialEstado.error,
+      );
+      return;
+    }
+
+    final horaAprobadaId = horario.id;
 
     try {
       final exito = await _repository.registrarAsistenciaPorReconocimiento(
