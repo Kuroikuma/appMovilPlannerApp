@@ -6,6 +6,7 @@ import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../widget/reconocimiento_facial/build_procesando.dart';
+import '../widget/trabajador/trabajador_detail_sheet.dart';
 import '../widget/trabajador_card.dart';
 import '../utils/notification_utils.dart';
 
@@ -258,7 +259,7 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
           final trabajador = state.trabajadoresFiltrados[index];
           return TrabajadorCard(
             trabajador: trabajador,
-            onTap: () => _mostrarDetallesTrabajador(trabajador.id.toString()),
+            onTap: () => _mostrarDetallesTrabajador(trabajador),
           );
         },
       ),
@@ -332,31 +333,38 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
     );
   }
 
-  void _mostrarDetallesTrabajador(String id) {
-    // Aquí implementarías la navegación a la pantalla de detalles
-    // Por ejemplo:
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     builder: (_) => TrabajadorDetailScreen(trabajadorId: id),
-    //   ),
-    // );
-
-    // Por ahora, mostraremos un diálogo simple
-    showDialog(
+void _mostrarDetallesTrabajador(trabajador) {
+    showModalBottomSheet(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Detalles del Trabajador'),
-            content: const Text(
-              'Aquí se mostrarían los detalles completos del trabajador.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cerrar'),
-              ),
-            ],
-          ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return TrabajadorDetailSheet(
+          trabajador: trabajador,
+          onEditPressed: () {
+            // Implementar navegación a pantalla de edición
+            Navigator.pop(context);
+            NotificationUtils.showSnackBar(
+              context: context,
+              message: 'Función de edición próximamente',
+              isError: false,
+            );
+          },
+          onDeletePressed: () {
+            // Implementar lógica de eliminación
+            Navigator.pop(context);
+            NotificationUtils.showSnackBar(
+              context: context,
+              message: 'Función de eliminación próximamente',
+              isError: false,
+            );
+          },
+          onStatusChanged: (newStatus) {
+            // Implementar cambio de estado
+            Navigator.pop(context);
+          },
+        );
+      },
     );
   }
 

@@ -6,6 +6,7 @@ import '../providers/use_case/ubicacion.dart';
 import '../providers/use_case/trabajador.dart';
 import '../routes/app_routes.dart';
 import '../widget/registro_diario/employee_verification_sheet.dart';
+import '../widget/registro_diario/registro_asistencia_detail_sheet.dart';
 import '../widget/registro_diario_card.dart';
 import '../widget/resumen_asistencia_card.dart';
 import '../utils/notification_utils.dart';
@@ -359,7 +360,7 @@ class _RegistroAsistenciaScreenState
                     .map(
                       (registro) => RegistroDiarioCard(
                         registro: registro,
-                        onTap: () => _mostrarDetallesRegistro(registro.id!),
+                        onTap: () => _mostrarDetallesRegistro(registro),
                         onRegistrarSalida:
                             registro.tieneSalida
                                 ? null
@@ -588,24 +589,44 @@ class _RegistroAsistenciaScreenState
     }
   }
 
-  void _mostrarDetallesRegistro(int id) {
-    // Aquí implementarías la navegación a la pantalla de detalles
-    // Por ahora, mostraremos un diálogo simple
-    showDialog(
+void _mostrarDetallesRegistro(registro) {
+    showModalBottomSheet(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Detalles del Registro'),
-            content: const Text(
-              'Aquí se mostrarían los detalles completos del registro.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cerrar'),
-              ),
-            ],
-          ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return RegistroAsistenciaDetailSheet(
+          registro: registro,
+          onEditPressed: () {
+            // Implementar navegación a pantalla de edición
+            Navigator.pop(context);
+            NotificationUtils.showSnackBar(
+              context: context,
+              message: 'Función de edición próximamente',
+              isError: false,
+            );
+          },
+          onDeletePressed: () {
+            // Implementar lógica de eliminación
+            Navigator.pop(context);
+            NotificationUtils.showSnackBar(
+              context: context,
+              message: 'Función de eliminación próximamente',
+              isError: false,
+            );
+          },
+          onStatusChanged: (newStatus) {
+            // Implementar cambio de estado
+            Navigator.pop(context);
+          },
+          onRegistrarSalida: registro.tieneSalida 
+              ? null 
+              : () {
+                  Navigator.pop(context);
+                  _registrarSalida(registro.id!);
+                },
+        );
+      },
     );
   }
 
