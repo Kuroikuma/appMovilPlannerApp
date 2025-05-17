@@ -1457,7 +1457,6 @@ class _ReconocimientoFacialScreenState
           ),
     );
 
-    print('Modal bottom sheet closed');
     notifier.cambiarEstado(ReconocimientoFacialEstado.inicial);
     _searchController.clear();
     _searchQuery = '';

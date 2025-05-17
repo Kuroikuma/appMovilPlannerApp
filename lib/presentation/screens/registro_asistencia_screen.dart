@@ -5,6 +5,7 @@ import '../providers/use_case/registro_diario.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../providers/use_case/trabajador.dart';
 import '../routes/app_routes.dart';
+import '../widget/registro_diario/employee_verification_sheet.dart';
 import '../widget/registro_diario_card.dart';
 import '../widget/resumen_asistencia_card.dart';
 import '../utils/notification_utils.dart';
@@ -121,7 +122,11 @@ class _RegistroAsistenciaScreenState
                 _buildRegistrosTab(context, registroDiarioState),
 
                 // Pestaña de registro de asistencia
-                _buildRegistrarAsistenciaTab(context, trabajadorState, registroDiarioState),
+                _buildRegistrarAsistenciaTab(
+                  context,
+                  trabajadorState,
+                  registroDiarioState,
+                ),
               ],
             ),
           ),
@@ -319,6 +324,7 @@ class _RegistroAsistenciaScreenState
       return _buildEmptyView();
     }
 
+
     return RefreshIndicator(
       onRefresh: () async {
         _cargarRegistros();
@@ -357,7 +363,7 @@ class _RegistroAsistenciaScreenState
                         onRegistrarSalida:
                             registro.tieneSalida
                                 ? null
-                                : () => _registrarSalida(registro.equipoId, 36825),
+                                : () => _mostrarVerificacionEmpleadoSalida(registro.equipoId),
                       ),
                     )
                     .toList(),
@@ -389,18 +395,19 @@ class _RegistroAsistenciaScreenState
 
     final now = DateTime.now();
 
-    final trabajadoresRegistrados = state.trabajadores.map((trabajador) {
-      return trabajador.copyWith(
-        faceSync: true,
-        isEntry: registroDiarioState.registrosFiltrados.any(
-          (registro) =>
-              registro.equipoId == trabajador.equipoId &&
-              registro.fechaIngreso.year == now.year &&
-              registro.fechaIngreso.month == now.month &&
-              registro.fechaIngreso.day == now.day,
-        ),
-      );
-    }).toList();
+    final trabajadoresRegistrados =
+        state.trabajadores.map((trabajador) {
+          return trabajador.copyWith(
+            faceSync: true,
+            isEntry: registroDiarioState.registrosFiltrados.any(
+              (registro) =>
+                  registro.equipoId == trabajador.equipoId &&
+                  registro.fechaIngreso.year == now.year &&
+                  registro.fechaIngreso.month == now.month &&
+                  registro.fechaIngreso.day == now.day,
+            ),
+          );
+        }).toList();
 
     if (trabajadoresRegistrados.isEmpty) {
       return const Center(child: Text('No hay trabajadores disponibles'));
@@ -439,9 +446,21 @@ class _RegistroAsistenciaScreenState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: trabajador.isEntry == true ? const Icon(Icons.logout, color: Colors.red) : const Icon(Icons.login, color: Colors.blue),
+                          icon:
+                              trabajador.isEntry == true
+                                  ? const Icon(Icons.logout, color: Colors.red)
+                                  : const Icon(Icons.login, color: Colors.blue),
+                          // onPressed:
+                          //     () => _registrarAsistencia(trabajador.equipoId),
                           onPressed:
-                              () => _registrarAsistencia(trabajador.equipoId, 36825),
+                              () => _mostrarVerificacionEmpleado(
+                                trabajador.id.toString(),
+                                "${trabajador.nombre} ${trabajador.primerApellido} ${trabajador.segundoApellido}",
+                                trabajador.cargo,
+                                trabajador.fotoUrl,
+                                trabajador.equipoId,
+                                true, // Es entrada
+                              ),
                           tooltip: 'Registrar entrada',
                         ),
                         IconButton(
@@ -590,10 +609,10 @@ class _RegistroAsistenciaScreenState
     );
   }
 
-  void _registrarAsistencia(int equipoId, int horaAprobadaId) {
+  void _registrarAsistencia(int equipoId) {
     ref
         .read(registroDiarioNotifierProvider.notifier)
-        .registrarAsistencia(equipoId, horaAprobadaId)
+        .registrarAsistencia(equipoId)
         .then((_) {
           NotificationUtils.showSnackBar(
             context: context,
@@ -606,10 +625,10 @@ class _RegistroAsistenciaScreenState
         });
   }
 
-  void _registrarSalida(int equipoId, int horaAprobadaId) {
+  void _registrarSalida(int equipoId) {
     ref
         .read(registroDiarioNotifierProvider.notifier)
-        .registrarAsistencia(equipoId, horaAprobadaId)
+        .registrarAsistencia(equipoId)
         .then((_) {
           NotificationUtils.showSnackBar(
             context: context,
@@ -923,5 +942,72 @@ class _RegistroAsistenciaScreenState
             );
       }
     }
+  }
+
+  void _mostrarVerificacionEmpleado(
+    String trabajadorId,
+    String nombreTrabajador,
+    String? cargoTrabajador,
+    String? fotoTrabajador,
+    int equipoId,
+    bool esEntrada,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return EmployeeVerificationSheet(
+          employeeName: nombreTrabajador,
+          employeeId: trabajadorId,
+          employeePosition: cargoTrabajador,
+          employeePhoto: fotoTrabajador,
+          onVerify: (verifiedId) {
+            // Verificar que el ID coincida con el trabajador
+            if (verifiedId == trabajadorId) {
+              if (esEntrada) {
+                _registrarAsistencia(equipoId);
+              } else {
+                _registrarSalida(equipoId);
+              }
+
+              NotificationUtils.showSnackBar(
+                context: context,
+                message: 'Verificación exitosa',
+                isError: false,
+                icon: Icons.check_circle,
+              );
+            } else {
+              NotificationUtils.showSnackBar(
+                context: context,
+                message: 'El ID ingresado no coincide con el trabajador',
+                isError: true,
+                icon: Icons.error_outline,
+              );
+            }
+          },
+          onCancel: () {
+            // Simplemente cerrar el modal
+          },
+        );
+      },
+    );
+  }
+
+  void _mostrarVerificacionEmpleadoSalida(int equipoId) {
+    final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
+
+    final trabajador = trabajadores.firstWhere(
+      (trabajador) => trabajador.equipoId == equipoId,
+    );
+
+    _mostrarVerificacionEmpleado(
+      trabajador.id.toString(),
+      "${trabajador.nombre} ${trabajador.primerApellido} ${trabajador.segundoApellido}",
+      trabajador.cargo,
+      trabajador.fotoUrl,
+      trabajador.equipoId,
+      false, // Es entrada
+    );
   }
 }

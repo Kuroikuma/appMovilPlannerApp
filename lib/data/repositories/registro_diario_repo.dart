@@ -101,7 +101,7 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
     if (registroDiarioEntrada != null) {
       if (!registroDiarioEntrada.puedeRegistrarSalida) {
         final tiempoRestante = registroDiarioEntrada.tiempoRestanteFormateado;
-        throw Exception(
+        throw CustomException(
           'Debe esperar $tiempoRestante antes de registrar la salida',
         );
       }

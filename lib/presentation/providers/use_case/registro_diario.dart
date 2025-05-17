@@ -4,8 +4,10 @@ import '../../../domain/models/registro_diario.dart';
 import '../../../domain/repositories/i_registro_diario_repository.dart';
 import '../providers.dart';
 import '../repositories.dart';
+import 'horario_notifier.dart';
 
 enum RegistroFilterType { todos, soloEntrada, conSalida, inactivos }
+
 enum RegistroType { entrada, salida }
 
 class RegistroDiarioState {
@@ -80,14 +82,16 @@ final registroDiarioNotifierProvider =
       return RegistroDiarioNotifier(
         ref.watch(registroDiarioRepositoryProvider),
         ref.watch(networkInfoProvider),
+        ref,
       );
     });
 
 class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
   final IRegistroDiarioRepository _repository;
   final NetworkInfo networkInfo;
+  final Ref ref;
 
-  RegistroDiarioNotifier(this._repository, this.networkInfo)
+  RegistroDiarioNotifier(this._repository, this.networkInfo, this.ref)
     : super(const RegistroDiarioState());
 
   Future<void> cargarRegistros(String ubicacionId, {DateTime? fecha}) async {
@@ -114,16 +118,20 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
   }
 
   Future<RegistroDiario?> obtenerRegistroPorEquipo(int equipoId) async {
-    final registroDiarioEntrada = await _repository.obtenerRegistroPorEquipo(equipoId);
+    final registroDiarioEntrada = await _repository.obtenerRegistroPorEquipo(
+      equipoId,
+    );
 
     return registroDiarioEntrada;
   }
 
   Future<void> tipoRegistroAsistencia(int equipoId) async {
-    final registroDiarioEntrada = await _repository.obtenerRegistroPorEquipo(equipoId);
+    final registroDiarioEntrada = await _repository.obtenerRegistroPorEquipo(
+      equipoId,
+    );
 
     if (registroDiarioEntrada != null) {
-    state = state.copyWith(tipoRegistro: RegistroType.salida);
+      state = state.copyWith(tipoRegistro: RegistroType.salida);
     } else {
       state = state.copyWith(tipoRegistro: RegistroType.entrada);
     }
@@ -233,19 +241,20 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
     }
   }
 
-  Future<void> registrarAsistencia(
-    int equipoId, int horaAprobadaId) async {
+  Future<void> registrarAsistencia(int equipoId) async {
     state = state.copyWith(isLoading: true).clearErrors();
 
-    // Verificar conexión a internet
-    final hasInternet = await networkInfo.isConnected;
-    if (!hasInternet) {
+    final horario = ref.read(horarioNotifierProvider).horario;
+
+    if (horario == null) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'No hay conexión a internet',
+        errorMessage: 'No hay horario disponible',
       );
       return;
     }
+
+    final horaAprobadaId = horario.id;
 
     try {
       final nuevoRegistro = await _repository.registrarAsistencia(

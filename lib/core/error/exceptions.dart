@@ -39,3 +39,11 @@ class NoInternetUbicacionException implements Exception {
   @override
   String toString() => "NoInternetUbicacionException: $message";
 }
+
+class CustomException implements Exception {
+  final String message;
+  CustomException([this.message = "Error desconocido"]);
+
+  @override
+  String toString() => "Error: $message";
+}

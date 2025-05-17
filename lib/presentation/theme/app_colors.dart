@@ -1,34 +1,39 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Colores principales
-  static const Color primary = Color(0xFF2563EB);
-  static const Color primaryLight = Color(0xFFEFF6FF);
-  static const Color secondary = Color(0xFF6B7280);
-  static const Color accent = Color(0xFF3B82F6);
+  // Colores primarios
+  static const Color primary = Color(0xFF2196F3);
+  static const Color primaryLight = Color(0xFFE3F2FD);
+  static const Color primaryDark = Color(0xFF1976D2);
+  
+  // Colores secundarios
+  static const Color secondary = Color(0xFF4CAF50);
+  static const Color secondaryLight = Color(0xFFE8F5E9);
+  static const Color secondaryDark = Color(0xFF388E3C);
   
   // Colores de estado
-  static const Color success = Color(0xFF10B981);
-  static const Color successLight = Color(0xFFECFDF5);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color warningLight = Color(0xFFFFFBEB);
-  static const Color error = Color(0xFFEF4444);
-  static const Color errorLight = Color(0xFFFEF2F2);
-  static const Color info = Color(0xFF3B82F6);
-  static const Color infoLight = Color(0xFFEFF6FF);
+  static const Color success = Color(0xFF4CAF50);
+  static const Color successLight = Color(0xFFE8F5E9);
+  
+  static const Color warning = Color(0xFFFFC107);
+  static const Color warningLight = Color(0xFFFFF8E1);
+  
+  static const Color error = Color(0xFFF44336);
+  static const Color errorLight = Color(0xFFFFEBEE);
+  
+  static const Color info = Color(0xFF2196F3);
+  static const Color infoLight = Color(0xFFE3F2FD);
   
   // Colores de fondo
-  static const Color background = Color(0xFFF9FAFB);
+  static const Color background = Color(0xFFF5F5F5);
   static const Color surface = Colors.white;
-  static const Color surfaceVariant = Color(0xFFF3F4F6);
   
   // Colores de texto
-  static const Color onPrimary = Colors.white;
-  static const Color onBackground = Color(0xFF1F2937);
-  static const Color onSurface = Color(0xFF1F2937);
-  static const Color onSurfaceVariant = Color(0xFF6B7280);
+  static const Color textPrimary = Color(0xFF212121);
+  static const Color textSecondary = Color(0xFF757575);
+  static const Color textDisabled = Color(0xFFBDBDBD);
   
   // Colores de borde
-  static const Color outline = Color(0xFFE5E7EB);
-  static const Color outlineVariant = Color(0xFFD1D5DB);
+  static const Color border = Color(0xFFE0E0E0);
+  static const Color divider = Color(0xFFE0E0E0);
 }

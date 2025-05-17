@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/database.dart';
+import '../../../core/error/exceptions.dart';
 import '../../../domain/models/registro_diario.dart';
 import '../../converters/date_converter.dart';
 import '../../converters/time_converter.dart';
@@ -208,7 +209,7 @@ class RegistroDiarioRepositoryLocal {
 
       return nuevoRegistro;
     } catch (e) {
-      throw Exception('Error al registrar entrada: $e');
+      throw CustomException('Error al registrar entrada: $e');
     }
   }
 
@@ -224,7 +225,7 @@ class RegistroDiarioRepositoryLocal {
       (registro) => registro.id == registroId,
     );
     if (index == -1) {
-      throw Exception('Registro no encontrado');
+      throw CustomException('Registro no encontrado');
     }
 
     // Actualizar el registro con la salida
