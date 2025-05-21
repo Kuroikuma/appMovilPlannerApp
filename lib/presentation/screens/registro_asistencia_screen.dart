@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../domain/entities.dart';
 import '../providers/use_case/registro_diario.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../providers/use_case/trabajador.dart';
@@ -325,7 +326,6 @@ class _RegistroAsistenciaScreenState
       return _buildEmptyView();
     }
 
-
     return RefreshIndicator(
       onRefresh: () async {
         _cargarRegistros();
@@ -364,7 +364,9 @@ class _RegistroAsistenciaScreenState
                         onRegistrarSalida:
                             registro.tieneSalida
                                 ? null
-                                : () => _mostrarVerificacionEmpleadoSalida(registro.equipoId),
+                                : () => _mostrarVerificacionEmpleadoSalida(
+                                  registro.equipoId,
+                                ),
                       ),
                     )
                     .toList(),
@@ -589,7 +591,7 @@ class _RegistroAsistenciaScreenState
     }
   }
 
-void _mostrarDetallesRegistro(registro) {
+  void _mostrarDetallesRegistro(registro) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -619,21 +621,22 @@ void _mostrarDetallesRegistro(registro) {
             // Implementar cambio de estado
             Navigator.pop(context);
           },
-          onRegistrarSalida: registro.tieneSalida 
-              ? null 
-              : () {
-                  Navigator.pop(context);
-                  _registrarSalida(registro.id!);
-                },
+          onRegistrarSalida:
+              registro.tieneSalida
+                  ? null
+                  : () {
+                    Navigator.pop(context);
+                    _registrarSalida(registro.id!);
+                  },
         );
       },
     );
   }
 
-  void _registrarAsistencia(int equipoId) {
+  void _registrarAsistencia(int equipoId, {int? trabajadorId}) {
     ref
         .read(registroDiarioNotifierProvider.notifier)
-        .registrarAsistencia(equipoId)
+        .registrarAsistencia(equipoId, trabajadorId: trabajadorId)
         .then((_) {
           NotificationUtils.showSnackBar(
             context: context,
@@ -646,10 +649,10 @@ void _mostrarDetallesRegistro(registro) {
         });
   }
 
-  void _registrarSalida(int equipoId) {
+  void _registrarSalida(int equipoId, {int? trabajadorId}) {
     ref
         .read(registroDiarioNotifierProvider.notifier)
-        .registrarAsistencia(equipoId)
+        .registrarAsistencia(equipoId, trabajadorId: trabajadorId)
         .then((_) {
           NotificationUtils.showSnackBar(
             context: context,
@@ -973,6 +976,8 @@ void _mostrarDetallesRegistro(registro) {
     int equipoId,
     bool esEntrada,
   ) {
+    final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -984,12 +989,16 @@ void _mostrarDetallesRegistro(registro) {
           employeePosition: cargoTrabajador,
           employeePhoto: fotoTrabajador,
           onVerify: (verifiedId) {
+            final Trabajador? trabajador = trabajadores.cast<Trabajador?>().firstWhere(
+              (t) => t?.id.toString() == verifiedId,
+              orElse: () => null,
+            );
             // Verificar que el ID coincida con el trabajador
-            if (verifiedId == trabajadorId) {
+            if (trabajador != null) {
               if (esEntrada) {
-                _registrarAsistencia(equipoId);
+                _registrarAsistencia(equipoId, trabajadorId: trabajador.id);
               } else {
-                _registrarSalida(equipoId);
+                _registrarSalida(equipoId, trabajadorId: trabajador.id);
               }
 
               NotificationUtils.showSnackBar(
@@ -1001,7 +1010,7 @@ void _mostrarDetallesRegistro(registro) {
             } else {
               NotificationUtils.showSnackBar(
                 context: context,
-                message: 'El ID ingresado no coincide con el trabajador',
+                message: 'El ID ingresado no coincide con los trabajadores registrados',
                 isError: true,
                 icon: Icons.error_outline,
               );

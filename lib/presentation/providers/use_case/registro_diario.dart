@@ -241,7 +241,7 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
     }
   }
 
-  Future<void> registrarAsistencia(int equipoId) async {
+  Future<void> registrarAsistencia(int equipoId, {int? trabajadorId}) async {
     state = state.copyWith(isLoading: true).clearErrors();
 
     final horario = ref.read(horarioNotifierProvider).horario;
@@ -260,6 +260,7 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
       final nuevoRegistro = await _repository.registrarAsistencia(
         equipoId,
         horaAprobadaId,
+        trabajadorId: trabajadorId
       );
 
       // Actualizar la lista de registros

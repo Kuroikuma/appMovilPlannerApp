@@ -30,33 +30,15 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 1;
 
-  // @override
-  // MigrationStrategy get migration => MigrationStrategy(
-  //   onCreate: (m) async {
-  //     await m.createAll(); // Crea todas las tablas
-
-  //     // Inserta registros iniciales
-  //     await into(trabajadores).insert(
-  //       TrabajadoresCompanion.insert(
-  //         nombre: 'Juan',
-  //         apellido: 'Pérez',
-  //         cedula: '1234567890',
-  //         activo: Value(true),
-  //         ultimaActualizacion: Value(DateTime.now()),
-  //       ),
-  //     );
-
-  //     await into(trabajadores).insert(
-  //       TrabajadoresCompanion.insert(
-  //         nombre: 'María',
-  //         apellido: 'López',
-  //         cedula: '0987654321',
-  //         activo: Value(true),
-  //         ultimaActualizacion: Value(DateTime.now()),
-  //       ),
-  //     );
-  //   },
-  // );
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (migrator, from, to) async {
+          if (from == 1) {
+            await migrator.addColumn(registrosDiarios, registrosDiarios.registroId);
+            // Otras migraciones que quieras
+          }
+        },
+  );
 }
 
 // Tabla: Trabajadores
@@ -166,6 +148,8 @@ class RegistrosDiarios extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get equipoId =>
       integer().named('equipo_id').references(Trabajadores, #equipoId)();
+  IntColumn get registroId =>
+      integer().nullable().named('registro_id').references(Trabajadores, #id)();
   TextColumn get reconocimientoFacialId =>
       text()
           .nullable()

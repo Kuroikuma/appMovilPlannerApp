@@ -155,6 +155,7 @@ class RegistroDiarioRepositoryLocal {
   Future<RegistroDiario> registrarEntrada(
     int equipoId,
     int horaAprobadaId,
+    int? trabajadorId,
   ) async {
     try {
       // Simular una llamada a la API
@@ -170,6 +171,7 @@ class RegistroDiarioRepositoryLocal {
               horaIngreso: TimeOfDay.now(),
               nombreTrabajador: 'Trabajador #$equipoId',
               horarioId: horaAprobadaId,
+              registroId: trabajadorId
             ),
       );
 
@@ -184,6 +186,7 @@ class RegistroDiarioRepositoryLocal {
         fotoTrabajador: trabajador.fotoTrabajador,
         cargoTrabajador: trabajador.cargoTrabajador,
         horarioId: horaAprobadaId,
+        registroId: trabajadorId
       );
 
       // En una implementación real, aquí se guardaría en la base de datos
@@ -261,6 +264,7 @@ class RegistroDiarioRepositoryLocal {
   Future<RegistroDiario> registrarAsistencia(
     int equipoId,
     int horaAprobadaId,
+    int? registroId,
   ) async {
     final hoy = DateTime.now();
     final registrosDiarios = await getRegistroDiario();
@@ -274,7 +278,7 @@ class RegistroDiarioRepositoryLocal {
 
     if (registrosHoy.isEmpty) {
       // No hay registro de entrada hoy, registrar entrada
-      return await registrarEntrada(equipoId, horaAprobadaId);
+      return await registrarEntrada(equipoId, horaAprobadaId, registroId);
     } else {
       // Ya hay un registro de entrada, registrar salida sobre el último registro de hoy
       final registroDelDia = registrosHoy.lastWhere(
@@ -353,5 +357,40 @@ class RegistroDiarioRepositoryLocal {
         horarioId: Value(registro.horarioId),
       ),
     );
+  }
+
+  Future<bool> estaDentroDelHorario() async {
+    final fecha = DateTime.now();
+    final hora = TimeOfDay.now();
+
+    final localData = await _db.select(_db.horarios).get();
+
+    final horario = localData[0];
+    // Verificar que la fecha esté entre fechaInicio y fechaFin
+    final fechaSinHora = DateTime(fecha.year, fecha.month, fecha.day);
+    final fechaInicio = DateTime(
+      horario.fechaInicio.year,
+      horario.fechaInicio.month,
+      horario.fechaInicio.day,
+    );
+    final fechaFin = DateTime(
+      horario.fechaFin.year,
+      horario.fechaFin.month,
+      horario.fechaFin.day,
+    );
+
+    final dentroDeFechas =
+        fechaSinHora.isAtSameMomentAs(fechaInicio) ||
+        fechaSinHora.isAtSameMomentAs(fechaFin) ||
+        (fechaSinHora.isAfter(fechaInicio) && fechaSinHora.isBefore(fechaFin));
+
+    if (!dentroDeFechas) return false;
+
+    // Verificar que la hora esté entre horaInicio y horaFin
+    final ahoraMinutos = hora.hour * 60 + hora.minute;
+   
+    final finMinutos = horario.horaFin.hour * 60 + horario.horaFin.minute;
+
+    return ahoraMinutos <= finMinutos;
   }
 }

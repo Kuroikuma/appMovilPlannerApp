@@ -12,6 +12,7 @@ class RegistroDiario {
   final TimeOfDay? horaSalida;
   final bool estado;
   final int horarioId;
+  final int? registroId;
 
   // Campos adicionales para la UI
   final String? nombreTrabajador;
@@ -30,6 +31,7 @@ class RegistroDiario {
     this.nombreTrabajador,
     this.fotoTrabajador,
     this.cargoTrabajador,
+    this.registroId,
     required this.horarioId,
   });
 
@@ -84,6 +86,7 @@ class RegistroDiario {
     String? fotoTrabajador,
     String? cargoTrabajador,
     int? horarioId,
+    int? registroId,
   }) {
     return RegistroDiario(
       id: id ?? this.id,
@@ -99,6 +102,7 @@ class RegistroDiario {
       fotoTrabajador: fotoTrabajador ?? this.fotoTrabajador,
       cargoTrabajador: cargoTrabajador ?? this.cargoTrabajador,
       horarioId: horarioId ?? this.horarioId,
+      registroId: registroId ?? this.registroId,
     );
   }
 
@@ -124,6 +128,7 @@ class RegistroDiario {
           json['trabajadorStringFile'] ??
           'https://randomuser.me/api/portraits/men/1.jpg',
       cargoTrabajador: json['puestoNombre'] ?? 'Desconocido',
+      registroId: json['registroId'] ?? 0,
       horarioId: json['horaAprobadaId'],
     );
   }
@@ -141,6 +146,8 @@ class RegistroDiario {
       fotoTrabajador: data.fotoTrabajador,
       cargoTrabajador: data.cargoTrabajador,
       horarioId: data.horarioId,
+      registroId: data.registroId,
+      reconocimientoFacialId: data.reconocimientoFacialId,
     );
   }
 
@@ -162,6 +169,7 @@ class RegistroDiario {
       'fotoTrabajador': fotoTrabajador,
       'cargoTrabajador': cargoTrabajador,
       'horarioId': horarioId,
+      'registroId': registroId,
     };
   }
 

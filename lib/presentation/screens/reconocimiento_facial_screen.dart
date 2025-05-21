@@ -916,20 +916,20 @@ class _ReconocimientoFacialScreenState
           //     ],
           //   ),
           // ),
-          const SizedBox(height: 32),
+          // const SizedBox(height: 32),
 
-          // Botón principal
-          FilledButton.icon(
-            onPressed: () => _buildDraggableSearchSheet(context),
-            icon: const Icon(Icons.face),
-            label: const Text('Añadir registro facial'),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(double.infinity, 56),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
+          // // Botón principal
+          // FilledButton.icon(
+          //   onPressed: () => _buildDraggableSearchSheet(context),
+          //   icon: const Icon(Icons.face),
+          //   label: const Text('Añadir registro facial'),
+          //   style: FilledButton.styleFrom(
+          //     minimumSize: const Size(double.infinity, 56),
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(12),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

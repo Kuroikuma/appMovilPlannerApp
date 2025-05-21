@@ -8,8 +8,9 @@ abstract class IRegistroDiarioRepository {
   Future<RegistroDiario?> obtenerRegistroPorId(int id);
   Future<RegistroDiario> registrarAsistencia(
     int equipoId,
-    int horaAprobadaId,
-  );
+    int horaAprobadaId, {
+    int? trabajadorId,
+  });
   Future<List<RegistroDiario>> obtenerRegistrosPorTrabajador(
     int equipoId, {
     DateTime? fechaInicio,

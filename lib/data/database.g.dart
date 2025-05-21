@@ -2674,6 +2674,20 @@ class $RegistrosDiariosTable extends RegistrosDiarios
       'REFERENCES trabajadores (equipo_id)',
     ),
   );
+  static const VerificationMeta _registroIdMeta = const VerificationMeta(
+    'registroId',
+  );
+  @override
+  late final GeneratedColumn<int> registroId = GeneratedColumn<int>(
+    'registro_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES trabajadores (id)',
+    ),
+  );
   static const VerificationMeta _reconocimientoFacialIdMeta =
       const VerificationMeta('reconocimientoFacialId');
   @override
@@ -2788,6 +2802,7 @@ class $RegistrosDiariosTable extends RegistrosDiarios
   List<GeneratedColumn> get $columns => [
     id,
     equipoId,
+    registroId,
     reconocimientoFacialId,
     fechaIngreso,
     horaIngreso,
@@ -2821,6 +2836,12 @@ class $RegistrosDiariosTable extends RegistrosDiarios
       );
     } else if (isInserting) {
       context.missing(_equipoIdMeta);
+    }
+    if (data.containsKey('registro_id')) {
+      context.handle(
+        _registroIdMeta,
+        registroId.isAcceptableOrUnknown(data['registro_id']!, _registroIdMeta),
+      );
     }
     if (data.containsKey('reconocimiento_facial_id')) {
       context.handle(
@@ -2897,6 +2918,10 @@ class $RegistrosDiariosTable extends RegistrosDiarios
             DriftSqlType.int,
             data['${effectivePrefix}equipo_id'],
           )!,
+      registroId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}registro_id'],
+      ),
       reconocimientoFacialId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}reconocimiento_facial_id'],
@@ -2975,6 +3000,7 @@ class $RegistrosDiariosTable extends RegistrosDiarios
 class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
   final int id;
   final int equipoId;
+  final int? registroId;
   final String? reconocimientoFacialId;
   final DateTime fechaIngreso;
   final TimeOfDay horaIngreso;
@@ -2988,6 +3014,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
   const RegistrosDiario({
     required this.id,
     required this.equipoId,
+    this.registroId,
     this.reconocimientoFacialId,
     required this.fechaIngreso,
     required this.horaIngreso,
@@ -3004,6 +3031,9 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['equipo_id'] = Variable<int>(equipoId);
+    if (!nullToAbsent || registroId != null) {
+      map['registro_id'] = Variable<int>(registroId);
+    }
     if (!nullToAbsent || reconocimientoFacialId != null) {
       map['reconocimiento_facial_id'] = Variable<String>(
         reconocimientoFacialId,
@@ -3041,6 +3071,10 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     return RegistrosDiariosCompanion(
       id: Value(id),
       equipoId: Value(equipoId),
+      registroId:
+          registroId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(registroId),
       reconocimientoFacialId:
           reconocimientoFacialId == null && nullToAbsent
               ? const Value.absent()
@@ -3071,6 +3105,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     return RegistrosDiario(
       id: serializer.fromJson<int>(json['id']),
       equipoId: serializer.fromJson<int>(json['equipoId']),
+      registroId: serializer.fromJson<int?>(json['registroId']),
       reconocimientoFacialId: serializer.fromJson<String?>(
         json['reconocimientoFacialId'],
       ),
@@ -3091,6 +3126,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'equipoId': serializer.toJson<int>(equipoId),
+      'registroId': serializer.toJson<int?>(registroId),
       'reconocimientoFacialId': serializer.toJson<String?>(
         reconocimientoFacialId,
       ),
@@ -3109,6 +3145,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
   RegistrosDiario copyWith({
     int? id,
     int? equipoId,
+    Value<int?> registroId = const Value.absent(),
     Value<String?> reconocimientoFacialId = const Value.absent(),
     DateTime? fechaIngreso,
     TimeOfDay? horaIngreso,
@@ -3122,6 +3159,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
   }) => RegistrosDiario(
     id: id ?? this.id,
     equipoId: equipoId ?? this.equipoId,
+    registroId: registroId.present ? registroId.value : this.registroId,
     reconocimientoFacialId:
         reconocimientoFacialId.present
             ? reconocimientoFacialId.value
@@ -3140,6 +3178,8 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     return RegistrosDiario(
       id: data.id.present ? data.id.value : this.id,
       equipoId: data.equipoId.present ? data.equipoId.value : this.equipoId,
+      registroId:
+          data.registroId.present ? data.registroId.value : this.registroId,
       reconocimientoFacialId:
           data.reconocimientoFacialId.present
               ? data.reconocimientoFacialId.value
@@ -3176,6 +3216,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     return (StringBuffer('RegistrosDiario(')
           ..write('id: $id, ')
           ..write('equipoId: $equipoId, ')
+          ..write('registroId: $registroId, ')
           ..write('reconocimientoFacialId: $reconocimientoFacialId, ')
           ..write('fechaIngreso: $fechaIngreso, ')
           ..write('horaIngreso: $horaIngreso, ')
@@ -3194,6 +3235,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
   int get hashCode => Object.hash(
     id,
     equipoId,
+    registroId,
     reconocimientoFacialId,
     fechaIngreso,
     horaIngreso,
@@ -3211,6 +3253,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
       (other is RegistrosDiario &&
           other.id == this.id &&
           other.equipoId == this.equipoId &&
+          other.registroId == this.registroId &&
           other.reconocimientoFacialId == this.reconocimientoFacialId &&
           other.fechaIngreso == this.fechaIngreso &&
           other.horaIngreso == this.horaIngreso &&
@@ -3226,6 +3269,7 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
 class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
   final Value<int> id;
   final Value<int> equipoId;
+  final Value<int?> registroId;
   final Value<String?> reconocimientoFacialId;
   final Value<DateTime> fechaIngreso;
   final Value<TimeOfDay> horaIngreso;
@@ -3239,6 +3283,7 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
   const RegistrosDiariosCompanion({
     this.id = const Value.absent(),
     this.equipoId = const Value.absent(),
+    this.registroId = const Value.absent(),
     this.reconocimientoFacialId = const Value.absent(),
     this.fechaIngreso = const Value.absent(),
     this.horaIngreso = const Value.absent(),
@@ -3253,6 +3298,7 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
   RegistrosDiariosCompanion.insert({
     this.id = const Value.absent(),
     required int equipoId,
+    this.registroId = const Value.absent(),
     this.reconocimientoFacialId = const Value.absent(),
     required DateTime fechaIngreso,
     required TimeOfDay horaIngreso,
@@ -3273,6 +3319,7 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
   static Insertable<RegistrosDiario> custom({
     Expression<int>? id,
     Expression<int>? equipoId,
+    Expression<int>? registroId,
     Expression<String>? reconocimientoFacialId,
     Expression<String>? fechaIngreso,
     Expression<String>? horaIngreso,
@@ -3287,6 +3334,7 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (equipoId != null) 'equipo_id': equipoId,
+      if (registroId != null) 'registro_id': registroId,
       if (reconocimientoFacialId != null)
         'reconocimiento_facial_id': reconocimientoFacialId,
       if (fechaIngreso != null) 'fecha_ingreso': fechaIngreso,
@@ -3304,6 +3352,7 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
   RegistrosDiariosCompanion copyWith({
     Value<int>? id,
     Value<int>? equipoId,
+    Value<int?>? registroId,
     Value<String?>? reconocimientoFacialId,
     Value<DateTime>? fechaIngreso,
     Value<TimeOfDay>? horaIngreso,
@@ -3318,6 +3367,7 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     return RegistrosDiariosCompanion(
       id: id ?? this.id,
       equipoId: equipoId ?? this.equipoId,
+      registroId: registroId ?? this.registroId,
       reconocimientoFacialId:
           reconocimientoFacialId ?? this.reconocimientoFacialId,
       fechaIngreso: fechaIngreso ?? this.fechaIngreso,
@@ -3340,6 +3390,9 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     }
     if (equipoId.present) {
       map['equipo_id'] = Variable<int>(equipoId.value);
+    }
+    if (registroId.present) {
+      map['registro_id'] = Variable<int>(registroId.value);
     }
     if (reconocimientoFacialId.present) {
       map['reconocimiento_facial_id'] = Variable<String>(
@@ -3389,6 +3442,7 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     return (StringBuffer('RegistrosDiariosCompanion(')
           ..write('id: $id, ')
           ..write('equipoId: $equipoId, ')
+          ..write('registroId: $registroId, ')
           ..write('reconocimientoFacialId: $reconocimientoFacialId, ')
           ..write('fechaIngreso: $fechaIngreso, ')
           ..write('horaIngreso: $horaIngreso, ')
@@ -4006,31 +4060,6 @@ final class $$TrabajadoresTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
-
-  static MultiTypedResultKey<$RegistrosDiariosTable, List<RegistrosDiario>>
-  _registrosDiariosRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.registrosDiarios,
-    aliasName: $_aliasNameGenerator(
-      db.trabajadores.equipoId,
-      db.registrosDiarios.equipoId,
-    ),
-  );
-
-  $$RegistrosDiariosTableProcessedTableManager get registrosDiariosRefs {
-    final manager = $$RegistrosDiariosTableTableManager(
-      $_db,
-      $_db.registrosDiarios,
-    ).filter(
-      (f) => f.equipoId.equipoId.sqlEquals($_itemColumn<int>('equipo_id')!),
-    );
-
-    final cache = $_typedResult.readTableOrNull(
-      _registrosDiariosRefsTable($_db),
-    );
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
 }
 
 class $$TrabajadoresTableFilterComposer
@@ -4140,31 +4169,6 @@ class $$TrabajadoresTableFilterComposer
                     $removeJoinBuilderFromRootComposer,
               ),
         );
-    return f(composer);
-  }
-
-  Expression<bool> registrosDiariosRefs(
-    Expression<bool> Function($$RegistrosDiariosTableFilterComposer f) f,
-  ) {
-    final $$RegistrosDiariosTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.equipoId,
-      referencedTable: $db.registrosDiarios,
-      getReferencedColumn: (t) => t.equipoId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$RegistrosDiariosTableFilterComposer(
-            $db: $db,
-            $table: $db.registrosDiarios,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
     return f(composer);
   }
 }
@@ -4325,31 +4329,6 @@ class $$TrabajadoresTableAnnotationComposer
         );
     return f(composer);
   }
-
-  Expression<T> registrosDiariosRefs<T extends Object>(
-    Expression<T> Function($$RegistrosDiariosTableAnnotationComposer a) f,
-  ) {
-    final $$RegistrosDiariosTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.equipoId,
-      referencedTable: $db.registrosDiarios,
-      getReferencedColumn: (t) => t.equipoId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$RegistrosDiariosTableAnnotationComposer(
-            $db: $db,
-            $table: $db.registrosDiarios,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$TrabajadoresTableTableManager
@@ -4368,7 +4347,6 @@ class $$TrabajadoresTableTableManager
           PrefetchHooks Function({
             bool registrosBiometricosRefs,
             bool reconocimientosFacialRefs,
-            bool registrosDiariosRefs,
           })
         > {
   $$TrabajadoresTableTableManager(_$AppDatabase db, $TrabajadoresTable table)
@@ -4444,14 +4422,12 @@ class $$TrabajadoresTableTableManager
           prefetchHooksCallback: ({
             registrosBiometricosRefs = false,
             reconocimientosFacialRefs = false,
-            registrosDiariosRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (registrosBiometricosRefs) db.registrosBiometricos,
                 if (reconocimientosFacialRefs) db.reconocimientosFacial,
-                if (registrosDiariosRefs) db.registrosDiarios,
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -4500,28 +4476,6 @@ class $$TrabajadoresTableTableManager
                           ),
                       typedResults: items,
                     ),
-                  if (registrosDiariosRefs)
-                    await $_getPrefetchedData<
-                      Trabajadore,
-                      $TrabajadoresTable,
-                      RegistrosDiario
-                    >(
-                      currentTable: table,
-                      referencedTable: $$TrabajadoresTableReferences
-                          ._registrosDiariosRefsTable(db),
-                      managerFromTypedResult:
-                          (p0) =>
-                              $$TrabajadoresTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).registrosDiariosRefs,
-                      referencedItemsForCurrentItem:
-                          (item, referencedItems) => referencedItems.where(
-                            (e) => e.equipoId == item.equipoId,
-                          ),
-                      typedResults: items,
-                    ),
                 ];
               },
             );
@@ -4545,7 +4499,6 @@ typedef $$TrabajadoresTableProcessedTableManager =
       PrefetchHooks Function({
         bool registrosBiometricosRefs,
         bool reconocimientosFacialRefs,
-        bool registrosDiariosRefs,
       })
     >;
 typedef $$GruposUbicacionesTableCreateCompanionBuilder =
@@ -6464,6 +6417,7 @@ typedef $$RegistrosDiariosTableCreateCompanionBuilder =
     RegistrosDiariosCompanion Function({
       Value<int> id,
       required int equipoId,
+      Value<int?> registroId,
       Value<String?> reconocimientoFacialId,
       required DateTime fechaIngreso,
       required TimeOfDay horaIngreso,
@@ -6479,6 +6433,7 @@ typedef $$RegistrosDiariosTableUpdateCompanionBuilder =
     RegistrosDiariosCompanion Function({
       Value<int> id,
       Value<int> equipoId,
+      Value<int?> registroId,
       Value<String?> reconocimientoFacialId,
       Value<DateTime> fechaIngreso,
       Value<TimeOfDay> horaIngreso,
@@ -6516,6 +6471,28 @@ final class $$RegistrosDiariosTableReferences
       $_db.trabajadores,
     ).filter((f) => f.equipoId.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_equipoIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $TrabajadoresTable _registroIdTable(_$AppDatabase db) =>
+      db.trabajadores.createAlias(
+        $_aliasNameGenerator(
+          db.registrosDiarios.registroId,
+          db.trabajadores.id,
+        ),
+      );
+
+  $$TrabajadoresTableProcessedTableManager? get registroId {
+    final $_column = $_itemColumn<int>('registro_id');
+    if ($_column == null) return null;
+    final manager = $$TrabajadoresTableTableManager(
+      $_db,
+      $_db.trabajadores,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_registroIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -6632,6 +6609,29 @@ class $$RegistrosDiariosTableFilterComposer
       getCurrentColumn: (t) => t.equipoId,
       referencedTable: $db.trabajadores,
       getReferencedColumn: (t) => t.equipoId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TrabajadoresTableFilterComposer(
+            $db: $db,
+            $table: $db.trabajadores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TrabajadoresTableFilterComposer get registroId {
+    final $$TrabajadoresTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.registroId,
+      referencedTable: $db.trabajadores,
+      getReferencedColumn: (t) => t.id,
       builder:
           (
             joinBuilder, {
@@ -6774,6 +6774,29 @@ class $$RegistrosDiariosTableOrderingComposer
     return composer;
   }
 
+  $$TrabajadoresTableOrderingComposer get registroId {
+    final $$TrabajadoresTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.registroId,
+      referencedTable: $db.trabajadores,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TrabajadoresTableOrderingComposer(
+            $db: $db,
+            $table: $db.trabajadores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   $$ReconocimientosFacialTableOrderingComposer get reconocimientoFacialId {
     final $$ReconocimientosFacialTableOrderingComposer composer =
         $composerBuilder(
@@ -6899,6 +6922,29 @@ class $$RegistrosDiariosTableAnnotationComposer
     return composer;
   }
 
+  $$TrabajadoresTableAnnotationComposer get registroId {
+    final $$TrabajadoresTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.registroId,
+      referencedTable: $db.trabajadores,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TrabajadoresTableAnnotationComposer(
+            $db: $db,
+            $table: $db.trabajadores,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   $$ReconocimientosFacialTableAnnotationComposer get reconocimientoFacialId {
     final $$ReconocimientosFacialTableAnnotationComposer composer =
         $composerBuilder(
@@ -6962,6 +7008,7 @@ class $$RegistrosDiariosTableTableManager
           RegistrosDiario,
           PrefetchHooks Function({
             bool equipoId,
+            bool registroId,
             bool reconocimientoFacialId,
             bool horarioId,
           })
@@ -6990,6 +7037,7 @@ class $$RegistrosDiariosTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<int> equipoId = const Value.absent(),
+                Value<int?> registroId = const Value.absent(),
                 Value<String?> reconocimientoFacialId = const Value.absent(),
                 Value<DateTime> fechaIngreso = const Value.absent(),
                 Value<TimeOfDay> horaIngreso = const Value.absent(),
@@ -7003,6 +7051,7 @@ class $$RegistrosDiariosTableTableManager
               }) => RegistrosDiariosCompanion(
                 id: id,
                 equipoId: equipoId,
+                registroId: registroId,
                 reconocimientoFacialId: reconocimientoFacialId,
                 fechaIngreso: fechaIngreso,
                 horaIngreso: horaIngreso,
@@ -7018,6 +7067,7 @@ class $$RegistrosDiariosTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required int equipoId,
+                Value<int?> registroId = const Value.absent(),
                 Value<String?> reconocimientoFacialId = const Value.absent(),
                 required DateTime fechaIngreso,
                 required TimeOfDay horaIngreso,
@@ -7031,6 +7081,7 @@ class $$RegistrosDiariosTableTableManager
               }) => RegistrosDiariosCompanion.insert(
                 id: id,
                 equipoId: equipoId,
+                registroId: registroId,
                 reconocimientoFacialId: reconocimientoFacialId,
                 fechaIngreso: fechaIngreso,
                 horaIngreso: horaIngreso,
@@ -7054,6 +7105,7 @@ class $$RegistrosDiariosTableTableManager
                       .toList(),
           prefetchHooksCallback: ({
             equipoId = false,
+            registroId = false,
             reconocimientoFacialId = false,
             horarioId = false,
           }) {
@@ -7086,6 +7138,20 @@ class $$RegistrosDiariosTableTableManager
                                 $$RegistrosDiariosTableReferences
                                     ._equipoIdTable(db)
                                     .equipoId,
+                          )
+                          as T;
+                }
+                if (registroId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.registroId,
+                            referencedTable: $$RegistrosDiariosTableReferences
+                                ._registroIdTable(db),
+                            referencedColumn:
+                                $$RegistrosDiariosTableReferences
+                                    ._registroIdTable(db)
+                                    .id,
                           )
                           as T;
                 }
@@ -7143,6 +7209,7 @@ typedef $$RegistrosDiariosTableProcessedTableManager =
       RegistrosDiario,
       PrefetchHooks Function({
         bool equipoId,
+        bool registroId,
         bool reconocimientoFacialId,
         bool horarioId,
       })

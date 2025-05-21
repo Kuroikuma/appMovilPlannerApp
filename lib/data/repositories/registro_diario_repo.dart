@@ -94,8 +94,9 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
   @override
   Future<RegistroDiario> registrarAsistencia(
     int equipoId,
-    int horaAprobadaId,
-  ) async {
+    int horaAprobadaId, {
+    int? trabajadorId,
+  }) async {
     final registroDiarioEntrada = await localDataSource.isEntry(equipoId);
 
     if (registroDiarioEntrada != null) {
@@ -108,9 +109,19 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
     }
 
     final isEntry = registroDiarioEntrada != null;
+
+    if (!isEntry) {
+      final isInside = await localDataSource.estaDentroDelHorario();
+
+      if (!isInside) {
+        throw CustomException('No puedes registrar entrada en este momento');
+      }
+    }
+
     final registroAsistencia = await localDataSource.registrarAsistencia(
       equipoId,
       horaAprobadaId,
+      trabajadorId,
     );
 
     final isConnected = await networkInfo.isConnected;
