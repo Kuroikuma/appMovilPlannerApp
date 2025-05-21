@@ -462,9 +462,13 @@ class _RegistroAsistenciaScreenState
                                 trabajador.cargo,
                                 trabajador.fotoUrl,
                                 trabajador.equipoId,
-                                true, // Es entrada
+                                trabajador.isEntry == true
+                                    ? false
+                                    : true, // Es entrada
                               ),
-                          tooltip: 'Registrar entrada',
+                          tooltip: trabajador.isEntry == true
+                              ? 'Registrar salida'
+                              : 'Registrar entrada',
                         ),
                         IconButton(
                           icon: const Icon(
@@ -977,6 +981,7 @@ class _RegistroAsistenciaScreenState
     bool esEntrada,
   ) {
     final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
+    print(esEntrada);
 
     showModalBottomSheet(
       context: context,
@@ -988,33 +993,33 @@ class _RegistroAsistenciaScreenState
           employeeId: trabajadorId,
           employeePosition: cargoTrabajador,
           employeePhoto: fotoTrabajador,
+          employees: trabajadores,
           onVerify: (verifiedId) {
-            final Trabajador? trabajador = trabajadores.cast<Trabajador?>().firstWhere(
-              (t) => t?.id.toString() == verifiedId,
-              orElse: () => null,
-            );
             // Verificar que el ID coincida con el trabajador
-            if (trabajador != null) {
-              if (esEntrada) {
-                _registrarAsistencia(equipoId, trabajadorId: trabajador.id);
-              } else {
-                _registrarSalida(equipoId, trabajadorId: trabajador.id);
-              }
 
-              NotificationUtils.showSnackBar(
-                context: context,
-                message: 'Verificación exitosa',
-                isError: false,
-                icon: Icons.check_circle,
+            if (esEntrada) {
+              print('Registrar asistencia');
+              _registrarAsistencia(
+                equipoId,
+                trabajadorId: int.parse(verifiedId),
               );
             } else {
-              NotificationUtils.showSnackBar(
-                context: context,
-                message: 'El ID ingresado no coincide con los trabajadores registrados',
-                isError: true,
-                icon: Icons.error_outline,
-              );
+              print('Registrar salida');
+              _registrarSalida(equipoId, trabajadorId: int.parse(verifiedId));
             }
+
+            print(
+              'Asistencia registrada para el trabajador con ID: $verifiedId',
+            );
+
+            NotificationUtils.showSnackBar(
+              context: context,
+              message: 'Verificación exitosa',
+              isError: false,
+              icon: Icons.check_circle,
+            );
+
+            Navigator.of(context).pop();
           },
           onCancel: () {
             // Simplemente cerrar el modal

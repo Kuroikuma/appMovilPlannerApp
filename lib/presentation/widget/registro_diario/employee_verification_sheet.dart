@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/domain/entities.dart';
 
 import '../../theme/app_colors.dart';
 
@@ -10,6 +11,7 @@ class EmployeeVerificationSheet extends StatefulWidget {
   final String? employeePhoto;
   final Function(String) onVerify;
   final VoidCallback onCancel;
+  final List<Trabajador> employees;
 
   const EmployeeVerificationSheet({
     Key? key,
@@ -19,6 +21,7 @@ class EmployeeVerificationSheet extends StatefulWidget {
     this.employeePhoto,
     required this.onVerify,
     required this.onCancel,
+    required this.employees,
   }) : super(key: key);
 
   @override
@@ -57,15 +60,19 @@ class _EmployeeVerificationSheetState extends State<EmployeeVerificationSheet> {
         return;
       }
 
-      if (_idController.text != widget.employeeId) {
+      final Trabajador? trabajador = widget.employees.cast<Trabajador?>().firstWhere(
+              (t) => t?.id.toString() == _idController.text,
+              orElse: () => null,
+            );
+
+      if (trabajador == null) {
         setState(() {
           _isVerifying = false;
           _errorMessage = 'ID de empleado incorrecto';
         });
         return;
-        
-      }
-      
+      } 
+
       widget.onVerify(_idController.text);
     });
   }
@@ -226,7 +233,7 @@ class _EmployeeVerificationSheetState extends State<EmployeeVerificationSheet> {
           CircleAvatar(
             radius: 30,
             backgroundColor: colorScheme.primary.withOpacity(0.2),
-            backgroundImage: widget.employeePhoto != null 
+            backgroundImage: widget.employeePhoto != "" 
                 ? NetworkImage(widget.employeePhoto!) 
                 : null,
             child: widget.employeePhoto == null 
