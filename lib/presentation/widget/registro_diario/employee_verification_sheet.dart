@@ -82,7 +82,9 @@ class _EmployeeVerificationSheetState extends State<EmployeeVerificationSheet> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
-    return Container(
+    return Padding(
+      padding: MediaQuery.of(context).viewInsets,
+      child: Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: const BorderRadius.only(
@@ -216,6 +218,7 @@ class _EmployeeVerificationSheetState extends State<EmployeeVerificationSheet> {
           );
         },
       ),
+    ),
     );
   }
 
