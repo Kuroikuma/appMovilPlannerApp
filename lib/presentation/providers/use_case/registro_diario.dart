@@ -255,16 +255,33 @@ class RegistroDiarioNotifier extends StateNotifier<RegistroDiarioState> {
     }
 
     final horaAprobadaId = horario.id;
+    final hoy = DateTime.now();
+
+    // Verificar si ya hay un registro hoy para ese equipo
+    final indexExistente = state.registros.indexWhere(
+      (r) =>
+          r.equipoId == equipoId &&
+          r.fechaIngreso.year == hoy.year &&
+          r.fechaIngreso.month == hoy.month &&
+          r.fechaIngreso.day == hoy.day,
+    );
 
     try {
       final nuevoRegistro = await _repository.registrarAsistencia(
         equipoId,
         horaAprobadaId,
-        trabajadorId: trabajadorId
+        trabajadorId: trabajadorId,
       );
 
-      // Actualizar la lista de registros
-      final registrosActualizados = [...state.registros, nuevoRegistro];
+      final registrosActualizados = [...state.registros];
+
+      if (indexExistente != -1) {
+        // Si ya existe, actualizar ese registro
+        registrosActualizados[indexExistente] = nuevoRegistro;
+      } else {
+        // Si no existe, agregarlo
+        registrosActualizados.add(nuevoRegistro);
+      }
 
       state = state.copyWith(
         registros: registrosActualizados,

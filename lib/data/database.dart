@@ -28,16 +28,24 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (migrator, from, to) async {
-          if (from == 1) {
-            await migrator.addColumn(registrosDiarios, registrosDiarios.registroId);
-            // Otras migraciones que quieras
-          }
-        },
+      print('⏫ Migrando base de datos de v$from a v$to');
+      if (from == 1) {
+        await migrator.addColumn(registrosDiarios, registrosDiarios.registroId);
+      }
+      if (from == 3) {
+        await migrator.addColumn(
+          registrosDiarios,
+          registrosDiarios.iniciaLabores,
+        );
+        await migrator.addColumn(registrosDiarios, registrosDiarios.finLabores);
+        // Otras migraciones que quieras
+      }
+    },
   );
 }
 
@@ -163,11 +171,19 @@ class RegistrosDiarios extends Table {
       text().nullable().named('fecha_salida').map(const DateConverter())();
   TextColumn get horaSalida =>
       text().nullable().named('hora_salida').map(const TimeOfDayConverter())();
+  TextColumn get iniciaLabores =>
+      text()
+          .nullable()
+          .named('inicia_labores')
+          .map(const TimeOfDayConverter())();
+  TextColumn get finLabores =>
+      text().nullable().named('fin_labores').map(const TimeOfDayConverter())();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();
   TextColumn get nombreTrabajador => text().named('nombre_trabajador')();
   TextColumn get fotoTrabajador => text().named('foto_trabajador')();
   TextColumn get cargoTrabajador => text().named('cargo_trabajador')();
-  IntColumn get horarioId => integer().named('horario_id').references(Horarios, #id)();
+  IntColumn get horarioId =>
+      integer().named('horario_id').references(Horarios, #id)();
 }
 
 class SyncsEntitys extends Table {

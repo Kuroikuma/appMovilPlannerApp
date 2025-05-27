@@ -13,6 +13,8 @@ class RegistroDiario {
   final bool estado;
   final int horarioId;
   final int? registroId;
+  final TimeOfDay? iniciaLabores;
+  final TimeOfDay? finLabores;
 
   // Campos adicionales para la UI
   final String? nombreTrabajador;
@@ -25,6 +27,8 @@ class RegistroDiario {
     this.reconocimientoFacialId,
     required this.fechaIngreso,
     required this.horaIngreso,
+    this.iniciaLabores,
+    this.finLabores,
     this.fechaSalida,
     this.horaSalida,
     this.estado = true,
@@ -87,6 +91,8 @@ class RegistroDiario {
     String? cargoTrabajador,
     int? horarioId,
     int? registroId,
+    TimeOfDay? iniciaLabores,
+    TimeOfDay? finLabores,
   }) {
     return RegistroDiario(
       id: id ?? this.id,
@@ -103,6 +109,8 @@ class RegistroDiario {
       cargoTrabajador: cargoTrabajador ?? this.cargoTrabajador,
       horarioId: horarioId ?? this.horarioId,
       registroId: registroId ?? this.registroId,
+      iniciaLabores: iniciaLabores ?? this.iniciaLabores,
+      finLabores: finLabores ?? this.finLabores,
     );
   }
 
@@ -121,6 +129,14 @@ class RegistroDiario {
       horaSalida:
           json['horaSalida'] != "00:00:00"
               ? _timeFromString(json['horaSalida'])
+              : null,
+      iniciaLabores:
+          json['iniciaLabores'] != "00:00:00"
+              ? json['iniciaLabores'] != null ? _timeFromString(json['iniciaLabores']) : null
+              : null,
+      finLabores:
+          json['finLabores'] != "00:00:00"
+              ? json['finLabores'] != null ? _timeFromString(json['finLabores']) : null
               : null,
       estado: json['estado'] ?? true,
       nombreTrabajador: json['trabajadorNombreCompleto'] ?? 'Desconocido',
@@ -148,6 +164,8 @@ class RegistroDiario {
       horarioId: data.horarioId,
       registroId: data.registroId,
       reconocimientoFacialId: data.reconocimientoFacialId,
+      iniciaLabores: data.iniciaLabores,
+      finLabores: data.finLabores,
     );
   }
 
@@ -170,6 +188,12 @@ class RegistroDiario {
       'cargoTrabajador': cargoTrabajador,
       'horarioId': horarioId,
       'registroId': registroId,
+      'iniciaLabores': iniciaLabores != null
+          ? '${iniciaLabores!.hour}:${iniciaLabores!.minute}'
+          : null,
+      'finLabores': finLabores != null
+          ? '${finLabores!.hour}:${finLabores!.minute}'
+          : null,
     };
   }
 
@@ -179,10 +203,10 @@ class RegistroDiario {
     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
   }
 
-    // Método para obtener el tiempo transcurrido desde el ingreso
+  // Método para obtener el tiempo transcurrido desde el ingreso
   Duration get tiempoTranscurridoDesdeIngreso {
     final ahora = DateTime.now();
-    
+
     // Convertir TimeOfDay a DateTime para cálculos precisos
     final fechaHoraIngreso = DateTime(
       fechaIngreso.year,
@@ -191,7 +215,7 @@ class RegistroDiario {
       horaIngreso.hour,
       horaIngreso.minute,
     );
-    
+
     return ahora.difference(fechaHoraIngreso);
   }
 
@@ -199,7 +223,7 @@ class RegistroDiario {
   bool get puedeRegistrarSalida {
     // Si ya tiene salida registrada, no puede registrar otra
     if (tieneSalida) return false;
-    
+
     // Verificar si han pasado al menos 5 minutos desde el ingreso
     return tiempoTranscurridoDesdeIngreso.inMinutes >= 5;
   }
@@ -208,25 +232,25 @@ class RegistroDiario {
   Duration get tiempoRestanteParaSalida {
     final tiempoMinimo = const Duration(minutes: 5);
     final tiempoTranscurrido = tiempoTranscurridoDesdeIngreso;
-    
+
     if (tiempoTranscurrido >= tiempoMinimo) {
       return Duration.zero;
     }
-    
+
     return tiempoMinimo - tiempoTranscurrido;
   }
 
   // Formato legible del tiempo restante
   String get tiempoRestanteFormateado {
     final restante = tiempoRestanteParaSalida;
-    
+
     if (restante.inSeconds <= 0) {
       return "Puede registrar salida";
     }
-    
+
     final minutos = restante.inMinutes;
     final segundos = restante.inSeconds % 60;
-    
+
     if (minutos > 0) {
       return "$minutos min $segundos seg";
     } else {

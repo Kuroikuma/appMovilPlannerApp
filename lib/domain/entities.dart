@@ -85,32 +85,6 @@ class Ubicacion {
   });
 }
 
-class Horario {
-  final int id;
-  final int ubicacionId;
-  final DateTime fechaInicio;
-  final DateTime fechaFin;
-  final TimeOfDay horaInicio;
-  final TimeOfDay horaFin;
-  final TimeOfDay inicioDescanso;
-  final TimeOfDay finDescanso;
-  final bool pagaAlmuerzo;
-  final bool estado;
-
-  Horario({
-    required this.id,
-    required this.ubicacionId,
-    required this.fechaInicio,
-    required this.fechaFin,
-    required this.horaInicio,
-    required this.horaFin,
-    required this.inicioDescanso,
-    required this.finDescanso,
-    required this.pagaAlmuerzo,
-    required this.estado,
-  });
-}
-
 class SyncEntity {
   final String id;
   final String entityTableNameToSync;

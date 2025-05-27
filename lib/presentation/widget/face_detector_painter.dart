@@ -58,6 +58,7 @@ class FaceDetectorPainter extends CustomPainter {
   final InputImageRotation rotation;
   final CameraLensDirection cameraLensDirection;
   final String name;
+  final String _detectionMessage;
 
   FaceDetectorPainter(
     this.faces,
@@ -65,6 +66,7 @@ class FaceDetectorPainter extends CustomPainter {
     this.rotation,
     this.cameraLensDirection,
     this.name,
+    this._detectionMessage,
   );
 
   @override
@@ -74,6 +76,26 @@ class FaceDetectorPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0
           ..color = Colors.red;
+
+          // Dibuja el mensaje de detección en la parte superior central del lienzo
+    final ui.ParagraphBuilder messagePb = ui.ParagraphBuilder(
+      ui.ParagraphStyle(
+        textAlign: TextAlign.center,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    messagePb.pushStyle(ui.TextStyle(color: Colors.white, background: Paint()..color = Colors.black54));
+    messagePb.addText(_detectionMessage);
+    messagePb.pop();
+
+    final ui.Paragraph messageParagraph = messagePb.build();
+    messageParagraph.layout(ui.ParagraphConstraints(width: size.width));
+
+    canvas.drawParagraph(
+      messageParagraph,
+      Offset(0, 20), // Posición en la parte superior con un pequeño margen
+    );
 
     for (final Face face in faces) {
       final left = translateX(
@@ -136,6 +158,6 @@ class FaceDetectorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(FaceDetectorPainter oldDelegate) {
-    return oldDelegate.imageSize != imageSize || oldDelegate.faces != faces;
+    return oldDelegate.imageSize != imageSize || oldDelegate.faces != faces || oldDelegate._detectionMessage != _detectionMessage;
   }
 }

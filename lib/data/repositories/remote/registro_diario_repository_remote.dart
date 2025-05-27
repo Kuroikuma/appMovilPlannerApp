@@ -45,7 +45,8 @@ class RegistroDiarioRepositoryRemote {
           if (json is! Map<String, dynamic>) {
             throw ApiException();
           }
-          return RegistroDiario.fromJson(json);
+          final registro = RegistroDiario.fromJson(json);
+          return registro;
         } catch (e) {
           rethrow;
         }

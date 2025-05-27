@@ -2738,6 +2738,24 @@ class $RegistrosDiariosTable extends RegistrosDiarios
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       ).withConverter<TimeOfDay?>($RegistrosDiariosTable.$converterhoraSalidan);
+  @override
+  late final GeneratedColumnWithTypeConverter<TimeOfDay?, String>
+  iniciaLabores = GeneratedColumn<String>(
+    'inicia_labores',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<TimeOfDay?>($RegistrosDiariosTable.$converteriniciaLaboresn);
+  @override
+  late final GeneratedColumnWithTypeConverter<TimeOfDay?, String> finLabores =
+      GeneratedColumn<String>(
+        'fin_labores',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<TimeOfDay?>($RegistrosDiariosTable.$converterfinLaboresn);
   static const VerificationMeta _estadoMeta = const VerificationMeta('estado');
   @override
   late final GeneratedColumn<bool> estado = GeneratedColumn<bool>(
@@ -2808,6 +2826,8 @@ class $RegistrosDiariosTable extends RegistrosDiarios
     horaIngreso,
     fechaSalida,
     horaSalida,
+    iniciaLabores,
+    finLabores,
     estado,
     nombreTrabajador,
     fotoTrabajador,
@@ -2950,6 +2970,18 @@ class $RegistrosDiariosTable extends RegistrosDiarios
           data['${effectivePrefix}hora_salida'],
         ),
       ),
+      iniciaLabores: $RegistrosDiariosTable.$converteriniciaLaboresn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}inicia_labores'],
+        ),
+      ),
+      finLabores: $RegistrosDiariosTable.$converterfinLaboresn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}fin_labores'],
+        ),
+      ),
       estado:
           attachedDatabase.typeMapping.read(
             DriftSqlType.bool,
@@ -2995,6 +3027,14 @@ class $RegistrosDiariosTable extends RegistrosDiarios
       const TimeOfDayConverter();
   static TypeConverter<TimeOfDay?, String?> $converterhoraSalidan =
       NullAwareTypeConverter.wrap($converterhoraSalida);
+  static TypeConverter<TimeOfDay, String> $converteriniciaLabores =
+      const TimeOfDayConverter();
+  static TypeConverter<TimeOfDay?, String?> $converteriniciaLaboresn =
+      NullAwareTypeConverter.wrap($converteriniciaLabores);
+  static TypeConverter<TimeOfDay, String> $converterfinLabores =
+      const TimeOfDayConverter();
+  static TypeConverter<TimeOfDay?, String?> $converterfinLaboresn =
+      NullAwareTypeConverter.wrap($converterfinLabores);
 }
 
 class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
@@ -3006,6 +3046,8 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
   final TimeOfDay horaIngreso;
   final DateTime? fechaSalida;
   final TimeOfDay? horaSalida;
+  final TimeOfDay? iniciaLabores;
+  final TimeOfDay? finLabores;
   final bool estado;
   final String nombreTrabajador;
   final String fotoTrabajador;
@@ -3020,6 +3062,8 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     required this.horaIngreso,
     this.fechaSalida,
     this.horaSalida,
+    this.iniciaLabores,
+    this.finLabores,
     required this.estado,
     required this.nombreTrabajador,
     required this.fotoTrabajador,
@@ -3059,6 +3103,16 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
         $RegistrosDiariosTable.$converterhoraSalidan.toSql(horaSalida),
       );
     }
+    if (!nullToAbsent || iniciaLabores != null) {
+      map['inicia_labores'] = Variable<String>(
+        $RegistrosDiariosTable.$converteriniciaLaboresn.toSql(iniciaLabores),
+      );
+    }
+    if (!nullToAbsent || finLabores != null) {
+      map['fin_labores'] = Variable<String>(
+        $RegistrosDiariosTable.$converterfinLaboresn.toSql(finLabores),
+      );
+    }
     map['estado'] = Variable<bool>(estado);
     map['nombre_trabajador'] = Variable<String>(nombreTrabajador);
     map['foto_trabajador'] = Variable<String>(fotoTrabajador);
@@ -3089,6 +3143,14 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
           horaSalida == null && nullToAbsent
               ? const Value.absent()
               : Value(horaSalida),
+      iniciaLabores:
+          iniciaLabores == null && nullToAbsent
+              ? const Value.absent()
+              : Value(iniciaLabores),
+      finLabores:
+          finLabores == null && nullToAbsent
+              ? const Value.absent()
+              : Value(finLabores),
       estado: Value(estado),
       nombreTrabajador: Value(nombreTrabajador),
       fotoTrabajador: Value(fotoTrabajador),
@@ -3113,6 +3175,8 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
       horaIngreso: serializer.fromJson<TimeOfDay>(json['horaIngreso']),
       fechaSalida: serializer.fromJson<DateTime?>(json['fechaSalida']),
       horaSalida: serializer.fromJson<TimeOfDay?>(json['horaSalida']),
+      iniciaLabores: serializer.fromJson<TimeOfDay?>(json['iniciaLabores']),
+      finLabores: serializer.fromJson<TimeOfDay?>(json['finLabores']),
       estado: serializer.fromJson<bool>(json['estado']),
       nombreTrabajador: serializer.fromJson<String>(json['nombreTrabajador']),
       fotoTrabajador: serializer.fromJson<String>(json['fotoTrabajador']),
@@ -3134,6 +3198,8 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
       'horaIngreso': serializer.toJson<TimeOfDay>(horaIngreso),
       'fechaSalida': serializer.toJson<DateTime?>(fechaSalida),
       'horaSalida': serializer.toJson<TimeOfDay?>(horaSalida),
+      'iniciaLabores': serializer.toJson<TimeOfDay?>(iniciaLabores),
+      'finLabores': serializer.toJson<TimeOfDay?>(finLabores),
       'estado': serializer.toJson<bool>(estado),
       'nombreTrabajador': serializer.toJson<String>(nombreTrabajador),
       'fotoTrabajador': serializer.toJson<String>(fotoTrabajador),
@@ -3151,6 +3217,8 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     TimeOfDay? horaIngreso,
     Value<DateTime?> fechaSalida = const Value.absent(),
     Value<TimeOfDay?> horaSalida = const Value.absent(),
+    Value<TimeOfDay?> iniciaLabores = const Value.absent(),
+    Value<TimeOfDay?> finLabores = const Value.absent(),
     bool? estado,
     String? nombreTrabajador,
     String? fotoTrabajador,
@@ -3168,6 +3236,9 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     horaIngreso: horaIngreso ?? this.horaIngreso,
     fechaSalida: fechaSalida.present ? fechaSalida.value : this.fechaSalida,
     horaSalida: horaSalida.present ? horaSalida.value : this.horaSalida,
+    iniciaLabores:
+        iniciaLabores.present ? iniciaLabores.value : this.iniciaLabores,
+    finLabores: finLabores.present ? finLabores.value : this.finLabores,
     estado: estado ?? this.estado,
     nombreTrabajador: nombreTrabajador ?? this.nombreTrabajador,
     fotoTrabajador: fotoTrabajador ?? this.fotoTrabajador,
@@ -3194,6 +3265,12 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
           data.fechaSalida.present ? data.fechaSalida.value : this.fechaSalida,
       horaSalida:
           data.horaSalida.present ? data.horaSalida.value : this.horaSalida,
+      iniciaLabores:
+          data.iniciaLabores.present
+              ? data.iniciaLabores.value
+              : this.iniciaLabores,
+      finLabores:
+          data.finLabores.present ? data.finLabores.value : this.finLabores,
       estado: data.estado.present ? data.estado.value : this.estado,
       nombreTrabajador:
           data.nombreTrabajador.present
@@ -3222,6 +3299,8 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
           ..write('horaIngreso: $horaIngreso, ')
           ..write('fechaSalida: $fechaSalida, ')
           ..write('horaSalida: $horaSalida, ')
+          ..write('iniciaLabores: $iniciaLabores, ')
+          ..write('finLabores: $finLabores, ')
           ..write('estado: $estado, ')
           ..write('nombreTrabajador: $nombreTrabajador, ')
           ..write('fotoTrabajador: $fotoTrabajador, ')
@@ -3241,6 +3320,8 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
     horaIngreso,
     fechaSalida,
     horaSalida,
+    iniciaLabores,
+    finLabores,
     estado,
     nombreTrabajador,
     fotoTrabajador,
@@ -3259,6 +3340,8 @@ class RegistrosDiario extends DataClass implements Insertable<RegistrosDiario> {
           other.horaIngreso == this.horaIngreso &&
           other.fechaSalida == this.fechaSalida &&
           other.horaSalida == this.horaSalida &&
+          other.iniciaLabores == this.iniciaLabores &&
+          other.finLabores == this.finLabores &&
           other.estado == this.estado &&
           other.nombreTrabajador == this.nombreTrabajador &&
           other.fotoTrabajador == this.fotoTrabajador &&
@@ -3275,6 +3358,8 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
   final Value<TimeOfDay> horaIngreso;
   final Value<DateTime?> fechaSalida;
   final Value<TimeOfDay?> horaSalida;
+  final Value<TimeOfDay?> iniciaLabores;
+  final Value<TimeOfDay?> finLabores;
   final Value<bool> estado;
   final Value<String> nombreTrabajador;
   final Value<String> fotoTrabajador;
@@ -3289,6 +3374,8 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     this.horaIngreso = const Value.absent(),
     this.fechaSalida = const Value.absent(),
     this.horaSalida = const Value.absent(),
+    this.iniciaLabores = const Value.absent(),
+    this.finLabores = const Value.absent(),
     this.estado = const Value.absent(),
     this.nombreTrabajador = const Value.absent(),
     this.fotoTrabajador = const Value.absent(),
@@ -3304,6 +3391,8 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     required TimeOfDay horaIngreso,
     this.fechaSalida = const Value.absent(),
     this.horaSalida = const Value.absent(),
+    this.iniciaLabores = const Value.absent(),
+    this.finLabores = const Value.absent(),
     this.estado = const Value.absent(),
     required String nombreTrabajador,
     required String fotoTrabajador,
@@ -3325,6 +3414,8 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     Expression<String>? horaIngreso,
     Expression<String>? fechaSalida,
     Expression<String>? horaSalida,
+    Expression<String>? iniciaLabores,
+    Expression<String>? finLabores,
     Expression<bool>? estado,
     Expression<String>? nombreTrabajador,
     Expression<String>? fotoTrabajador,
@@ -3341,6 +3432,8 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
       if (horaIngreso != null) 'hora_ingreso': horaIngreso,
       if (fechaSalida != null) 'fecha_salida': fechaSalida,
       if (horaSalida != null) 'hora_salida': horaSalida,
+      if (iniciaLabores != null) 'inicia_labores': iniciaLabores,
+      if (finLabores != null) 'fin_labores': finLabores,
       if (estado != null) 'estado': estado,
       if (nombreTrabajador != null) 'nombre_trabajador': nombreTrabajador,
       if (fotoTrabajador != null) 'foto_trabajador': fotoTrabajador,
@@ -3358,6 +3451,8 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
     Value<TimeOfDay>? horaIngreso,
     Value<DateTime?>? fechaSalida,
     Value<TimeOfDay?>? horaSalida,
+    Value<TimeOfDay?>? iniciaLabores,
+    Value<TimeOfDay?>? finLabores,
     Value<bool>? estado,
     Value<String>? nombreTrabajador,
     Value<String>? fotoTrabajador,
@@ -3374,6 +3469,8 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
       horaIngreso: horaIngreso ?? this.horaIngreso,
       fechaSalida: fechaSalida ?? this.fechaSalida,
       horaSalida: horaSalida ?? this.horaSalida,
+      iniciaLabores: iniciaLabores ?? this.iniciaLabores,
+      finLabores: finLabores ?? this.finLabores,
       estado: estado ?? this.estado,
       nombreTrabajador: nombreTrabajador ?? this.nombreTrabajador,
       fotoTrabajador: fotoTrabajador ?? this.fotoTrabajador,
@@ -3419,6 +3516,18 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
         $RegistrosDiariosTable.$converterhoraSalidan.toSql(horaSalida.value),
       );
     }
+    if (iniciaLabores.present) {
+      map['inicia_labores'] = Variable<String>(
+        $RegistrosDiariosTable.$converteriniciaLaboresn.toSql(
+          iniciaLabores.value,
+        ),
+      );
+    }
+    if (finLabores.present) {
+      map['fin_labores'] = Variable<String>(
+        $RegistrosDiariosTable.$converterfinLaboresn.toSql(finLabores.value),
+      );
+    }
     if (estado.present) {
       map['estado'] = Variable<bool>(estado.value);
     }
@@ -3448,6 +3557,8 @@ class RegistrosDiariosCompanion extends UpdateCompanion<RegistrosDiario> {
           ..write('horaIngreso: $horaIngreso, ')
           ..write('fechaSalida: $fechaSalida, ')
           ..write('horaSalida: $horaSalida, ')
+          ..write('iniciaLabores: $iniciaLabores, ')
+          ..write('finLabores: $finLabores, ')
           ..write('estado: $estado, ')
           ..write('nombreTrabajador: $nombreTrabajador, ')
           ..write('fotoTrabajador: $fotoTrabajador, ')
@@ -6423,6 +6534,8 @@ typedef $$RegistrosDiariosTableCreateCompanionBuilder =
       required TimeOfDay horaIngreso,
       Value<DateTime?> fechaSalida,
       Value<TimeOfDay?> horaSalida,
+      Value<TimeOfDay?> iniciaLabores,
+      Value<TimeOfDay?> finLabores,
       Value<bool> estado,
       required String nombreTrabajador,
       required String fotoTrabajador,
@@ -6439,6 +6552,8 @@ typedef $$RegistrosDiariosTableUpdateCompanionBuilder =
       Value<TimeOfDay> horaIngreso,
       Value<DateTime?> fechaSalida,
       Value<TimeOfDay?> horaSalida,
+      Value<TimeOfDay?> iniciaLabores,
+      Value<TimeOfDay?> finLabores,
       Value<bool> estado,
       Value<String> nombreTrabajador,
       Value<String> fotoTrabajador,
@@ -6580,6 +6695,18 @@ class $$RegistrosDiariosTableFilterComposer
   ColumnWithTypeConverterFilters<TimeOfDay?, TimeOfDay, String>
   get horaSalida => $composableBuilder(
     column: $table.horaSalida,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<TimeOfDay?, TimeOfDay, String>
+  get iniciaLabores => $composableBuilder(
+    column: $table.iniciaLabores,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<TimeOfDay?, TimeOfDay, String>
+  get finLabores => $composableBuilder(
+    column: $table.finLabores,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
@@ -6731,6 +6858,16 @@ class $$RegistrosDiariosTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get iniciaLabores => $composableBuilder(
+    column: $table.iniciaLabores,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get finLabores => $composableBuilder(
+    column: $table.finLabores,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get estado => $composableBuilder(
     column: $table.estado,
     builder: (column) => ColumnOrderings(column),
@@ -6878,6 +7015,18 @@ class $$RegistrosDiariosTableAnnotationComposer
   GeneratedColumnWithTypeConverter<TimeOfDay?, String> get horaSalida =>
       $composableBuilder(
         column: $table.horaSalida,
+        builder: (column) => column,
+      );
+
+  GeneratedColumnWithTypeConverter<TimeOfDay?, String> get iniciaLabores =>
+      $composableBuilder(
+        column: $table.iniciaLabores,
+        builder: (column) => column,
+      );
+
+  GeneratedColumnWithTypeConverter<TimeOfDay?, String> get finLabores =>
+      $composableBuilder(
+        column: $table.finLabores,
         builder: (column) => column,
       );
 
@@ -7043,6 +7192,8 @@ class $$RegistrosDiariosTableTableManager
                 Value<TimeOfDay> horaIngreso = const Value.absent(),
                 Value<DateTime?> fechaSalida = const Value.absent(),
                 Value<TimeOfDay?> horaSalida = const Value.absent(),
+                Value<TimeOfDay?> iniciaLabores = const Value.absent(),
+                Value<TimeOfDay?> finLabores = const Value.absent(),
                 Value<bool> estado = const Value.absent(),
                 Value<String> nombreTrabajador = const Value.absent(),
                 Value<String> fotoTrabajador = const Value.absent(),
@@ -7057,6 +7208,8 @@ class $$RegistrosDiariosTableTableManager
                 horaIngreso: horaIngreso,
                 fechaSalida: fechaSalida,
                 horaSalida: horaSalida,
+                iniciaLabores: iniciaLabores,
+                finLabores: finLabores,
                 estado: estado,
                 nombreTrabajador: nombreTrabajador,
                 fotoTrabajador: fotoTrabajador,
@@ -7073,6 +7226,8 @@ class $$RegistrosDiariosTableTableManager
                 required TimeOfDay horaIngreso,
                 Value<DateTime?> fechaSalida = const Value.absent(),
                 Value<TimeOfDay?> horaSalida = const Value.absent(),
+                Value<TimeOfDay?> iniciaLabores = const Value.absent(),
+                Value<TimeOfDay?> finLabores = const Value.absent(),
                 Value<bool> estado = const Value.absent(),
                 required String nombreTrabajador,
                 required String fotoTrabajador,
@@ -7087,6 +7242,8 @@ class $$RegistrosDiariosTableTableManager
                 horaIngreso: horaIngreso,
                 fechaSalida: fechaSalida,
                 horaSalida: horaSalida,
+                iniciaLabores: iniciaLabores,
+                finLabores: finLabores,
                 estado: estado,
                 nombreTrabajador: nombreTrabajador,
                 fotoTrabajador: fotoTrabajador,

@@ -2,10 +2,11 @@ import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/database.dart';
 import '../../../core/error/exceptions.dart';
+import '../../../domain/entities.dart';
 import '../../../domain/models/registro_diario.dart';
 import '../../converters/date_converter.dart';
-import '../../converters/time_converter.dart';
 import '../../mappers/registro_diario_mapper.dart';
+import '../../mappers/trabajador_mappers.dart';
 
 class RegistroDiarioRepositoryLocal {
   final AppDatabase _db;
@@ -15,6 +16,14 @@ class RegistroDiarioRepositoryLocal {
   Future<List<RegistroDiario>> getRegistroDiario() async {
     final result = await _db.select(_db.registrosDiarios).get();
     return result.map(RegistroDiario.fromDataModel).toList();
+  }
+
+  Future<Trabajador> getTrabajadorByEquipoId(int equipoId) async {
+    final result =
+        await (_db.select(_db.trabajadores)
+          ..where((tbl) => tbl.equipoId.equals(equipoId))).getSingle();
+
+    return TrabajadorMapper.fromDataModel(result);
   }
 
   Future<List<RegistroDiario>> obtenerRegistrosPorUbicacion(
@@ -160,20 +169,9 @@ class RegistroDiarioRepositoryLocal {
     try {
       // Simular una llamada a la API
       final registrosDiarios = await getRegistroDiario();
+      final horario = await obtenerHorarioPorId(horaAprobadaId);
+      final trabajador = await getTrabajadorByEquipoId(equipoId);
 
-      // Buscar información del trabajador
-      final trabajador = registrosDiarios.firstWhere(
-        (registro) => registro.equipoId == equipoId,
-        orElse:
-            () => RegistroDiario(
-              equipoId: equipoId,
-              fechaIngreso: DateTime.now(),
-              horaIngreso: TimeOfDay.now(),
-              nombreTrabajador: 'Trabajador #$equipoId',
-              horarioId: horaAprobadaId,
-              registroId: trabajadorId
-            ),
-      );
 
       // Crear nuevo registro
       final nuevoRegistro = RegistroDiario(
@@ -181,12 +179,13 @@ class RegistroDiarioRepositoryLocal {
         equipoId: equipoId,
         fechaIngreso: DateTime.now(),
         horaIngreso: TimeOfDay.now(),
+        iniciaLabores: horario.horaInicio,
         estado: true,
-        nombreTrabajador: trabajador.nombreTrabajador,
-        fotoTrabajador: trabajador.fotoTrabajador,
-        cargoTrabajador: trabajador.cargoTrabajador,
+        nombreTrabajador: '$trabajador.nombre $trabajador.primerApellido $trabajador.segundoApellido',
+        fotoTrabajador: trabajador.fotoUrl,
+        cargoTrabajador: trabajador.cargo,
         horarioId: horaAprobadaId,
-        registroId: trabajadorId
+        registroId: trabajadorId,
       );
 
       // En una implementación real, aquí se guardaría en la base de datos
@@ -207,6 +206,8 @@ class RegistroDiarioRepositoryLocal {
                 nuevoRegistro.cargoTrabajador ?? "Desconocido",
               ),
               horarioId: Value(nuevoRegistro.horarioId),
+              registroId: Value(nuevoRegistro.registroId),
+              iniciaLabores: Value(nuevoRegistro.iniciaLabores),
             ),
           );
 
@@ -222,6 +223,7 @@ class RegistroDiarioRepositoryLocal {
   ) async {
     // Simular una llamada a la API
     final registrosDiarios = await getRegistroDiario();
+    final horario = await obtenerHorarioPorId(horaAprobadaId);
 
     // Buscar el registro
     final index = registrosDiarios.indexWhere(
@@ -235,6 +237,7 @@ class RegistroDiarioRepositoryLocal {
     final registroActualizado = registrosDiarios[index].copyWith(
       fechaSalida: DateTime.now(),
       horaSalida: TimeOfDay.now(),
+      finLabores: horario.horaFin,
       horarioId: horaAprobadaId,
     );
 
@@ -254,7 +257,8 @@ class RegistroDiarioRepositoryLocal {
         return registro.equipoId == equipoId &&
             registro.fechaIngreso.year == hoy.year &&
             registro.fechaIngreso.month == hoy.month &&
-            registro.fechaIngreso.day == hoy.day && !registro.tieneSalida;
+            registro.fechaIngreso.day == hoy.day &&
+            !registro.tieneSalida;
       });
     } catch (e) {
       return null; // No encontrado
@@ -273,7 +277,8 @@ class RegistroDiarioRepositoryLocal {
           return registro.equipoId == equipoId &&
               registro.fechaIngreso.year == hoy.year &&
               registro.fechaIngreso.month == hoy.month &&
-              registro.fechaIngreso.day == hoy.day && !registro.tieneSalida;
+              registro.fechaIngreso.day == hoy.day &&
+              !registro.tieneSalida;
         }).toList();
 
     if (registrosHoy.isEmpty) {
@@ -350,6 +355,13 @@ class RegistroDiarioRepositoryLocal {
             registro.horaSalida != null
                 ? Value(registro.horaSalida!)
                 : const Value.absent(),
+        equipoId: Value(registro.equipoId),
+        registroId: Value(registro.registroId!),
+        iniciaLabores: registro.iniciaLabores != null
+                ? Value(registro.iniciaLabores!)
+                : const Value.absent(),
+        finLabores:
+            registro.finLabores != null ? Value(registro.finLabores!) : const Value.absent(),
         estado: Value(registro.estado),
         nombreTrabajador: Value(registro.nombreTrabajador ?? "Desconocido"),
         fotoTrabajador: Value(registro.fotoTrabajador ?? ""),
@@ -388,9 +400,14 @@ class RegistroDiarioRepositoryLocal {
 
     // Verificar que la hora esté entre horaInicio y horaFin
     final ahoraMinutos = hora.hour * 60 + hora.minute;
-   
+
     final finMinutos = horario.horaFin.hour * 60 + horario.horaFin.minute;
 
     return ahoraMinutos <= finMinutos;
+  }
+
+  Future<Horario> obtenerHorarioPorId(int id) async {
+    final horarios = await _db.select(_db.horarios).get();
+    return horarios.firstWhere((horario) => horario.id == id);
   }
 }

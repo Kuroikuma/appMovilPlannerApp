@@ -79,7 +79,6 @@ class _ReconocimientoFacialScreenState
   }
 
   void _onSearchChanged() {
-    print('buscando: ${_searchController.text}');
     setState(() {
       _searchQuery = _searchController.text;
       _isSearching = _searchQuery.isNotEmpty;
@@ -96,7 +95,6 @@ class _ReconocimientoFacialScreenState
     _inactivityTimer?.cancel();
     _searchController.dispose();
 
-    print('dispose de la camara');
     super.dispose();
   }
 
@@ -138,8 +136,6 @@ class _ReconocimientoFacialScreenState
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final CameraController? cameraController = _cameraController;
-
-    print('dispose de la camara');
 
     // App state changed before we got the chance to initialize.
     if (cameraController == null || !cameraController.value.isInitialized) {
@@ -258,6 +254,7 @@ class _ReconocimientoFacialScreenState
   }
 
   Future<void> _processCameraImage(CameraImage image) async {
+    String _detectionMessage = "";
     if (!mounted) return;
     final state = ref.watch(reconocimientoFacialNotifierProvider);
 
@@ -336,6 +333,8 @@ class _ReconocimientoFacialScreenState
       // Detect faces
       final faces = await reconocimientoNotifier.detectFaces(inputImage);
       if (faces.isEmpty) {
+        _detectionMessage = 'No se detectaron rostros.';
+        
         if (mounted) {
           setState(() => customPaint = null);
         }
@@ -351,8 +350,22 @@ class _ReconocimientoFacialScreenState
             _ultimaFoto = image;
           });
 
-          print('Ultima foto');
+          final face = faces.first;
 
+          final Rect boundingBox = face.boundingBox;
+
+          // Define un umbral para considerar un rostro "lejos"
+          // Estos valores son de ejemplo y pueden necesitar ajuste
+          const double minFaceWidthThreshold = 150.0; // Ancho mínimo en píxeles
+          const double minFaceHeightThreshold = 150.0; // Alto mínimo en píxeles
+
+          // Si el ancho o alto del cuadro delimitador es menor que el umbral
+          if (boundingBox.width < minFaceWidthThreshold ||
+              boundingBox.height < minFaceHeightThreshold) {
+            _detectionMessage = 'Rostro detectado: ¡Demasiado lejos!';
+          } else {
+            _detectionMessage = 'Rostro detectado: Distancia óptima.';
+          }
           await _cameraController?.stopImageStream();
         }
       }
@@ -388,6 +401,7 @@ class _ReconocimientoFacialScreenState
               inputImage.metadata!.rotation,
               camera.lensDirection,
               name,
+              _detectionMessage,
             ),
           );
           _ultimaFoto = null;
