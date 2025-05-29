@@ -2,11 +2,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/entities.dart' show Trabajador;
 import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../widget/reconocimiento_facial/build_procesando.dart';
 import '../widget/trabajador/trabajador_detail_sheet.dart';
+import '../widget/trabajador/trabajador_image_gallery.dart';
 import '../widget/trabajador_card.dart';
 import '../utils/notification_utils.dart';
 
@@ -63,7 +65,7 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
   }
 
   void _initFaceRecognition() async {
-    ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
+    // ref.read(reconocimientoFacialNotifierProvider.notifier).reiniciarEstado();
     await ref.read(reconocimientoFacialNotifierProvider.notifier).initialize();
   }
 
@@ -333,7 +335,7 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
     );
   }
 
-void _mostrarDetallesTrabajador(trabajador) {
+  void _mostrarDetallesTrabajador(trabajador) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -359,10 +361,33 @@ void _mostrarDetallesTrabajador(trabajador) {
               isError: false,
             );
           },
-          onStatusChanged: (newStatus) {
-            // Implementar cambio de estado
+          onViewGallery: () {
+            // Cerrar el detalle y mostrar la galería
             Navigator.pop(context);
+            _mostrarGaleriaTrabajador(trabajador);
           },
+        );
+      },
+    );
+  }
+
+  void _mostrarGaleriaTrabajador(Trabajador trabajador) {
+    final faces = ref.watch(reconocimientoFacialNotifierProvider).cachedFaces;
+
+    final facesByTrabajador = faces.where(
+      (face) => face.trabajadorId == trabajador.id,
+    );
+
+    final imagenes =
+        facesByTrabajador.map((face) => face.blobFileString).toList();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return TrabajadorImageGallery(
+          trabajador: trabajador,
+          imagenes: imagenes,
         );
       },
     );

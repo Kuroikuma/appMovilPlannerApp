@@ -1699,6 +1699,17 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
       'REFERENCES trabajadores (id)',
     ),
   );
+  static const VerificationMeta _blobFileStringMeta = const VerificationMeta(
+    'blobFileString',
+  );
+  @override
+  late final GeneratedColumn<String> blobFileString = GeneratedColumn<String>(
+    'blob_file_string',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   late final GeneratedColumnWithTypeConverter<List<double>, String>
   datosBiometricos = GeneratedColumn<String>(
@@ -1738,6 +1749,7 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
   List<GeneratedColumn> get $columns => [
     id,
     trabajadorId,
+    blobFileString,
     datosBiometricos,
     estado,
     tipoRegistro,
@@ -1770,6 +1782,17 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
     } else if (isInserting) {
       context.missing(_trabajadorIdMeta);
     }
+    if (data.containsKey('blob_file_string')) {
+      context.handle(
+        _blobFileStringMeta,
+        blobFileString.isAcceptableOrUnknown(
+          data['blob_file_string']!,
+          _blobFileStringMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_blobFileStringMeta);
+    }
     if (data.containsKey('estado')) {
       context.handle(
         _estadoMeta,
@@ -1794,6 +1817,11 @@ class $RegistrosBiometricosTable extends RegistrosBiometricos
           attachedDatabase.typeMapping.read(
             DriftSqlType.int,
             data['${effectivePrefix}trabajador_id'],
+          )!,
+      blobFileString:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}blob_file_string'],
           )!,
       datosBiometricos: $RegistrosBiometricosTable.$converterdatosBiometricos
           .fromSql(
@@ -1831,12 +1859,14 @@ class RegistrosBiometrico extends DataClass
     implements Insertable<RegistrosBiometrico> {
   final String id;
   final int trabajadorId;
+  final String blobFileString;
   final List<double> datosBiometricos;
   final bool estado;
   final TipoRegistroBiometrico tipoRegistro;
   const RegistrosBiometrico({
     required this.id,
     required this.trabajadorId,
+    required this.blobFileString,
     required this.datosBiometricos,
     required this.estado,
     required this.tipoRegistro,
@@ -1846,6 +1876,7 @@ class RegistrosBiometrico extends DataClass
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['trabajador_id'] = Variable<int>(trabajadorId);
+    map['blob_file_string'] = Variable<String>(blobFileString);
     {
       map['datos_biometricos'] = Variable<String>(
         $RegistrosBiometricosTable.$converterdatosBiometricos.toSql(
@@ -1866,6 +1897,7 @@ class RegistrosBiometrico extends DataClass
     return RegistrosBiometricosCompanion(
       id: Value(id),
       trabajadorId: Value(trabajadorId),
+      blobFileString: Value(blobFileString),
       datosBiometricos: Value(datosBiometricos),
       estado: Value(estado),
       tipoRegistro: Value(tipoRegistro),
@@ -1880,6 +1912,7 @@ class RegistrosBiometrico extends DataClass
     return RegistrosBiometrico(
       id: serializer.fromJson<String>(json['id']),
       trabajadorId: serializer.fromJson<int>(json['trabajadorId']),
+      blobFileString: serializer.fromJson<String>(json['blobFileString']),
       datosBiometricos: serializer.fromJson<List<double>>(
         json['datosBiometricos'],
       ),
@@ -1895,6 +1928,7 @@ class RegistrosBiometrico extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'trabajadorId': serializer.toJson<int>(trabajadorId),
+      'blobFileString': serializer.toJson<String>(blobFileString),
       'datosBiometricos': serializer.toJson<List<double>>(datosBiometricos),
       'estado': serializer.toJson<bool>(estado),
       'tipoRegistro': serializer.toJson<TipoRegistroBiometrico>(tipoRegistro),
@@ -1904,12 +1938,14 @@ class RegistrosBiometrico extends DataClass
   RegistrosBiometrico copyWith({
     String? id,
     int? trabajadorId,
+    String? blobFileString,
     List<double>? datosBiometricos,
     bool? estado,
     TipoRegistroBiometrico? tipoRegistro,
   }) => RegistrosBiometrico(
     id: id ?? this.id,
     trabajadorId: trabajadorId ?? this.trabajadorId,
+    blobFileString: blobFileString ?? this.blobFileString,
     datosBiometricos: datosBiometricos ?? this.datosBiometricos,
     estado: estado ?? this.estado,
     tipoRegistro: tipoRegistro ?? this.tipoRegistro,
@@ -1921,6 +1957,10 @@ class RegistrosBiometrico extends DataClass
           data.trabajadorId.present
               ? data.trabajadorId.value
               : this.trabajadorId,
+      blobFileString:
+          data.blobFileString.present
+              ? data.blobFileString.value
+              : this.blobFileString,
       datosBiometricos:
           data.datosBiometricos.present
               ? data.datosBiometricos.value
@@ -1938,6 +1978,7 @@ class RegistrosBiometrico extends DataClass
     return (StringBuffer('RegistrosBiometrico(')
           ..write('id: $id, ')
           ..write('trabajadorId: $trabajadorId, ')
+          ..write('blobFileString: $blobFileString, ')
           ..write('datosBiometricos: $datosBiometricos, ')
           ..write('estado: $estado, ')
           ..write('tipoRegistro: $tipoRegistro')
@@ -1946,14 +1987,21 @@ class RegistrosBiometrico extends DataClass
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, trabajadorId, datosBiometricos, estado, tipoRegistro);
+  int get hashCode => Object.hash(
+    id,
+    trabajadorId,
+    blobFileString,
+    datosBiometricos,
+    estado,
+    tipoRegistro,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is RegistrosBiometrico &&
           other.id == this.id &&
           other.trabajadorId == this.trabajadorId &&
+          other.blobFileString == this.blobFileString &&
           other.datosBiometricos == this.datosBiometricos &&
           other.estado == this.estado &&
           other.tipoRegistro == this.tipoRegistro);
@@ -1963,6 +2011,7 @@ class RegistrosBiometricosCompanion
     extends UpdateCompanion<RegistrosBiometrico> {
   final Value<String> id;
   final Value<int> trabajadorId;
+  final Value<String> blobFileString;
   final Value<List<double>> datosBiometricos;
   final Value<bool> estado;
   final Value<TipoRegistroBiometrico> tipoRegistro;
@@ -1970,6 +2019,7 @@ class RegistrosBiometricosCompanion
   const RegistrosBiometricosCompanion({
     this.id = const Value.absent(),
     this.trabajadorId = const Value.absent(),
+    this.blobFileString = const Value.absent(),
     this.datosBiometricos = const Value.absent(),
     this.estado = const Value.absent(),
     this.tipoRegistro = const Value.absent(),
@@ -1978,17 +2028,20 @@ class RegistrosBiometricosCompanion
   RegistrosBiometricosCompanion.insert({
     required String id,
     required int trabajadorId,
+    required String blobFileString,
     required List<double> datosBiometricos,
     this.estado = const Value.absent(),
     required TipoRegistroBiometrico tipoRegistro,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        trabajadorId = Value(trabajadorId),
+       blobFileString = Value(blobFileString),
        datosBiometricos = Value(datosBiometricos),
        tipoRegistro = Value(tipoRegistro);
   static Insertable<RegistrosBiometrico> custom({
     Expression<String>? id,
     Expression<int>? trabajadorId,
+    Expression<String>? blobFileString,
     Expression<String>? datosBiometricos,
     Expression<bool>? estado,
     Expression<String>? tipoRegistro,
@@ -1997,6 +2050,7 @@ class RegistrosBiometricosCompanion
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (trabajadorId != null) 'trabajador_id': trabajadorId,
+      if (blobFileString != null) 'blob_file_string': blobFileString,
       if (datosBiometricos != null) 'datos_biometricos': datosBiometricos,
       if (estado != null) 'estado': estado,
       if (tipoRegistro != null) 'tipo_registro': tipoRegistro,
@@ -2007,6 +2061,7 @@ class RegistrosBiometricosCompanion
   RegistrosBiometricosCompanion copyWith({
     Value<String>? id,
     Value<int>? trabajadorId,
+    Value<String>? blobFileString,
     Value<List<double>>? datosBiometricos,
     Value<bool>? estado,
     Value<TipoRegistroBiometrico>? tipoRegistro,
@@ -2015,6 +2070,7 @@ class RegistrosBiometricosCompanion
     return RegistrosBiometricosCompanion(
       id: id ?? this.id,
       trabajadorId: trabajadorId ?? this.trabajadorId,
+      blobFileString: blobFileString ?? this.blobFileString,
       datosBiometricos: datosBiometricos ?? this.datosBiometricos,
       estado: estado ?? this.estado,
       tipoRegistro: tipoRegistro ?? this.tipoRegistro,
@@ -2030,6 +2086,9 @@ class RegistrosBiometricosCompanion
     }
     if (trabajadorId.present) {
       map['trabajador_id'] = Variable<int>(trabajadorId.value);
+    }
+    if (blobFileString.present) {
+      map['blob_file_string'] = Variable<String>(blobFileString.value);
     }
     if (datosBiometricos.present) {
       map['datos_biometricos'] = Variable<String>(
@@ -2059,6 +2118,7 @@ class RegistrosBiometricosCompanion
     return (StringBuffer('RegistrosBiometricosCompanion(')
           ..write('id: $id, ')
           ..write('trabajadorId: $trabajadorId, ')
+          ..write('blobFileString: $blobFileString, ')
           ..write('datosBiometricos: $datosBiometricos, ')
           ..write('estado: $estado, ')
           ..write('tipoRegistro: $tipoRegistro, ')
@@ -5648,6 +5708,7 @@ typedef $$RegistrosBiometricosTableCreateCompanionBuilder =
     RegistrosBiometricosCompanion Function({
       required String id,
       required int trabajadorId,
+      required String blobFileString,
       required List<double> datosBiometricos,
       Value<bool> estado,
       required TipoRegistroBiometrico tipoRegistro,
@@ -5657,6 +5718,7 @@ typedef $$RegistrosBiometricosTableUpdateCompanionBuilder =
     RegistrosBiometricosCompanion Function({
       Value<String> id,
       Value<int> trabajadorId,
+      Value<String> blobFileString,
       Value<List<double>> datosBiometricos,
       Value<bool> estado,
       Value<TipoRegistroBiometrico> tipoRegistro,
@@ -5710,6 +5772,11 @@ class $$RegistrosBiometricosTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get blobFileString => $composableBuilder(
+    column: $table.blobFileString,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5772,6 +5839,11 @@ class $$RegistrosBiometricosTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get blobFileString => $composableBuilder(
+    column: $table.blobFileString,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get datosBiometricos => $composableBuilder(
     column: $table.datosBiometricos,
     builder: (column) => ColumnOrderings(column),
@@ -5822,6 +5894,11 @@ class $$RegistrosBiometricosTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get blobFileString => $composableBuilder(
+    column: $table.blobFileString,
+    builder: (column) => column,
+  );
 
   GeneratedColumnWithTypeConverter<List<double>, String> get datosBiometricos =>
       $composableBuilder(
@@ -5903,6 +5980,7 @@ class $$RegistrosBiometricosTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<int> trabajadorId = const Value.absent(),
+                Value<String> blobFileString = const Value.absent(),
                 Value<List<double>> datosBiometricos = const Value.absent(),
                 Value<bool> estado = const Value.absent(),
                 Value<TipoRegistroBiometrico> tipoRegistro =
@@ -5911,6 +5989,7 @@ class $$RegistrosBiometricosTableTableManager
               }) => RegistrosBiometricosCompanion(
                 id: id,
                 trabajadorId: trabajadorId,
+                blobFileString: blobFileString,
                 datosBiometricos: datosBiometricos,
                 estado: estado,
                 tipoRegistro: tipoRegistro,
@@ -5920,6 +5999,7 @@ class $$RegistrosBiometricosTableTableManager
               ({
                 required String id,
                 required int trabajadorId,
+                required String blobFileString,
                 required List<double> datosBiometricos,
                 Value<bool> estado = const Value.absent(),
                 required TipoRegistroBiometrico tipoRegistro,
@@ -5927,6 +6007,7 @@ class $$RegistrosBiometricosTableTableManager
               }) => RegistrosBiometricosCompanion.insert(
                 id: id,
                 trabajadorId: trabajadorId,
+                blobFileString: blobFileString,
                 datosBiometricos: datosBiometricos,
                 estado: estado,
                 tipoRegistro: tipoRegistro,

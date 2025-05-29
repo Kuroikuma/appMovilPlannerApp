@@ -11,6 +11,7 @@ import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../utils/facial_recognition_utils_dos.dart';
+import 'trabajador/trabajador_image_gallery.dart';
 
 class TrabajadorCard extends ConsumerStatefulWidget {
   final Trabajador trabajador;
@@ -122,7 +123,7 @@ class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
                               Icons.face_retouching_off,
                               color: Colors.red,
                             ),
-                    onPressed: () => _registerFace(trabajador),
+                    onPressed: () => _mostrarGaleriaTrabajador(trabajador),
                   ),
                 ],
               ),
@@ -130,6 +131,30 @@ class _TrabajadorCardState extends ConsumerState<TrabajadorCard> {
           ),
         ),
       ),
+    );
+  }
+
+  void _mostrarGaleriaTrabajador(Trabajador trabajador) {
+    final faces = ref.watch(reconocimientoFacialNotifierProvider).cachedFaces;
+
+    print(faces);
+
+    final facesByTrabajador = faces.where(
+      (face) => face.trabajadorId == trabajador.id,
+    );
+
+    final imagenes =
+        facesByTrabajador.map((face) => face.blobFileString).toList();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return TrabajadorImageGallery(
+          trabajador: trabajador,
+          imagenes: imagenes,
+        );
+      },
     );
   }
 

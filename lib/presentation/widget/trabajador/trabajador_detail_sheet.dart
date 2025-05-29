@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../domain/entities.dart';
 import '../../theme/app_colors.dart';
@@ -8,15 +7,15 @@ class TrabajadorDetailSheet extends StatelessWidget {
   final Trabajador trabajador;
   final VoidCallback? onEditPressed;
   final VoidCallback? onDeletePressed;
-  final Function(bool)? onStatusChanged;
+  final VoidCallback? onViewGallery;
 
   const TrabajadorDetailSheet({
-    Key? key,
+    super.key,
     required this.trabajador,
     this.onEditPressed,
     this.onDeletePressed,
-    this.onStatusChanged,
-  }) : super(key: key);
+    this.onViewGallery,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -99,10 +98,10 @@ class TrabajadorDetailSheet extends StatelessWidget {
                 tag: 'trabajador_${trabajador.id}',
                 child: CircleAvatar(
                   radius: 30,
-                  backgroundImage: trabajador.fotoUrl != null 
-                      ? NetworkImage(trabajador.fotoUrl!) 
+                  backgroundImage: trabajador.fotoUrl != "" 
+                      ? NetworkImage(trabajador.fotoUrl) 
                       : null,
-                  child: trabajador.fotoUrl == null 
+                  child: trabajador.fotoUrl == "" 
                       ? Text(
                           trabajador.nombre[0].toUpperCase(),
                           style: const TextStyle(fontSize: 24),
@@ -164,18 +163,17 @@ class TrabajadorDetailSheet extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        if (trabajador.cargo != null)
-                          Expanded(
-                            child: Text(
-                              trabajador.cargo!,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                        Expanded(
+                          child: Text(
+                            trabajador.cargo,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                        ),
                       ],
                     ),
                   ],
@@ -292,14 +290,14 @@ class TrabajadorDetailSheet extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: FilledButton.icon(
-                onPressed: onStatusChanged != null 
-                    ? () => onStatusChanged!(!trabajador.faceSync) 
+                onPressed: onViewGallery != null 
+                    ? () => onViewGallery!()
                     : null,
                 icon: Icon(
                   trabajador.faceSync ? Icons.cancel : Icons.face,
                 ),
                 label: Text(
-                  trabajador.faceSync ? 'Desactivar' : 'Activar',
+                  trabajador.faceSync ? 'Con imagenes' : 'Sin imagenes',
                 ),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),

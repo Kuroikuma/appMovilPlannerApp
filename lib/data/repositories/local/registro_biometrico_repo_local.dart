@@ -25,6 +25,7 @@ class RegistroBiometricoRepositoryLocal {
         datosBiometricos: embedding,
         estado: true,
         tipoRegistro: TipoRegistroBiometrico.face,
+        blobFileString: ""
       );
       await _db
           .into(_db.registrosBiometricos)
@@ -53,6 +54,7 @@ class RegistroBiometricoRepositoryLocal {
                   datosBiometricos: Value(e.datosBiometricos),
                   estado: Value(e.estado),
                   tipoRegistro: Value(e.tipoRegistro),
+                  blobFileString: Value(e.blobFileString),
                 ),
               )
               .toList(),

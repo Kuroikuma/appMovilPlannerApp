@@ -28,7 +28,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -43,6 +43,12 @@ class AppDatabase extends _$AppDatabase {
           registrosDiarios.iniciaLabores,
         );
         await migrator.addColumn(registrosDiarios, registrosDiarios.finLabores);
+        // Otras migraciones que quieras
+      }
+
+      if (from == 4) {
+        // Agrega aquí solo columnas nuevas que no existan en la tabla RegistrosBiometricos
+        await migrator.addColumn(registrosBiometricos, registrosBiometricos.blobFileString);
         // Otras migraciones que quieras
       }
     },
@@ -129,6 +135,7 @@ class RegistrosBiometricos extends Table {
   TextColumn get id => text()();
   IntColumn get trabajadorId =>
       integer().named('trabajador_id').references(Trabajadores, #id)();
+  TextColumn get blobFileString => text().named('blob_file_string')();
   TextColumn get datosBiometricos =>
       text().named('datos_biometricos').map(const JsonConverterEmbedding())();
   BoolColumn get estado => boolean().withDefault(const Constant(true))();

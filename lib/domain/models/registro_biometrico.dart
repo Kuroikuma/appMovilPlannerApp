@@ -8,6 +8,7 @@ class RegistroBiometrico {
   final List<double> datosBiometricos;
   final bool estado;
   final TipoRegistroBiometrico tipoRegistro;
+  final String blobFileString;
 
   RegistroBiometrico({
     required this.id,
@@ -15,6 +16,7 @@ class RegistroBiometrico {
     this.estado = true,
     required this.datosBiometricos,
     required this.tipoRegistro,
+    required this.blobFileString,
   });
 
   factory RegistroBiometrico.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class RegistroBiometrico {
       tipoRegistro: TipoRegistroBiometrico.values.firstWhere(
         (element) => element.index == json['tipoRegistro'],
       ),
+      blobFileString: json['blobFileString'],
     );
     return registroBiometrico;
   }
@@ -41,6 +44,7 @@ class RegistroBiometrico {
       tipoRegistro: TipoRegistroBiometrico.values.firstWhere(
         (element) => element.name == data.tipoRegistro.name,
       ),
+      blobFileString: data.blobFileString,
     );
   }
 
@@ -51,6 +55,7 @@ class RegistroBiometrico {
       datosBiometricos: datosBiometricos,
       estado: estado,
       tipoRegistro: tipoRegistro,
+      blobFileString: blobFileString,
     );
   }
 
@@ -61,6 +66,7 @@ class RegistroBiometrico {
       'estado': estado,
       'datosBiometricos': datosBiometricos,
       'tipoRegistro': tipoRegistro.name,
+      'blobFileString': blobFileString,
     };
   }
 }

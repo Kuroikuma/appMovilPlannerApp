@@ -150,7 +150,7 @@ class ReconocimientoFacialNotifier
 
     try {
       final registros = await _biometricoRepository.getFaces(ubicacionId);
-      print("registros");
+      print("registros BIOMETRICOS");
 
       state = state.copyWith(cachedFaces: registros);
     } catch (e) {
