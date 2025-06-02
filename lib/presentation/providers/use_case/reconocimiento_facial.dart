@@ -204,21 +204,19 @@ class ReconocimientoFacialNotifier
     );
 
     try {
-      final registroBiometrico = await _biometricoRepository.saveFace(
+      await _biometricoRepository.saveFace(
         trabajadorId,
         embedding,
         image,
         imagenUrl,
       );
 
-      final cachedNewFaces = state.cachedFaces;
-      cachedNewFaces.add(registroBiometrico);
-
       state = state.copyWith(
         estado: ReconocimientoFacialEstado.inicial,
         isLoading: false,
-        cachedFaces: cachedNewFaces,
       );
+
+      cargarRegistrosBiometricos();
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }

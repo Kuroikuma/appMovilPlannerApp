@@ -219,6 +219,23 @@ class RegistroDiario {
     return ahora.difference(fechaHoraIngreso);
   }
 
+  Duration? get tiempoTranscurridoDesdeSalida {
+    if (!tieneSalida) return null;
+
+    final ahora = DateTime.now();
+
+    // Convertir TimeOfDay a DateTime para cálculos precisos
+    final fechaHoraSalida = DateTime(
+      fechaSalida!.year,
+      fechaSalida!.month,
+      fechaSalida!.day,
+      horaSalida!.hour,
+      horaSalida!.minute,
+    );
+
+    return ahora.difference(fechaHoraSalida);
+  }
+
   // Verificar si ha pasado el tiempo mínimo para registrar salida (5 minutos)
   bool get puedeRegistrarSalida {
     // Si ya tiene salida registrada, no puede registrar otra
