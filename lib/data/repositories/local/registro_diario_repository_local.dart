@@ -151,6 +151,10 @@ class RegistroDiarioRepositoryLocal {
                   equipoId: Value(e.equipoId),
                   id: Value(e.id!),
                   horarioId: Value(e.horarioId),
+                  iniciaLabores: Value(e.iniciaLabores),
+                  finLabores: Value(e.finLabores),
+                  reconocimientoFacialId: Value(e.reconocimientoFacialId),
+                  registroId: Value(e.registroId),
                 ),
               )
               .toList(),

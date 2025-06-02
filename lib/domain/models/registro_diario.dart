@@ -212,8 +212,8 @@ class RegistroDiario {
       fechaIngreso.year,
       fechaIngreso.month,
       fechaIngreso.day,
-      horaIngreso.hour,
-      horaIngreso.minute,
+      iniciaLabores?.hour ?? 0,
+      finLabores?.minute ?? 0,
     );
 
     return ahora.difference(fechaHoraIngreso);
