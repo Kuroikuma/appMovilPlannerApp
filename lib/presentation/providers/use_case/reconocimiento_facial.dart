@@ -203,6 +203,21 @@ class ReconocimientoFacialNotifier
       estado: ReconocimientoFacialEstado.capturando,
     );
 
+    final faces = state.cachedFaces;
+
+    final facesByTrabajador = faces.where(
+      (face) => face.trabajadorId == trabajadorId,
+    ).toList();
+
+    if (facesByTrabajador.length > 5) {
+      state = state.copyWith(
+        estado: ReconocimientoFacialEstado.error,
+        isLoading: false,
+        errorMessage: 'No puedes registrar más de 5 fotos',
+      );
+      return;
+    }
+
     try {
       await _biometricoRepository.saveFace(
         trabajadorId,

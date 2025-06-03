@@ -108,6 +108,10 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
       }
     }
 
+    if (!await localDataSource.sePuedeRegistrarAsistencia()) {
+      throw CustomException('No puedes registrar entrada en este momento');
+    }
+
     final isEntry = registroDiarioEntrada != null;
 
     if (!isEntry) {

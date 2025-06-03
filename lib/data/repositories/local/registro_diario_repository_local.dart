@@ -410,6 +410,20 @@ class RegistroDiarioRepositoryLocal {
     return ahoraMinutos <= finMinutos;
   }
 
+  Future<bool> sePuedeRegistrarAsistencia() async {
+    final registroDiarios = await getRegistroDiario();
+    final ultimoRegistro = registroDiarios.isNotEmpty ? registroDiarios.last : null;
+
+    if (ultimoRegistro != null && ultimoRegistro.tieneSalida) {
+      if (ultimoRegistro.tiempoTranscurridoDesdeSalida != null &&
+          ultimoRegistro.tiempoTranscurridoDesdeSalida!.inSeconds <= 60) {
+            return false;
+      }
+    }
+
+    return true;
+  }
+
   Future<Horario> obtenerHorarioPorId(int id) async {
     final horarios = await _db.select(_db.horarios).get();
     return horarios.firstWhere((horario) => horario.id == id);
