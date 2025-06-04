@@ -50,16 +50,16 @@ class RegistroDiario {
       fechaIngreso.year,
       fechaIngreso.month,
       fechaIngreso.day,
-      horaIngreso.hour,
-      horaIngreso.minute,
+      iniciaLabores?.hour ?? 0,
+      iniciaLabores?.minute ?? 0,
     );
 
     final salida = DateTime(
       fechaSalida!.year,
       fechaSalida!.month,
       fechaSalida!.day,
-      horaSalida!.hour,
-      horaSalida!.minute,
+      finLabores!.hour,
+      finLabores!.minute,
     );
 
     return salida.difference(entrada);
@@ -212,8 +212,8 @@ class RegistroDiario {
       fechaIngreso.year,
       fechaIngreso.month,
       fechaIngreso.day,
-      iniciaLabores?.hour ?? 0,
-      finLabores?.minute ?? 0,
+      horaIngreso.hour,
+      horaIngreso.minute,
     );
 
     return ahora.difference(fechaHoraIngreso);

@@ -176,7 +176,6 @@ class RegistroDiarioRepositoryLocal {
       final horario = await obtenerHorarioPorId(horaAprobadaId);
       final trabajador = await getTrabajadorByEquipoId(equipoId);
 
-
       // Crear nuevo registro
       final nuevoRegistro = RegistroDiario(
         id: registrosDiarios.length + 1,
@@ -185,7 +184,8 @@ class RegistroDiarioRepositoryLocal {
         horaIngreso: TimeOfDay.now(),
         iniciaLabores: horario.horaInicio,
         estado: true,
-        nombreTrabajador: '$trabajador.nombre $trabajador.primerApellido $trabajador.segundoApellido',
+        nombreTrabajador:
+            '$trabajador.nombre $trabajador.primerApellido $trabajador.segundoApellido',
         fotoTrabajador: trabajador.fotoUrl,
         cargoTrabajador: trabajador.cargo,
         horarioId: horaAprobadaId,
@@ -342,6 +342,31 @@ class RegistroDiarioRepositoryLocal {
         );
   }
 
+  Future<void> actualizarLocal(RegistroDiario registro) async {
+    await _db
+        .into(_db.registrosDiarios)
+        .insert(
+          RegistrosDiariosCompanion(
+            id: Value(registro.id!),
+            equipoId: Value(registro.equipoId),
+            fechaIngreso: Value(registro.fechaIngreso),
+            horaIngreso: Value(registro.horaIngreso),
+            estado: Value(registro.estado),
+            nombreTrabajador: Value(registro.nombreTrabajador ?? "Desconocido"),
+            fotoTrabajador: Value(registro.fotoTrabajador ?? ""),
+            cargoTrabajador: Value(registro.cargoTrabajador ?? "Desconocido"),
+            horarioId: Value(registro.horarioId),
+            registroId: Value(registro.registroId),
+            iniciaLabores: Value(registro.iniciaLabores),
+            fechaSalida: Value(registro.fechaSalida),
+            horaSalida: Value(registro.horaSalida),
+            finLabores: Value(registro.finLabores),
+            reconocimientoFacialId: Value(registro.reconocimientoFacialId),
+          ),
+          mode: InsertMode.replace,
+        );
+  }
+
   Future<void> actualizarRegistroLocal(RegistroDiario registro) async {
     await (_db.update(_db.registrosDiarios)..where(
       (tbl) =>
@@ -361,11 +386,14 @@ class RegistroDiarioRepositoryLocal {
                 : const Value.absent(),
         equipoId: Value(registro.equipoId),
         registroId: Value(registro.registroId!),
-        iniciaLabores: registro.iniciaLabores != null
+        iniciaLabores:
+            registro.iniciaLabores != null
                 ? Value(registro.iniciaLabores!)
                 : const Value.absent(),
         finLabores:
-            registro.finLabores != null ? Value(registro.finLabores!) : const Value.absent(),
+            registro.finLabores != null
+                ? Value(registro.finLabores!)
+                : const Value.absent(),
         estado: Value(registro.estado),
         nombreTrabajador: Value(registro.nombreTrabajador ?? "Desconocido"),
         fotoTrabajador: Value(registro.fotoTrabajador ?? ""),
@@ -412,16 +440,34 @@ class RegistroDiarioRepositoryLocal {
 
   Future<bool> sePuedeRegistrarAsistencia() async {
     final registroDiarios = await getRegistroDiario();
-    final ultimoRegistro = registroDiarios.isNotEmpty ? registroDiarios.last : null;
+    final ultimoRegistro =
+        registroDiarios.isNotEmpty ? registroDiarios.last : null;
 
     if (ultimoRegistro != null && ultimoRegistro.tieneSalida) {
       if (ultimoRegistro.tiempoTranscurridoDesdeSalida != null &&
           ultimoRegistro.tiempoTranscurridoDesdeSalida!.inSeconds <= 60) {
-            return false;
+        return false;
       }
     }
 
     return true;
+  }
+
+  Future<String> tiempoRestanteParaEntrada() async {
+    final registroDiarios = await getRegistroDiario();
+    final ultimoRegistro =
+        registroDiarios.isNotEmpty ? registroDiarios.last : null;
+
+    if (ultimoRegistro != null && ultimoRegistro.tieneSalida) {
+      if (ultimoRegistro.tiempoTranscurridoDesdeSalida != null &&
+          ultimoRegistro.tiempoTranscurridoDesdeSalida!.inSeconds <= 60) {
+        final segundos =
+            60 - ultimoRegistro.tiempoTranscurridoDesdeSalida!.inSeconds;
+        return "$segundos segundos";
+      }
+    }
+
+    return 'Puede registrar entrada';
   }
 
   Future<Horario> obtenerHorarioPorId(int id) async {

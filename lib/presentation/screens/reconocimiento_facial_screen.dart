@@ -254,7 +254,7 @@ class _ReconocimientoFacialScreenState
   }
 
   Future<void> _processCameraImage(CameraImage image) async {
-    String _detectionMessage = "";
+    String detectionMessage = "";
     if (!mounted) return;
     final state = ref.watch(reconocimientoFacialNotifierProvider);
 
@@ -333,7 +333,7 @@ class _ReconocimientoFacialScreenState
       // Detect faces
       final faces = await reconocimientoNotifier.detectFaces(inputImage);
       if (faces.isEmpty) {
-        _detectionMessage = 'No se detectaron rostros.';
+        detectionMessage = 'No se detectaron rostros.';
         
         if (mounted) {
           setState(() => customPaint = null);
@@ -362,9 +362,9 @@ class _ReconocimientoFacialScreenState
           // Si el ancho o alto del cuadro delimitador es menor que el umbral
           if (boundingBox.width < minFaceWidthThreshold ||
               boundingBox.height < minFaceHeightThreshold) {
-            _detectionMessage = 'Rostro detectado: ¡Demasiado lejos!';
+            detectionMessage = 'Rostro detectado: ¡Demasiado lejos!';
           } else {
-            _detectionMessage = 'Rostro detectado: Distancia óptima.';
+            detectionMessage = 'Rostro detectado: Distancia óptima.';
           }
           await _cameraController?.stopImageStream();
         }
@@ -401,7 +401,7 @@ class _ReconocimientoFacialScreenState
               inputImage.metadata!.rotation,
               camera.lensDirection,
               name,
-              _detectionMessage,
+              detectionMessage,
             ),
           );
           _ultimaFoto = null;
@@ -1305,18 +1305,18 @@ class _ReconocimientoFacialScreenState
             //     ),
             //   ),
             // ],
-            const SizedBox(height: 16),
+            // const SizedBox(height: 16),
 
-            OutlinedButton.icon(
-              onPressed: _reiniciarProceso,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Reiniciar Proceso'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-                foregroundColor: theme.colorScheme.primary,
-                side: BorderSide(color: theme.colorScheme.primary),
-              ),
-            ),
+            // OutlinedButton.icon(
+            //   onPressed: _reiniciarProceso,
+            //   icon: const Icon(Icons.refresh),
+            //   label: const Text('Reiniciar Proceso'),
+            //   style: OutlinedButton.styleFrom(
+            //     minimumSize: const Size(double.infinity, 50),
+            //     foregroundColor: theme.colorScheme.primary,
+            //     side: BorderSide(color: theme.colorScheme.primary),
+            //   ),
+            // ),
           ],
         ),
       ),

@@ -133,7 +133,7 @@ class ReconocimientoFacialNotifier
   }
 
   Future<void> initialize() async {
-    print(state.cachedFaces);
+    reiniciarEstado();
     if (state.isInitialized) return;
     final interpreterOptions = InterpreterOptions();
 
@@ -205,9 +205,8 @@ class ReconocimientoFacialNotifier
 
     final faces = state.cachedFaces;
 
-    final facesByTrabajador = faces.where(
-      (face) => face.trabajadorId == trabajadorId,
-    ).toList();
+    final facesByTrabajador =
+        faces.where((face) => face.trabajadorId == trabajadorId).toList();
 
     if (facesByTrabajador.length > 5) {
       state = state.copyWith(
@@ -420,7 +419,12 @@ class ReconocimientoFacialNotifier
   }
 
   void reiniciarEstado() {
-    state = const ReconocimientoFacialStateData();
+    state = state.copyWith(
+      estado: ReconocimientoFacialEstado.inicial,
+      isLoading: false,
+      errorMessage: null,
+      trabajadorIdentificado: null,
+    );
   }
 
   void cambiarEstado(ReconocimientoFacialEstado nuevoEstado) {
@@ -447,8 +451,6 @@ class ReconocimientoFacialNotifier
 
     final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
 
-    print(state.cachedFaces);
-
     for (var face in state.cachedFaces) {
       final distance = _euclideanDistance(embedding, face.datosBiometricos);
 
@@ -466,8 +468,9 @@ class ReconocimientoFacialNotifier
     );
 
     if (trabajador != null) {
-
-      await ref.read(registroDiarioNotifierProvider.notifier).tipoRegistroAsistencia(trabajador.equipoId);
+      await ref
+          .read(registroDiarioNotifierProvider.notifier)
+          .tipoRegistroAsistencia(trabajador.equipoId);
 
       state = state.copyWith(
         trabajadorIdentificado: trabajador,

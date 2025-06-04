@@ -109,7 +109,8 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
     }
 
     if (!await localDataSource.sePuedeRegistrarAsistencia()) {
-      throw CustomException('No puedes registrar entrada en este momento');
+      final tiempoRestante = await localDataSource.tiempoRestanteParaEntrada();
+      throw CustomException('No puedes registrar entrada en este momento. Tiempo restante: $tiempoRestante');
     }
 
     final isEntry = registroDiarioEntrada != null;
@@ -141,7 +142,7 @@ class RegistroDiarioRepository implements IRegistroDiarioRepository {
           isEntry ? registroAsistencia.id : null,
         );
 
-        await localDataSource.actualizarRegistroLocal(remoteData);
+        await localDataSource.actualizarLocal(remoteData);
         return remoteData;
       } catch (e) {
         throw ApiException();
