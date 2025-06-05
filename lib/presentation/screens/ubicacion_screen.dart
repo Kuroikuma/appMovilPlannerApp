@@ -7,6 +7,7 @@ import '../providers/use_case/registro_diario.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../routes/app_routes.dart';
+import '../theme/app_colors.dart';
 import '../utils/notification_utils.dart';
 import '../widget/location_deletion_overlay.dart';
 import '../widget/ubicacion/location_deletion_confirmation_modal.dart';
@@ -158,9 +159,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor:
-            theme
-                .colorScheme
-                .primary, // Cambia el color de fondo de la barra de estado
+            AppColors.primary, // Cambia el color de fondo de la barra de estado
         statusBarIconBrightness:
             Brightness.light, // Iconos claros si el fondo es oscuro
       ),
@@ -179,7 +178,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
+                          color: AppColors.primary,
                         ),
                         child: Row(
                           children: [
@@ -378,7 +377,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                color: AppColors.primary.withOpacity(0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
               ),
@@ -392,7 +391,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
               side: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
+                color: AppColors.primary,
                 width: 2,
               ),
             ),
@@ -408,14 +407,12 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withOpacity(0.2),
+                        color: AppColors.primary.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.face,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: AppColors.primary,
                         size: 28, // Icono más grande
                       ),
                     ),
@@ -432,7 +429,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                                   context,
                                 ).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
+                                  color: AppColors.primary,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -442,7 +439,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary,
+                                  color: AppColors.primary,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -475,7 +472,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
                     Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppColors.primary,
                     ),
                   ],
                 ),
@@ -549,7 +546,7 @@ class _UbicacionScreenState extends ConsumerState<UbicacionScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(

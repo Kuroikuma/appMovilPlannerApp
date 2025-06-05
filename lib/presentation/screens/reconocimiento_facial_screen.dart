@@ -14,8 +14,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
+import '../theme/app_colors.dart';
 import '../utils/facial_recognition_utils_dos.dart';
 import '../utils/notification_utils.dart';
+import '../widget/countdown_widget.dart';
 import '../widget/face_detector_painter.dart';
 import '../widget/reconocimiento_facial/build_procesando.dart';
 import '../widget/reconocimiento_facial/trabajador_card.dart';
@@ -52,6 +54,11 @@ class _ReconocimientoFacialScreenState
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isSearching = false;
+
+  // Variables para la cuenta regresiva
+  int _countdown = 3; // Inicia la cuenta regresiva en 3
+  bool _showCountdown = true; // Muestra la cuenta regresiva inicialmente
+  Timer? _countdownTimer; // Temporizador para la cuenta regresiva
 
   @override
   void initState() {
@@ -197,7 +204,8 @@ class _ReconocimientoFacialScreenState
       );
 
       await _cameraController!.initialize();
-      _cameraController!.startImageStream(_processCameraImage);
+       // Inicia la cuenta regresiva
+      _startCountdown();
 
       if (mounted) {
         setState(() {
@@ -211,6 +219,24 @@ class _ReconocimientoFacialScreenState
         isError: true,
       );
     }
+  }
+
+    void _startCountdown() {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_countdown > 0) {
+          _countdown--;
+        } else {
+          _countdownTimer?.cancel();
+          _showCountdown = false;
+          _startImageStream(); // Inicia el stream después del countdown
+        }
+      });
+    });
+  }
+
+  void _startImageStream() {
+    _cameraController!.startImageStream(_processCameraImage);
   }
 
   Future<void> _toggleCamera() async {
@@ -256,6 +282,13 @@ class _ReconocimientoFacialScreenState
   Future<void> _processCameraImage(CameraImage image) async {
     String detectionMessage = "";
     if (!mounted) return;
+
+    // Si la cuenta regresiva aún está activa, no proceses la imagen.
+    if (_showCountdown) {
+      _isBusy = false; // Asegurarse de resetear _isBusy si se salta
+      return;
+    }
+
     final state = ref.watch(reconocimientoFacialNotifierProvider);
 
     if (state.estado == ReconocimientoFacialEstado.exito ||
@@ -391,7 +424,11 @@ class _ReconocimientoFacialScreenState
       final name = await reconocimientoNotifier.identifyFace(embedding);
       // Update UI
       if (mounted) {
-        await _cameraController?.startImageStream(_processCameraImage);
+        if (name == 'No Registrado') {
+          _showCountdown = true;
+          _countdown = 3;
+          _startCountdown();
+        }
 
         setState(() {
           customPaint = CustomPaint(
@@ -414,6 +451,9 @@ class _ReconocimientoFacialScreenState
         ref
             .read(reconocimientoFacialNotifierProvider.notifier)
             .cambiarEstado(ReconocimientoFacialEstado.inicial);
+        _showCountdown = true;
+        _countdown = 3;
+        _startCountdown();
       }
     } finally {
       _isBusy = false;
@@ -573,12 +613,21 @@ class _ReconocimientoFacialScreenState
       }
     });
 
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor:
+            AppColors.primary, // Cambia el color de fondo de la barra de estado
+        statusBarIconBrightness:
+            Brightness.light, // Iconos claros si el fondo es oscuro
+      ),
+    );
+
     return PopScope(
       onPopInvokedWithResult: _onPopInvokedWithResult,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Reconocimiento Facial'),
-          backgroundColor: theme.colorScheme.primary,
+          backgroundColor: AppColors.primary,
           foregroundColor: theme.colorScheme.onPrimary,
           actions: [
             IconButton(
@@ -634,7 +683,7 @@ class _ReconocimientoFacialScreenState
     final theme = Theme.of(context);
 
     return Container(
-      color: theme.colorScheme.primary,
+      color: AppColors.primary,
       child: SafeArea(
         child: Column(
           children: [
@@ -684,7 +733,7 @@ class _ReconocimientoFacialScreenState
                           child: Icon(
                             Icons.timelapse,
                             size: 100,
-                            color: theme.colorScheme.primary.withOpacity(0.7),
+                            color: AppColors.primary.withOpacity(0.7),
                           ),
                         );
                       },
@@ -701,7 +750,7 @@ class _ReconocimientoFacialScreenState
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
@@ -734,7 +783,7 @@ class _ReconocimientoFacialScreenState
                         label: const Text('Reanudar Reconocimiento Facial'),
                         style: FilledButton.styleFrom(
                           minimumSize: const Size(double.infinity, 56),
-                          backgroundColor: theme.colorScheme.primary,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: theme.colorScheme.onPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -750,10 +799,10 @@ class _ReconocimientoFacialScreenState
                       margin: const EdgeInsets.symmetric(horizontal: 32),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        color: AppColors.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: theme.colorScheme.primary.withOpacity(0.3),
+                          color: AppColors.primary.withOpacity(0.3),
                         ),
                       ),
                       child: Column(
@@ -762,7 +811,7 @@ class _ReconocimientoFacialScreenState
                             children: [
                               Icon(
                                 Icons.lightbulb_outline,
-                                color: theme.colorScheme.primary,
+                                color: AppColors.primary,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
@@ -771,7 +820,7 @@ class _ReconocimientoFacialScreenState
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.primary,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ],
@@ -809,7 +858,7 @@ class _ReconocimientoFacialScreenState
 
     if (!_isCameraInitialized || _cameraController == null) {
       return Container(
-        color: theme.colorScheme.primary.withOpacity(0.1),
+        color: AppColors.primary.withOpacity(0.1),
         child: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -818,14 +867,14 @@ class _ReconocimientoFacialScreenState
     final scale = 1 / (_cameraController!.value.aspectRatio * size.aspectRatio);
 
     return Container(
-      color: theme.colorScheme.primary.withOpacity(0.1),
+      color: AppColors.primary.withOpacity(0.1),
       child: Column(
         children: [
           // Instrucciones
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-            color: theme.colorScheme.primary,
+            color: AppColors.primary,
             child: Column(
               children: [
                 Text(
@@ -873,7 +922,14 @@ class _ReconocimientoFacialScreenState
                       Positioned.fill(
                         child: CustomPaint(painter: customPaint!.painter),
                       ),
-
+                    if (_showCountdown)
+                      Positioned.fill(
+                        child: EnhancedCountdownWidget(
+                          message: '$_countdown',
+                          showCountdown: _showCountdown,
+                          progressValue: _countdown / 3,
+                        ),
+                      ),
                     // Guía para el rostro
                     Positioned.fill(
                       child: CustomPaint(painter: FaceGuideOverlay()),
@@ -975,7 +1031,7 @@ class _ReconocimientoFacialScreenState
     final theme = Theme.of(context);
 
     return Container(
-      color: theme.colorScheme.primary.withOpacity(0.1),
+      color: AppColors.primary.withOpacity(0.1),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1050,7 +1106,7 @@ class _ReconocimientoFacialScreenState
     final theme = Theme.of(context);
 
     return Container(
-      color: theme.colorScheme.primary.withOpacity(0.1),
+      color: AppColors.primary.withOpacity(0.1),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1060,7 +1116,7 @@ class _ReconocimientoFacialScreenState
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: theme.colorScheme.primary,
+                    color: AppColors.primary,
                     width: 3,
                   ),
                 ),
@@ -1076,14 +1132,14 @@ class _ReconocimientoFacialScreenState
               ),
               const SizedBox(height: 24),
             ],
-            CircularProgressIndicator(color: theme.colorScheme.primary),
+            CircularProgressIndicator(color: AppColors.primary),
             const SizedBox(height: 16),
             Text(
               'Procesando reconocimiento facial...',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 8),
@@ -1110,7 +1166,7 @@ class _ReconocimientoFacialScreenState
         ref.watch(registroDiarioNotifierProvider).tipoRegistro.name;
 
     return Container(
-      color: theme.colorScheme.primary.withOpacity(0.1),
+      color: AppColors.primary.withOpacity(0.1),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -1156,7 +1212,7 @@ class _ReconocimientoFacialScreenState
             if (trabajador != null) ...[
               CircleAvatar(
                 radius: 60,
-                backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+                backgroundColor: AppColors.primary.withOpacity(0.2),
                 backgroundImage:
                     trabajador.fotoUrl != null
                         ? FileImage(File(trabajador.fotoUrl))
@@ -1167,7 +1223,7 @@ class _ReconocimientoFacialScreenState
                           trabajador.nombre[0].toUpperCase(),
                           style: TextStyle(
                             fontSize: 40,
-                            color: theme.colorScheme.primary,
+                            color: AppColors.primary,
                           ),
                         )
                         : null,
@@ -1178,7 +1234,7 @@ class _ReconocimientoFacialScreenState
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
+                  color: AppColors.primary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -1199,10 +1255,10 @@ class _ReconocimientoFacialScreenState
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    color: AppColors.primary.withOpacity(0.3),
                   ),
                 ),
                 child: Column(
@@ -1212,7 +1268,7 @@ class _ReconocimientoFacialScreenState
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
+                        color: AppColors.primary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -1222,7 +1278,7 @@ class _ReconocimientoFacialScreenState
                         Icon(
                           Icons.calendar_today,
                           size: 16,
-                          color: theme.colorScheme.primary,
+                          color: AppColors.primary,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -1240,7 +1296,7 @@ class _ReconocimientoFacialScreenState
                         Icon(
                           Icons.access_time,
                           size: 16,
-                          color: theme.colorScheme.primary,
+                          color: AppColors.primary,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -1260,8 +1316,8 @@ class _ReconocimientoFacialScreenState
               width: size.width * 0.7,
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: LinearProgressIndicator(
-                backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
-                color: theme.colorScheme.primary,
+                backgroundColor: AppColors.primary.withOpacity(0.2),
+                color: AppColors.primary,
                 minHeight: 8,
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1327,7 +1383,7 @@ class _ReconocimientoFacialScreenState
     final theme = Theme.of(context);
 
     return Container(
-      color: theme.colorScheme.primary.withOpacity(0.1),
+      color: AppColors.primary.withOpacity(0.1),
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -1365,7 +1421,7 @@ class _ReconocimientoFacialScreenState
                 label: const Text('Intentar Nuevamente'),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: theme.colorScheme.primary,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: theme.colorScheme.onPrimary,
                 ),
               ),
