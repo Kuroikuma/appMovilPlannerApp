@@ -45,5 +45,5 @@ class CustomException implements Exception {
   CustomException([this.message = "Error desconocido"]);
 
   @override
-  String toString() => "Error: $message";
+  String toString() => "Advertencia: $message";
 }

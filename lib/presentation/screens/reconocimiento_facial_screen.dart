@@ -606,7 +606,6 @@ class _ReconocimientoFacialScreenState
         NotificationUtils.showSnackBar(
           context: context,
           message: state.errorMessage!,
-          isError: true,
         );
         // Limpiar el error después de mostrarlo
         ref.read(reconocimientoFacialNotifierProvider.notifier).clearErrors();
@@ -878,7 +877,7 @@ class _ReconocimientoFacialScreenState
             child: Column(
               children: [
                 Text(
-                  'Coloca tu rostro dentro del marco y presiona el botón para capturar',
+                  'Ubica tu rostro en el marco. La captura se hará automáticamente.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: theme.colorScheme.onPrimary,

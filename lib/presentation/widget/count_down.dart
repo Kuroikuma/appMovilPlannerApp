@@ -43,7 +43,7 @@ class CountdownPainter extends CustomPainter {
     );
     textPainter.layout();
     
-    final baseRadius = math.max(textPainter.width, textPainter.height) / 2 + 40;
+    final baseRadius = math.max(textPainter.width, textPainter.height) / 2 + 20;
     final animatedRadius = baseRadius * (0.8 + 0.2 * animationProgress);
     final pulseRadius = animatedRadius + (15 * pulseAnimation);
 
