@@ -55,7 +55,7 @@ class RegistroBiometricoRepositoryRemote {
   Future<void> deleteFace(String codigoRegistroBiometrico) async {
     try {
       await _client.delete(
-        '/DeleteRegistroDiario?registroDiarioId=$codigoRegistroBiometrico',
+        '/DeleteRegistroBiometrico?registroBiometricoId=$codigoRegistroBiometrico',
       );
     } catch (e) {
       print(e);
