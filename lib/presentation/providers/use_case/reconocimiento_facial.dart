@@ -495,8 +495,13 @@ class ReconocimientoFacialNotifier
     return sqrt(sum);
   }
 
-  Future<void> deleteFace(int equipoId, String registroBiometricoId) async {
-    await _biometricoRepository.deleteFace(equipoId, registroBiometricoId);
+  Future<void> deleteFace(int equipoId, String imagenUrl) async {
+
+    final registroBiometrico = state.cachedFaces.firstWhere(
+      (face) => face.blobFileString == imagenUrl,
+    );
+
+    await _biometricoRepository.deleteFace(equipoId, registroBiometrico.id);
     final ubicacionId = ref.read(ubicacionNotifierProvider).ubicacion!.id;
 
     state = state.copyWith(

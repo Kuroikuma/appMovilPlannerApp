@@ -224,13 +224,16 @@ class RegistroAsistenciaDetailSheet extends StatelessWidget {
     // Formatear fecha y hora
     final fechaIngreso = DateFormat('EEEE, d MMMM yyyy', 'es').format(registro.fechaIngreso);
     final horaIngreso = '${registro.horaIngreso.hour.toString().padLeft(2, '0')}:${registro.horaIngreso.minute.toString().padLeft(2, '0')}';
+    final iniciaLabores = '${registro.iniciaLabores!.hour.toString().padLeft(2, '0')}:${registro.iniciaLabores!.minute.toString().padLeft(2, '0')}';
     
     String? fechaSalida;
     String? horaSalida;
+    String? finLabores;
     
     if (registro.tieneSalida) {
       fechaSalida = DateFormat('EEEE, d MMMM yyyy', 'es').format(registro.fechaSalida!);
       horaSalida = '${registro.horaSalida!.hour.toString().padLeft(2, '0')}:${registro.horaSalida!.minute.toString().padLeft(2, '0')}';
+      finLabores = '${registro.finLabores!.hour.toString().padLeft(2, '0')}:${registro.finLabores!.minute.toString().padLeft(2, '0')}';
     }
 
     return Column(
@@ -251,7 +254,7 @@ class RegistroAsistenciaDetailSheet extends StatelessWidget {
           context,
           icon: Icons.login,
           title: 'Entrada',
-          value: '$fechaIngreso a las $horaIngreso',
+          value: '$fechaIngreso a las $iniciaLabores',
         ),
         
         if (registro.tieneSalida)
@@ -259,7 +262,7 @@ class RegistroAsistenciaDetailSheet extends StatelessWidget {
             context,
             icon: Icons.logout,
             title: 'Salida',
-            value: '$fechaSalida a las $horaSalida',
+            value: '$fechaSalida a las $finLabores',
           ),
         
         if (registro.tieneSalida)

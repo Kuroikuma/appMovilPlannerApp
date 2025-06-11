@@ -51,4 +51,15 @@ class RegistroBiometricoRepositoryRemote {
       throw Exception('Error al guardar el rostro');
     }
   }
+
+  Future<void> deleteFace(String codigoRegistroBiometrico) async {
+    try {
+      await _client.delete(
+        '/DeleteRegistroDiario?registroDiarioId=$codigoRegistroBiometrico',
+      );
+    } catch (e) {
+      print(e);
+      throw Exception('Error al eliminar el rostro');
+    }
+  }
 }

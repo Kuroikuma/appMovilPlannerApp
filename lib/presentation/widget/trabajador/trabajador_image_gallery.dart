@@ -27,12 +27,20 @@ class TrabajadorImageGallery extends ConsumerStatefulWidget {
   ConsumerState<TrabajadorImageGallery> createState() => _TrabajadorImageGalleryState();
 }
 
-class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery> {
+class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery> with TickerProviderStateMixin {
   final ImagePicker _picker = ImagePicker();
   List<String> _imagenes = [];
   bool _isLoading = false;
   int _selectedImageIndex = -1;
   final _imagePicker = ImagePicker();
+
+  bool _isDeleting = false;
+  String? _deletingImageUrl;
+  
+  // Controladores de animación
+  late AnimationController _deleteAnimationController;
+  late AnimationController _scaleAnimationController;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -44,56 +52,283 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
         !_imagenes.contains(widget.trabajador.fotoUrl)) {
       _imagenes.insert(0, widget.trabajador.fotoUrl);
     }
+
+    // Inicializar controladores de animación
+    _deleteAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    _scaleAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _scaleAnimationController,
+      curve: Curves.easeInOut,
+    ));
   }
 
-  Future<void> _addImage() async {
-    try {
-      setState(() {
-        _isLoading = true;
-      });
+  @override
+  void dispose() {
+    _deleteAnimationController.dispose();
+    _scaleAnimationController.dispose();
+    super.dispose();
+  }
 
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-      );
+   Future<void> _deleteImage(int index, String imageUrl) async {
+    // Verificar si es la foto de perfil
+    final reconocimientoNotifier = ref.read(
+      reconocimientoFacialNotifierProvider.notifier,
+    );
+    final bool isProfilePhoto = widget.trabajador.fotoUrl != null && 
+                               imageUrl == widget.trabajador.fotoUrl;
+    
+    if (isProfilePhoto) {
+      _showErrorSnackBar('No se puede eliminar la foto de perfil');
+      return;
+    }
 
-      if (image != null) {
-        // En una aplicación real, aquí subirías la imagen a un servidor
-        // y obtendrías la URL. Para este ejemplo, usaremos la ruta local
-        // simulando que es una URL.
-        
-        // Simular carga al servidor
-        await Future.delayed(const Duration(seconds: 1));
-        
-        // En una implementación real, esta sería la URL devuelta por el servidor
-        final String imageUrl = 'https://randomuser.me/api/portraits/${_imagenes.length % 2 == 0 ? 'men' : 'women'}/${_imagenes.length + 10}.jpg';
-        
+    // Mostrar diálogo de confirmación
+    final bool? shouldDelete = await _showDeleteConfirmationDialog(imageUrl);
+    
+    if (shouldDelete == true) {
+      try {
         setState(() {
-          _imagenes.add(imageUrl);
-          _isLoading = false;
+          _isDeleting = true;
+          _deletingImageUrl = imageUrl;
         });
+
+        // Animar la eliminación
+        await _scaleAnimationController.forward();
+        
+        // Simular eliminación del servidor
+        
+        await reconocimientoNotifier.deleteFace(widget.trabajador.id, imageUrl);
+        // Eliminar de la lista local
+        setState(() {
+          _imagenes.removeAt(index);
+          _isDeleting = false;
+          _deletingImageUrl = null;
+        });
+        
+        // Resetear animación
+        _scaleAnimationController.reset();
         
         // Notificar al padre sobre las imágenes actualizadas
-        // Excluimos la foto de perfil si fue añadida al inicio
-        final List<String> updatedImages = widget.trabajador.fotoUrl != null && 
-                                          _imagenes.isNotEmpty && 
-                                          _imagenes[0] == widget.trabajador.fotoUrl
-            ? _imagenes.sublist(1)
-            : _imagenes;
-            
-      } else {
+        _notifyImagesUpdated();
+        
+        // Mostrar mensaje de éxito
+        _showSuccessSnackBar('Imagen eliminada exitosamente');
+        
+      } catch (e) {
         setState(() {
-          _isLoading = false;
+          _isDeleting = false;
+          _deletingImageUrl = null;
         });
+        _scaleAnimationController.reset();
+        _showErrorSnackBar('Error al eliminar imagen: $e');
       }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al añadir imagen: $e')),
-      );
     }
+  }
+
+    Future<bool?> _showDeleteConfirmationDialog(String imageUrl) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.delete_outline,
+                  color: AppColors.error,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Eliminar Imagen',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '¿Estás seguro de que deseas eliminar esta imagen?',
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                height: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(
+                        child: Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 32,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.warning.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_outlined,
+                      color: AppColors.warning,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Esta acción no se puede deshacer.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.error,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _notifyImagesUpdated() {
+    // Excluimos la foto de perfil si fue añadida al inicio
+    final List<String> updatedImages = widget.trabajador.fotoUrl != null && 
+                                      _imagenes.isNotEmpty && 
+                                      _imagenes[0] == widget.trabajador.fotoUrl
+        ? _imagenes.sublist(1)
+        : _imagenes;
+        
+    // widget.onImagesUpdated(updatedImages);
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   void _viewImage(int index) {
@@ -139,9 +374,42 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
                     },
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  onPressed: () => Navigator.of(context).pop(),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Botón de eliminar (solo si no es la foto de perfil)
+                      if (!(widget.trabajador.fotoUrl != null && 
+                            _imagenes[index] == widget.trabajador.fotoUrl))
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _deleteImage(index, _imagenes[index]);
+                            },
+                          ),
+                        ),
+                      // Botón de cerrar
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -317,78 +585,123 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
       ),
       itemCount: _imagenes.length,
       itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () => _viewImage(index),
-          child: Hero(
-            tag: 'image_${widget.trabajador.id}_$index',
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.grey[300]!,
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 2,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.network(
-                      _imagenes[index],
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / 
-                                  loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
-                          child: Icon(
-                            Icons.error_outline,
-                            color: Colors.red,
-                          ),
-                        );
-                      },
-                    ),
-                    // Indicador para la foto de perfil
-                    if (index == 0 && 
-                        widget.trabajador.fotoUrl != "" && 
-                        _imagenes[0] == widget.trabajador.fotoUrl)
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 12,
-                          ),
-                        ),
+        final String imageUrl = _imagenes[index];
+        final bool isProfilePhoto = widget.trabajador.fotoUrl != null && 
+                                   imageUrl == widget.trabajador.fotoUrl;
+        final bool isDeleting = _deletingImageUrl == imageUrl;
+
+        return AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: isDeleting ? _scaleAnimation.value : 1.0,
+              child: GestureDetector(
+                onTap: () => _viewImage(index),
+                child: Hero(
+                  tag: 'image_${widget.trabajador.id}_$index',
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.grey[300]!,
+                        width: 1,
                       ),
-                  ],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 2,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded / 
+                                        loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                child: Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red,
+                                ),
+                              );
+                            },
+                          ),
+                          
+                          // Overlay de eliminación
+                          if (isDeleting)
+                            Container(
+                              color: Colors.black.withOpacity(0.7),
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          
+                          // Indicador para la foto de perfil
+                          if (isProfilePhoto)
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.9),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Icon(
+                                  Icons.person,
+                                  color: Colors.white,
+                                  size: 12,
+                                ),
+                              ),
+                            ),
+                          
+                          // Botón de eliminar (solo si no es la foto de perfil)
+                          if (!isProfilePhoto && !isDeleting)
+                            Positioned(
+                              top: 4,
+                              left: 4,
+                              child: GestureDetector(
+                                onTap: () => _deleteImage(index, imageUrl),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.error.withOpacity(0.9),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

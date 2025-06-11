@@ -104,6 +104,15 @@ class RegistroBiometricoRepository extends IRegistroBiometricoRepository {
   @override
   Future<void> deleteFace(int id, String registroBiometricoId) async {
     await localDataSource.deleteFace(id, registroBiometricoId);
+
+    final isConnected = await networkInfo.isConnected;
+    if (isConnected) {
+      try {
+        await remoteDataSource.deleteFace(registroBiometricoId);
+      } catch (e) {
+        print(e);
+      }
+    }
   }
 
   @override

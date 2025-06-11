@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities.dart';
+import '../../domain/models/registro_diario.dart';
 import '../providers/use_case/registro_diario.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../providers/use_case/trabajador.dart';
@@ -595,7 +596,7 @@ class _RegistroAsistenciaScreenState
     }
   }
 
-  void _mostrarDetallesRegistro(registro) {
+  void _mostrarDetallesRegistro(RegistroDiario registro) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -630,7 +631,7 @@ class _RegistroAsistenciaScreenState
                   ? null
                   : () {
                     Navigator.pop(context);
-                    _registrarSalida(registro.id!);
+                    _registrarSalida(registro.equipoId);
                   },
         );
       },
