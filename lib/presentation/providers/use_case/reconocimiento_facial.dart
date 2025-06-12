@@ -443,7 +443,7 @@ class ReconocimientoFacialNotifier
   }
 
   Future<String> identifyFace(
-    List<double> embedding, {
+    List<double> embedding, bool shouldYouClockIn, {
     double threshold = 0.8,
   }) async {
     double minDistance = double.maxFinite;
@@ -477,6 +477,10 @@ class ReconocimientoFacialNotifier
         isLoading: false,
         estado: ReconocimientoFacialEstado.exito,
       );
+
+      if (!shouldYouClockIn) {
+        return trabajador.nombre;
+      }
 
       await registrarAsistenciaPorReconocimiento();
     }

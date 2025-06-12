@@ -12,6 +12,7 @@ import '../../providers/use_case/trabajador.dart';
 import '../../providers/use_case/ubicacion.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/facial_recognition_utils_dos.dart';
+import 'existing_face_registration.dart';
 
 class TrabajadorImageGallery extends ConsumerStatefulWidget {
   final Trabajador trabajador;
@@ -85,7 +86,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
     final reconocimientoNotifier = ref.read(
       reconocimientoFacialNotifierProvider.notifier,
     );
-    final bool isProfilePhoto = widget.trabajador.fotoUrl != null && 
+    final bool isProfilePhoto = widget.trabajador.fotoUrl != "" && 
                                imageUrl == widget.trabajador.fotoUrl;
     
     if (isProfilePhoto) {
@@ -273,7 +274,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
 
   void _notifyImagesUpdated() {
     // Excluimos la foto de perfil si fue añadida al inicio
-    final List<String> updatedImages = widget.trabajador.fotoUrl != null && 
+    final List<String> updatedImages = widget.trabajador.fotoUrl != "" && 
                                       _imagenes.isNotEmpty && 
                                       _imagenes[0] == widget.trabajador.fotoUrl
         ? _imagenes.sublist(1)
@@ -381,7 +382,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Botón de eliminar (solo si no es la foto de perfil)
-                      if (!(widget.trabajador.fotoUrl != null && 
+                      if (!(widget.trabajador.fotoUrl != "" && 
                             _imagenes[index] == widget.trabajador.fotoUrl))
                         Container(
                           margin: const EdgeInsets.only(right: 8),
@@ -586,7 +587,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
       itemCount: _imagenes.length,
       itemBuilder: (context, index) {
         final String imageUrl = _imagenes[index];
-        final bool isProfilePhoto = widget.trabajador.fotoUrl != null && 
+        final bool isProfilePhoto = widget.trabajador.fotoUrl != "" && 
                                    imageUrl == widget.trabajador.fotoUrl;
         final bool isDeleting = _deletingImageUrl == imageUrl;
 
@@ -711,6 +712,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
     final reconocimientoNotifier = ref.read(
       reconocimientoFacialNotifierProvider.notifier,
     );
+    final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
     final trabajadorNotifier = ref.read(trabajadorNotifierProvider.notifier);
     final ubicacionState = ref.read(ubicacionNotifierProvider);
 
@@ -748,6 +750,29 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
       });
       final embedding = reconocimientoNotifier.getEmbedding(input);
 
+      final name = await reconocimientoNotifier.identifyFace(embedding, false);
+      // Update UI
+      if (name != 'No Registrado') {
+        if (name != trabajador.nombre) {
+
+          await reconocimientoNotifier.setLoading(false);
+
+          final Trabajador? existingWorker = trabajadores.cast<Trabajador?>().firstWhere(
+            (t) => t?.nombre == name,
+            orElse: () => null,
+          );
+
+          if (mounted) {
+            await _showExistingFaceRegistrationDialog(existingWorker!);
+            return;
+ 
+          } else {
+            return;
+          }
+
+        }
+      }
+
       try {
         final imagenUrl = '$path/${trabajador.id}-${trabajador.equipoId}.jpg';
         await reconocimientoNotifier.registerFace(
@@ -778,6 +803,38 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
         ),
       );
     }
+  }
+
+  // Mostrar diálogo detallado cuando la cara ya está registrada
+  Future<void> _showExistingFaceRegistrationDialog(Trabajador existingWorker) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ExistingFaceRegistrationWidget(
+            existingWorker: existingWorker,
+            currentWorker: widget.trabajador,
+            onViewProfile: () {
+              Navigator.of(context).pop();
+             
+            },
+            onContactSupport: () {
+              Navigator.of(context).pop();
+            },
+            onCancel: () {
+              Navigator.of(context).pop();
+            },
+            onForceRegister: () async {
+              Navigator.of(context).pop();
+            },
+          ),
+        );
+      },
+    );
   }
   
 

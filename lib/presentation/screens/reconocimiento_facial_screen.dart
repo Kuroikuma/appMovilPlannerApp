@@ -421,7 +421,7 @@ class _ReconocimientoFacialScreenState
       // Get embedding
       final embedding = reconocimientoNotifier.getEmbedding(input);
       // Identify the face
-      final name = await reconocimientoNotifier.identifyFace(embedding);
+      final name = await reconocimientoNotifier.identifyFace(embedding, true);
       // Update UI
       if (mounted) {
         if (name == 'No Registrado') {

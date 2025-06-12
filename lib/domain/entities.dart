@@ -57,6 +57,10 @@ class Trabajador {
       isEntry: isEntry ?? this.isEntry,
     );
   }
+
+  String get nombreCompleto {
+    return '${primerApellido} ${segundoApellido}';
+  }
 }
 
 class GrupoUbicacion {
