@@ -2,442 +2,825 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../domain/entities.dart';
-import '../../providers/use_case/reconocimiento_facial.dart';
 import '../../theme/app_colors.dart';
+import '../custom_app_bar.dart';
+import '../loading_overlay.dart';
 
-class ExistingFaceRegistrationWidget extends ConsumerStatefulWidget {
-  final VoidCallback onViewProfile;
-  final VoidCallback onContactSupport;
-  final VoidCallback onCancel;
-  final VoidCallback onForceRegister;
+class ExistingFaceRegistrationScreen extends ConsumerStatefulWidget {
+  final Trabajador existingWorker;
+  final Trabajador currentWorker;
 
-  const ExistingFaceRegistrationWidget({
+  const ExistingFaceRegistrationScreen({
     super.key,
-    required this.onViewProfile,
-    required this.onContactSupport,
-    required this.onCancel,
-    required this.onForceRegister,
+    required this.existingWorker,
+    required this.currentWorker,
   });
 
   @override
-  ConsumerState<ExistingFaceRegistrationWidget> createState() =>
-      _ExistingFaceRegistrationWidgetState();
+  ConsumerState<ExistingFaceRegistrationScreen> createState() =>
+      _ExistingFaceRegistrationScreenState();
 }
 
-class _ExistingFaceRegistrationWidgetState
-    extends ConsumerState<ExistingFaceRegistrationWidget>
+class _ExistingFaceRegistrationScreenState
+    extends ConsumerState<ExistingFaceRegistrationScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeInAnimation;
-  late Animation<Offset> _slideAnimation;
+  bool _isLoading = false;
   bool _showAdvancedOptions = false;
+  String? _errorMessage;
+  final LoadingOverlayController _controller = LoadingOverlayController();
+
+  late TabController _tabController;
+  final List<String> _tabs = ['Información', 'Opciones', 'Ayuda'];
 
   @override
   void initState() {
     super.initState();
-
-    // Configurar animaciones
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-
-    _fadeInAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeIn,
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
-    );
-
-    // Iniciar animación
-    _animationController.forward();
+    _tabController = TabController(length: _tabs.length, vsync: this);
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _viewWorkerProfile() async {
+    setState(() => _isLoading = true);
+
+    try {
+      // Simular carga de datos
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (!mounted) return;
+
+      // Navegar al perfil del trabajador
+      Navigator.of(context).pop('view_profile');
+    } catch (e) {
+      setState(() => _errorMessage = 'Error al cargar el perfil: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _contactSupport() async {
+    setState(() => _isLoading = true);
+
+    try {
+      // Simular envío de reporte
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (!mounted) return;
+
+      // Mostrar confirmación y volver
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Solicitud enviada a soporte técnico'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.of(context).pop('contact_support');
+    } catch (e) {
+      setState(() => _errorMessage = 'Error al contactar soporte: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _transferRegistration() async {
+    // Mostrar diálogo de confirmación
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => _buildTransferConfirmationDialog(),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Simular transferencia
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (!mounted) return;
+
+      // Mostrar confirmación y volver
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registro facial transferido exitosamente'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.of(context).pop('transfer_completed');
+    } catch (e) {
+      setState(() => _errorMessage = 'Error en la transferencia: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Widget _buildTransferConfirmationDialog() {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.warning.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.warning_amber_outlined,
+              color: AppColors.warning,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Confirmar Transferencia',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '¿Estás seguro de que deseas transferir el registro facial de ${widget.existingWorker.nombreCompleto} a ${widget.currentWorker.nombreCompleto}?',
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.error.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.error.withOpacity(0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.info_outline, color: AppColors.error, size: 20),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Consecuencias de esta acción:',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '• El registro facial será removido de ${widget.existingWorker.nombreCompleto}\n'
+                  '• ${widget.currentWorker.nombreCompleto} será asociado con esta cara\n'
+                  '• Esta acción puede requerir aprobación administrativa',
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          child: const Text(
+            'Cancelar',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.warning,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          child: const Text(
+            'Transferir',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final reconocimientoFacialState = ref.watch(
-      reconocimientoFacialNotifierProvider,
-    );
-
-    final currentWorker = reconocimientoFacialState.trabajadorBiometricoActual;
-    final existingWorker = reconocimientoFacialState.trabajadorIdentificado;
-
-    if (currentWorker == null || existingWorker == null) {
-      print('currentWorker: $currentWorker');
-      print('existingWorker: $existingWorker');
-      return const SizedBox.shrink();
-    }
-
-    return FadeTransition(
-      opacity: _fadeInAnimation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 16),
-                _buildConflictExplanation(currentWorker!),
-                const SizedBox(height: 24),
-                _buildExistingWorkerInfo(existingWorker!),
-                const SizedBox(height: 24),
-                _buildActionButtons(),
-                if (_showAdvancedOptions) ...[
-                  const SizedBox(height: 16),
-                  _buildAdvancedOptions(),
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: 'Conflicto de Registro Facial',
+        showBackButton: true,
+        onBackPressed: () => Navigator.of(context).pop(),
+      ),
+      body: ControlledLoadingOverlay(
+        controller: _controller,
+        child: Column(
+          children: [
+            _buildTabBar(),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildInformationTab(),
+                  _buildOptionsTab(),
+                  _buildHelpTab(),
                 ],
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
+      bottomNavigationBar: _buildBottomBar(),
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppColors.warning.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            Icons.face_retouching_natural,
-            color: AppColors.warning,
-            size: 28,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Conflicto de Registro Facial',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Esta cara ya está registrada',
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildConflictExplanation(Trabajador currentWorker) {
+  Widget _buildTabBar() {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.info.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.info.withOpacity(0.3), width: 1),
+      color: AppColors.primary,
+      child: TabBar(
+        controller: _tabController,
+        tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white.withOpacity(0.7),
+        indicatorColor: Colors.white,
+        indicatorWeight: 3,
       ),
+    );
+  }
+
+  Widget _buildInformationTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.info_outline, color: AppColors.info, size: 20),
-              const SizedBox(width: 8),
-              const Text(
-                'Información del Conflicto',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'La cara que intentas registrar para "${currentWorker.nombreCompleto}" '
-            'ya está asociada con otro trabajador en el sistema. '
-            'Esto puede deberse a un registro previo o a una coincidencia facial.',
-            style: const TextStyle(fontSize: 14, height: 1.5),
-          ),
+          if (_errorMessage != null) _buildErrorMessage(),
+          _buildConflictExplanation(),
+          const SizedBox(height: 24),
+          _buildComparisonSection(),
+          const SizedBox(height: 24),
+          _buildExistingWorkerInfo(),
         ],
       ),
     );
   }
 
-  Widget _buildExistingWorkerInfo(Trabajador existingWorker) {
-    return Container(
+  Widget _buildOptionsTab() {
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            spreadRadius: 0,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Trabajador con Registro Existente',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+          if (_errorMessage != null) _buildErrorMessage(),
+          _buildActionCard(
+            title: 'Ver Perfil Completo',
+            description:
+                'Accede a toda la información del trabajador con el registro facial existente.',
+            icon: Icons.person_search,
+            iconColor: AppColors.primary,
+            onTap: _viewWorkerProfile,
           ),
           const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Foto del trabajador
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey[300]!, width: 1),
-                ),
-                child:
-                    existingWorker.fotoUrl != ""
-                        ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            existingWorker.fotoUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Center(
-                                child: Icon(
-                                  Icons.person,
-                                  size: 40,
-                                  color: Colors.grey[400],
-                                ),
-                              );
-                            },
-                          ),
-                        )
-                        : Center(
-                          child: Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Colors.grey[400],
-                          ),
-                        ),
-              ),
-              const SizedBox(width: 16),
-              // Información del trabajador
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      existingWorker.nombreCompleto,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildInfoRow(
-                      Icons.badge_outlined,
-                      'ID: ${existingWorker.id}',
-                    ),
-                    const SizedBox(height: 4),
-                    _buildInfoRow(Icons.work_outline, existingWorker.cargo),
-                    const SizedBox(height: 4),
-                  ],
-                ),
-              ),
-            ],
+          _buildActionCard(
+            title: 'Contactar Soporte Técnico',
+            description:
+                'Solicita ayuda al equipo de soporte para resolver este conflicto de registro.',
+            icon: Icons.support_agent,
+            iconColor: AppColors.info,
+            onTap: _contactSupport,
           ),
           const SizedBox(height: 16),
-          // Estado del trabajador
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color:
-                  existingWorker.estado
-                      ? AppColors.success.withOpacity(0.1)
-                      : AppColors.error.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  existingWorker.estado
-                      ? Icons.check_circle_outline
-                      : Icons.cancel_outlined,
-                  size: 16,
-                  color:
-                      existingWorker.estado
-                          ? AppColors.success
-                          : AppColors.error,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  existingWorker.estado ? 'Activo' : 'Inactivo',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color:
-                        existingWorker.estado
-                            ? AppColors.success
-                            : AppColors.error,
-                  ),
-                ),
-              ],
-            ),
+          _buildAdvancedOptionsCard(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelpTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHelpSection(
+            title: '¿Qué significa este conflicto?',
+            content:
+                'Un conflicto de registro facial ocurre cuando intentas registrar una cara que ya está asociada a otro trabajador en el sistema. Esto puede deberse a un registro previo o a una coincidencia facial significativa.',
+            icon: Icons.help_outline,
+          ),
+          const SizedBox(height: 16),
+          _buildHelpSection(
+            title: '¿Qué opciones tengo?',
+            content:
+                'Puedes ver el perfil del trabajador existente para verificar su identidad, contactar al soporte técnico para resolver el conflicto, o si tienes permisos administrativos, transferir el registro facial al nuevo trabajador.',
+            icon: Icons.list_alt,
+          ),
+          const SizedBox(height: 16),
+          _buildHelpSection(
+            title: '¿Qué ocurre si transfiero el registro?',
+            content:
+                'Al transferir el registro facial, el trabajador anterior ya no será reconocido con esta cara y el nuevo trabajador será asociado con ella. Esta acción puede requerir aprobación administrativa y afecta directamente al sistema de reconocimiento facial.',
+            icon: Icons.swap_horiz,
+          ),
+          const SizedBox(height: 16),
+          _buildHelpSection(
+            title: 'Contacto de soporte',
+            content:
+                'Email: soporte@empresa.com\nTeléfono: +1 (555) 123-4567\nHorario: Lunes a Viernes, 8:00 AM - 6:00 PM',
+            icon: Icons.contact_support,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+  Widget _buildErrorMessage() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.error.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: AppColors.error),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              _errorMessage!,
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
-        ),
-      ],
+          IconButton(
+            icon: const Icon(Icons.close, size: 16),
+            onPressed: () => setState(() => _errorMessage = null),
+            color: AppColors.error,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildActionButtons() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FilledButton.icon(
-          onPressed: widget.onViewProfile,
-          icon: const Icon(Icons.person_search),
-          label: const Text('Ver Perfil del Trabajador'),
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-          ),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: widget.onContactSupport,
-          icon: const Icon(Icons.support_agent),
-          label: const Text('Contactar Soporte'),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: () {
-            setState(() {
-              _showAdvancedOptions = !_showAdvancedOptions;
-            });
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                _showAdvancedOptions
-                    ? 'Ocultar Opciones Avanzadas'
-                    : 'Mostrar Opciones Avanzadas',
-                style: const TextStyle(fontSize: 14),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                _showAdvancedOptions
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down,
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextButton(onPressed: widget.onCancel, child: const Text('Cancelar')),
-      ],
-    );
-  }
-
-  Widget _buildAdvancedOptions() {
-    return AnimatedOpacity(
-      opacity: _showAdvancedOptions ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 300),
-      child: Container(
+  Widget _buildConflictExplanation() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.warning.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.warning.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.warning_amber_outlined,
-                  color: AppColors.warning,
-                  size: 20,
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.face_retouching_natural,
+                    color: AppColors.warning,
+                    size: 28,
+                  ),
                 ),
+                const SizedBox(width: 16),
+                const Expanded(
+                  child: Text(
+                    'Conflicto Detectado',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'La cara que intentas registrar para "${widget.currentWorker.nombreCompleto}" '
+              'ya está asociada con otro trabajador en el sistema. '
+              'Esto puede deberse a un registro previo o a una coincidencia facial.',
+              style: const TextStyle(fontSize: 15, height: 1.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildComparisonSection() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Comparación de Trabajadores',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildWorkerComparisonCard(
+                    widget.currentWorker,
+                    'Trabajador Actual',
+                    AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildWorkerComparisonCard(
+                    widget.existingWorker,
+                    'Trabajador con Registro',
+                    AppColors.warning,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorkerComparisonCard(
+    Trabajador worker,
+    String label,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          CircleAvatar(
+            radius: 40,
+            backgroundColor: Colors.grey[200],
+            backgroundImage:
+                worker.fotoUrl.isNotEmpty ? NetworkImage(worker.fotoUrl) : null,
+            child:
+                worker.fotoUrl.isEmpty
+                    ? Text(
+                      worker.nombre[0].toUpperCase(),
+                      style: const TextStyle(fontSize: 30),
+                    )
+                    : null,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            worker.nombreCompleto,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            worker.cargo,
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color:
+                  worker.estado
+                      ? AppColors.success.withOpacity(0.1)
+                      : AppColors.error.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              worker.estado ? 'Activo' : 'Inactivo',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: worker.estado ? AppColors.success : AppColors.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExistingWorkerInfo() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Información Detallada',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow('ID', widget.existingWorker.id.toString()),
+            const Divider(),
+            _buildInfoRow(
+              'Nombre Completo',
+              widget.existingWorker.nombreCompleto,
+            ),
+            const Divider(),
+            _buildInfoRow('Cargo', widget.existingWorker.cargo),
+            const Divider(),
+            _buildInfoRow(
+              'Estado',
+              widget.existingWorker.estado ? 'Activo' : 'Inactivo',
+              valueColor:
+                  widget.existingWorker.estado
+                      ? AppColors.success
+                      : AppColors.error,
+            ),
+            const Divider(),
+            _buildInfoRow(
+              'Fecha de Registro',
+              '01/01/2023', // Simulado
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 15,
+                color: valueColor ?? Colors.black87,
+                fontWeight: valueColor != null ? FontWeight.bold : null,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionCard({
+    required String title,
+    required String description,
+    required IconData icon,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconColor, size: 28),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdvancedOptionsCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.admin_panel_settings,
+                    color: AppColors.warning,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const Expanded(
+                  child: Text(
+                    'Opciones Administrativas',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    _showAdvancedOptions
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: Colors.grey[600],
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _showAdvancedOptions = !_showAdvancedOptions;
+                    });
+                  },
+                ),
+              ],
+            ),
+            if (_showAdvancedOptions) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Las siguientes opciones requieren privilegios administrativos y pueden afectar '
+                'el funcionamiento del sistema de reconocimiento facial.',
+                style: TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: _transferRegistration,
+                icon: const Icon(Icons.swap_horiz),
+                label: const Text('Transferir Registro Facial'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.warning,
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Esta acción transferirá el registro facial del trabajador actual al nuevo trabajador. '
+                'El trabajador anterior ya no será reconocido con esta cara.',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHelpSection({
+    required String title,
+    required String content,
+    required IconData icon,
+  }) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: AppColors.info),
                 const SizedBox(width: 8),
-                const Text(
-                  'Opciones Administrativas',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Las siguientes opciones requieren privilegios administrativos y pueden afectar '
-              'el funcionamiento del sistema de reconocimiento facial.',
-              style: TextStyle(fontSize: 14, height: 1.5),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: widget.onForceRegister,
-              icon: const Icon(Icons.swap_horiz),
-              label: const Text('Transferir Registro Facial'),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.warning,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+            Text(content, style: const TextStyle(fontSize: 14, height: 1.5)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text('Cancelar'),
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Esta acción transferirá el registro facial del trabajador actual al nuevo trabajador. '
-              'El trabajador anterior ya no será reconocido con esta cara.',
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: Colors.grey,
+            const SizedBox(width: 16),
+            Expanded(
+              child: FilledButton(
+                onPressed: _contactSupport,
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text('Contactar Soporte'),
               ),
             ),
           ],

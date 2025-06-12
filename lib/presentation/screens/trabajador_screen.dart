@@ -88,19 +88,9 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
     print('trabajador_screen state.estado: ${state.estado}');
 
     if (state.estado == ReconocimientoFacialEstado.rostroExiste) {
-      return ExistingFaceRegistrationWidget(
-        onViewProfile: () {
-          Navigator.of(context).pop();
-        },
-        onContactSupport: () {
-          Navigator.of(context).pop();
-        },
-        onCancel: () {
-          Navigator.of(context).pop();
-        },
-        onForceRegister: () async {
-          Navigator.of(context).pop();
-        },
+      return ExistingFaceRegistrationScreen(
+        currentWorker: state.trabajadorBiometricoActual!,
+        existingWorker: state.trabajadorIdentificado!,
       );
     }
 
