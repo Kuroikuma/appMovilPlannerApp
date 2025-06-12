@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../domain/entities.dart';
+import '../../providers/use_case/reconocimiento_facial.dart';
 import '../../theme/app_colors.dart';
 
-class ExistingFaceRegistrationWidget extends StatefulWidget {
-  final Trabajador existingWorker;
-  final Trabajador currentWorker;
+class ExistingFaceRegistrationWidget extends ConsumerStatefulWidget {
   final VoidCallback onViewProfile;
   final VoidCallback onContactSupport;
   final VoidCallback onCancel;
@@ -13,8 +13,6 @@ class ExistingFaceRegistrationWidget extends StatefulWidget {
 
   const ExistingFaceRegistrationWidget({
     super.key,
-    required this.existingWorker,
-    required this.currentWorker,
     required this.onViewProfile,
     required this.onContactSupport,
     required this.onCancel,
@@ -22,10 +20,13 @@ class ExistingFaceRegistrationWidget extends StatefulWidget {
   });
 
   @override
-  State<ExistingFaceRegistrationWidget> createState() => _ExistingFaceRegistrationWidgetState();
+  ConsumerState<ExistingFaceRegistrationWidget> createState() =>
+      _ExistingFaceRegistrationWidgetState();
 }
 
-class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistrationWidget> with SingleTickerProviderStateMixin {
+class _ExistingFaceRegistrationWidgetState
+    extends ConsumerState<ExistingFaceRegistrationWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
   late Animation<Offset> _slideAnimation;
@@ -34,26 +35,25 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
   @override
   void initState() {
     super.initState();
-    
+
     // Configurar animaciones
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    
+
     _fadeInAnimation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeIn,
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.2),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+
     // Iniciar animación
     _animationController.forward();
   }
@@ -66,6 +66,19 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
 
   @override
   Widget build(BuildContext context) {
+    final reconocimientoFacialState = ref.watch(
+      reconocimientoFacialNotifierProvider,
+    );
+
+    final currentWorker = reconocimientoFacialState.trabajadorBiometricoActual;
+    final existingWorker = reconocimientoFacialState.trabajadorIdentificado;
+
+    if (currentWorker == null || existingWorker == null) {
+      print('currentWorker: $currentWorker');
+      print('existingWorker: $existingWorker');
+      return const SizedBox.shrink();
+    }
+
     return FadeTransition(
       opacity: _fadeInAnimation,
       child: SlideTransition(
@@ -80,9 +93,9 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
               children: [
                 _buildHeader(),
                 const SizedBox(height: 16),
-                _buildConflictExplanation(),
+                _buildConflictExplanation(currentWorker!),
                 const SizedBox(height: 24),
-                _buildExistingWorkerInfo(),
+                _buildExistingWorkerInfo(existingWorker!),
                 const SizedBox(height: 24),
                 _buildActionButtons(),
                 if (_showAdvancedOptions) ...[
@@ -119,18 +132,12 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
             children: [
               const Text(
                 'Conflicto de Registro Facial',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               Text(
                 'Esta cara ya está registrada',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -139,62 +146,46 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
     );
   }
 
-  Widget _buildConflictExplanation() {
+  Widget _buildConflictExplanation(Trabajador currentWorker) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.info.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.info.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.info.withOpacity(0.3), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                Icons.info_outline,
-                color: AppColors.info,
-                size: 20,
-              ),
+              Icon(Icons.info_outline, color: AppColors.info, size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Información del Conflicto',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            'La cara que intentas registrar para "${widget.currentWorker.nombreCompleto}" '
+            'La cara que intentas registrar para "${currentWorker.nombreCompleto}" '
             'ya está asociada con otro trabajador en el sistema. '
             'Esto puede deberse a un registro previo o a una coincidencia facial.',
-            style: const TextStyle(
-              fontSize: 14,
-              height: 1.5,
-            ),
+            style: const TextStyle(fontSize: 14, height: 1.5),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildExistingWorkerInfo() {
+  Widget _buildExistingWorkerInfo(Trabajador existingWorker) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.grey[300]!,
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey[300]!, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -225,35 +216,33 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
                 height: 80,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.grey[300]!,
-                    width: 1,
-                  ),
+                  border: Border.all(color: Colors.grey[300]!, width: 1),
                 ),
-                child: widget.existingWorker.fotoUrl != ""
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          widget.existingWorker.fotoUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Center(
-                              child: Icon(
-                                Icons.person,
-                                size: 40,
-                                color: Colors.grey[400],
-                              ),
-                            );
-                          },
+                child:
+                    existingWorker.fotoUrl != ""
+                        ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            existingWorker.fotoUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Center(
+                                child: Icon(
+                                  Icons.person,
+                                  size: 40,
+                                  color: Colors.grey[400],
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                        : Center(
+                          child: Icon(
+                            Icons.person,
+                            size: 40,
+                            color: Colors.grey[400],
+                          ),
                         ),
-                      )
-                    : Center(
-                        child: Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Colors.grey[400],
-                        ),
-                      ),
               ),
               const SizedBox(width: 16),
               // Información del trabajador
@@ -262,7 +251,7 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.existingWorker.nombreCompleto,
+                      existingWorker.nombreCompleto,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -271,13 +260,10 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
                     const SizedBox(height: 8),
                     _buildInfoRow(
                       Icons.badge_outlined,
-                      'ID: ${widget.existingWorker.id}',
+                      'ID: ${existingWorker.id}',
                     ),
                     const SizedBox(height: 4),
-                    _buildInfoRow(
-                      Icons.work_outline,
-                      widget.existingWorker.cargo,
-                    ),
+                    _buildInfoRow(Icons.work_outline, existingWorker.cargo),
                     const SizedBox(height: 4),
                   ],
                 ),
@@ -289,32 +275,35 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: widget.existingWorker.estado
-                  ? AppColors.success.withOpacity(0.1)
-                  : AppColors.error.withOpacity(0.1),
+              color:
+                  existingWorker.estado
+                      ? AppColors.success.withOpacity(0.1)
+                      : AppColors.error.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  widget.existingWorker.estado
+                  existingWorker.estado
                       ? Icons.check_circle_outline
                       : Icons.cancel_outlined,
                   size: 16,
-                  color: widget.existingWorker.estado
-                      ? AppColors.success
-                      : AppColors.error,
+                  color:
+                      existingWorker.estado
+                          ? AppColors.success
+                          : AppColors.error,
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  widget.existingWorker.estado ? 'Activo' : 'Inactivo',
+                  existingWorker.estado ? 'Activo' : 'Inactivo',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: widget.existingWorker.estado
-                        ? AppColors.success
-                        : AppColors.error,
+                    color:
+                        existingWorker.estado
+                            ? AppColors.success
+                            : AppColors.error,
                   ),
                 ),
               ],
@@ -329,19 +318,12 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: Colors.grey[600],
-        ),
+        Icon(icon, size: 16, color: Colors.grey[600]),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[800],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[800]),
           ),
         ),
       ],
@@ -383,9 +365,7 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
                 _showAdvancedOptions
                     ? 'Ocultar Opciones Avanzadas'
                     : 'Mostrar Opciones Avanzadas',
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
+                style: const TextStyle(fontSize: 14),
               ),
               const SizedBox(width: 4),
               Icon(
@@ -398,10 +378,7 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
           ),
         ),
         const SizedBox(height: 12),
-        TextButton(
-          onPressed: widget.onCancel,
-          child: const Text('Cancelar'),
-        ),
+        TextButton(onPressed: widget.onCancel, child: const Text('Cancelar')),
       ],
     );
   }
@@ -433,10 +410,7 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
                 const SizedBox(width: 8),
                 const Text(
                   'Opciones Administrativas',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -444,10 +418,7 @@ class _ExistingFaceRegistrationWidgetState extends State<ExistingFaceRegistratio
             const Text(
               'Las siguientes opciones requieren privilegios administrativos y pueden afectar '
               'el funcionamiento del sistema de reconocimiento facial.',
-              style: TextStyle(
-                fontSize: 14,
-                height: 1.5,
-              ),
+              style: TextStyle(fontSize: 14, height: 1.5),
             ),
             const SizedBox(height: 16),
             FilledButton.icon(

@@ -28,6 +28,7 @@ enum ReconocimientoFacialEstado {
   error,
   inactivo,
   pausado,
+  rostroExiste,
 }
 
 class ReconocimientoFacialStateData {
@@ -36,6 +37,7 @@ class ReconocimientoFacialStateData {
   final String? errorMessage;
   final String? imagenBase64;
   final Trabajador? trabajadorIdentificado;
+  final Trabajador? trabajadorBiometricoActual;
   final List<ReconocimientoFacial> reconocimientos;
   final bool registroExitoso;
   final List<RegistroBiometrico> cachedFaces;
@@ -48,6 +50,7 @@ class ReconocimientoFacialStateData {
     this.errorMessage,
     this.imagenBase64,
     this.trabajadorIdentificado,
+    this.trabajadorBiometricoActual,
     this.reconocimientos = const [],
     this.registroExitoso = false,
     this.cachedFaces = const [],
@@ -61,6 +64,7 @@ class ReconocimientoFacialStateData {
     String? errorMessage,
     String? imagenBase64,
     Trabajador? trabajadorIdentificado,
+    Trabajador? trabajadorBiometricoActual,
     List<ReconocimientoFacial>? reconocimientos,
     bool? registroExitoso,
     List<RegistroBiometrico>? cachedFaces,
@@ -74,6 +78,8 @@ class ReconocimientoFacialStateData {
       imagenBase64: imagenBase64 ?? this.imagenBase64,
       trabajadorIdentificado:
           trabajadorIdentificado ?? this.trabajadorIdentificado,
+      trabajadorBiometricoActual:
+          trabajadorBiometricoActual ?? this.trabajadorBiometricoActual,
       reconocimientos: reconocimientos ?? this.reconocimientos,
       registroExitoso: registroExitoso ?? this.registroExitoso,
       cachedFaces: cachedFaces ?? this.cachedFaces,
@@ -89,6 +95,7 @@ class ReconocimientoFacialStateData {
       isLoading: isLoading,
       imagenBase64: imagenBase64,
       trabajadorIdentificado: trabajadorIdentificado,
+      trabajadorBiometricoActual: trabajadorBiometricoActual,
       reconocimientos: reconocimientos,
       registroExitoso: registroExitoso,
       cachedFaces: cachedFaces,
@@ -164,6 +171,10 @@ class ReconocimientoFacialNotifier
 
   Future<void> setLoading(bool value) async {
     state = state.copyWith(isLoading: value);
+  }
+
+  Future<void> setTrabajadorBiometricoActual(Trabajador trabajador) async {
+    state = state.copyWith(trabajadorBiometricoActual: trabajador);
   }
 
   Future<void> obtenerReconocimientosPorTrabajador(String trabajadorId) async {
@@ -427,7 +438,7 @@ class ReconocimientoFacialNotifier
     );
   }
 
-  void cambiarEstado(ReconocimientoFacialEstado nuevoEstado) {
+  Future<void> cambiarEstado(ReconocimientoFacialEstado nuevoEstado) async {
     state = state.copyWith(estado: nuevoEstado);
   }
 
@@ -443,7 +454,8 @@ class ReconocimientoFacialNotifier
   }
 
   Future<String> identifyFace(
-    List<double> embedding, bool shouldYouClockIn, {
+    List<double> embedding,
+    bool shouldYouClockIn, {
     double threshold = 0.8,
   }) async {
     double minDistance = double.maxFinite;
@@ -500,7 +512,6 @@ class ReconocimientoFacialNotifier
   }
 
   Future<void> deleteFace(int equipoId, String imagenUrl) async {
-
     final registroBiometrico = state.cachedFaces.firstWhere(
       (face) => face.blobFileString == imagenUrl,
     );

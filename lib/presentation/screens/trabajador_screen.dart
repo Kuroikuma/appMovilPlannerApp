@@ -7,6 +7,7 @@ import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../providers/use_case/ubicacion.dart';
 import '../widget/reconocimiento_facial/build_procesando.dart';
+import '../widget/trabajador/existing_face_registration.dart';
 import '../widget/trabajador/trabajador_detail_sheet.dart';
 import '../widget/trabajador/trabajador_image_gallery.dart';
 import '../widget/trabajador_card.dart';
@@ -77,12 +78,30 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
   Widget build(BuildContext context) {
     final trabajadorState = ref.watch(trabajadorNotifierProvider);
     final ubicacionState = ref.watch(ubicacionNotifierProvider);
-    final reconocimientoFacialState = ref.watch(
-      reconocimientoFacialNotifierProvider,
-    );
 
-    if (reconocimientoFacialState.isLoading) {
+    final state = ref.watch(reconocimientoFacialNotifierProvider);
+
+    if (state.isLoading) {
       return buildProcesandoRegistroBiometrico(context, _animationController);
+    }
+
+    print('trabajador_screen state.estado: ${state.estado}');
+
+    if (state.estado == ReconocimientoFacialEstado.rostroExiste) {
+      return ExistingFaceRegistrationWidget(
+        onViewProfile: () {
+          Navigator.of(context).pop();
+        },
+        onContactSupport: () {
+          Navigator.of(context).pop();
+        },
+        onCancel: () {
+          Navigator.of(context).pop();
+        },
+        onForceRegister: () async {
+          Navigator.of(context).pop();
+        },
+      );
     }
 
     return Scaffold(

@@ -25,10 +25,12 @@ class TrabajadorImageGallery extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TrabajadorImageGallery> createState() => _TrabajadorImageGalleryState();
+  ConsumerState<TrabajadorImageGallery> createState() =>
+      _TrabajadorImageGalleryState();
 }
 
-class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery> with TickerProviderStateMixin {
+class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
+    with TickerProviderStateMixin {
   final ImagePicker _picker = ImagePicker();
   List<String> _imagenes = [];
   bool _isLoading = false;
@@ -37,7 +39,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
 
   bool _isDeleting = false;
   String? _deletingImageUrl;
-  
+
   // Controladores de animación
   late AnimationController _deleteAnimationController;
   late AnimationController _scaleAnimationController;
@@ -47,9 +49,9 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
   void initState() {
     super.initState();
     _imagenes = widget.imagenes;
-    
+
     // Añadir la foto de perfil al inicio de la galería si existe
-    if (widget.trabajador.fotoUrl != "" && 
+    if (widget.trabajador.fotoUrl != "" &&
         !_imagenes.contains(widget.trabajador.fotoUrl)) {
       _imagenes.insert(0, widget.trabajador.fotoUrl);
     }
@@ -59,19 +61,18 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _scaleAnimationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _scaleAnimationController,
-      curve: Curves.easeInOut,
-    ));
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _scaleAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   @override
@@ -81,14 +82,15 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
     super.dispose();
   }
 
-   Future<void> _deleteImage(int index, String imageUrl) async {
+  Future<void> _deleteImage(int index, String imageUrl) async {
     // Verificar si es la foto de perfil
     final reconocimientoNotifier = ref.read(
       reconocimientoFacialNotifierProvider.notifier,
     );
-    final bool isProfilePhoto = widget.trabajador.fotoUrl != "" && 
-                               imageUrl == widget.trabajador.fotoUrl;
-    
+    final bool isProfilePhoto =
+        widget.trabajador.fotoUrl != "" &&
+        imageUrl == widget.trabajador.fotoUrl;
+
     if (isProfilePhoto) {
       _showErrorSnackBar('No se puede eliminar la foto de perfil');
       return;
@@ -96,7 +98,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
 
     // Mostrar diálogo de confirmación
     final bool? shouldDelete = await _showDeleteConfirmationDialog(imageUrl);
-    
+
     if (shouldDelete == true) {
       try {
         setState(() {
@@ -106,9 +108,9 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
 
         // Animar la eliminación
         await _scaleAnimationController.forward();
-        
+
         // Simular eliminación del servidor
-        
+
         await reconocimientoNotifier.deleteFace(widget.trabajador.id, imageUrl);
         // Eliminar de la lista local
         setState(() {
@@ -116,16 +118,15 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
           _isDeleting = false;
           _deletingImageUrl = null;
         });
-        
+
         // Resetear animación
         _scaleAnimationController.reset();
-        
+
         // Notificar al padre sobre las imágenes actualizadas
         _notifyImagesUpdated();
-        
+
         // Mostrar mensaje de éxito
         _showSuccessSnackBar('Imagen eliminada exitosamente');
-        
       } catch (e) {
         setState(() {
           _isDeleting = false;
@@ -137,7 +138,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
     }
   }
 
-    Future<bool?> _showDeleteConfirmationDialog(String imageUrl) {
+  Future<bool?> _showDeleteConfirmationDialog(String imageUrl) {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -164,10 +165,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
               const Expanded(
                 child: Text(
                   'Eliminar Imagen',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -211,9 +209,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
                 decoration: BoxDecoration(
                   color: AppColors.warning.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.warning.withOpacity(0.3),
-                  ),
+                  border: Border.all(color: AppColors.warning.withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
@@ -241,21 +237,24 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
               ),
               child: const Text(
                 'Cancelar',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.error,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
               ),
               child: const Text(
                 'Eliminar',
@@ -274,12 +273,13 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
 
   void _notifyImagesUpdated() {
     // Excluimos la foto de perfil si fue añadida al inicio
-    final List<String> updatedImages = widget.trabajador.fotoUrl != "" && 
-                                      _imagenes.isNotEmpty && 
-                                      _imagenes[0] == widget.trabajador.fotoUrl
-        ? _imagenes.sublist(1)
-        : _imagenes;
-        
+    final List<String> updatedImages =
+        widget.trabajador.fotoUrl != "" &&
+                _imagenes.isNotEmpty &&
+                _imagenes[0] == widget.trabajador.fotoUrl
+            ? _imagenes.sublist(1)
+            : _imagenes;
+
     // widget.onImagesUpdated(updatedImages);
   }
 
@@ -288,20 +288,14 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
       SnackBar(
         content: Row(
           children: [
-            Icon(
-              Icons.check_circle_outline,
-              color: Colors.white,
-              size: 20,
-            ),
+            Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
             const SizedBox(width: 8),
             Expanded(child: Text(message)),
           ],
         ),
         backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         margin: const EdgeInsets.all(16),
       ),
     );
@@ -312,20 +306,14 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
       SnackBar(
         content: Row(
           children: [
-            Icon(
-              Icons.error_outline,
-              color: Colors.white,
-              size: 20,
-            ),
+            Icon(Icons.error_outline, color: Colors.white, size: 20),
             const SizedBox(width: 8),
             Expanded(child: Text(message)),
           ],
         ),
         backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 4),
       ),
@@ -336,114 +324,124 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
     setState(() {
       _selectedImageIndex = index;
     });
-    
+
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        insetPadding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
-              alignment: Alignment.topRight,
+      builder:
+          (context) => Dialog(
+            insetPadding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                InteractiveViewer(
-                  minScale: 0.5,
-                  maxScale: 3.0,
-                  child: Image.network(
-                    _imagenes[index],
-                    fit: BoxFit.contain,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded / 
-                                loadingProgress.expectedTotalBytes!
-                              : null,
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Center(
-                        child: Icon(
-                          Icons.error_outline,
-                          color: Colors.red,
-                          size: 48,
-                        ),
-                      );
-                    },
-                  ),
+                Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    InteractiveViewer(
+                      minScale: 0.5,
+                      maxScale: 3.0,
+                      child: Image.network(
+                        _imagenes[index],
+                        fit: BoxFit.contain,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value:
+                                  loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(
+                            child: Icon(
+                              Icons.error_outline,
+                              color: Colors.red,
+                              size: 48,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Botón de eliminar (solo si no es la foto de perfil)
+                          if (!(widget.trabajador.fotoUrl != "" &&
+                              _imagenes[index] == widget.trabajador.fotoUrl))
+                            Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: AppColors.error.withOpacity(0.9),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  _deleteImage(index, _imagenes[index]);
+                                },
+                              ),
+                            ),
+                          // Botón de cerrar
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.7),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  top: 8,
-                  right: 8,
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // Botón de eliminar (solo si no es la foto de perfil)
-                      if (!(widget.trabajador.fotoUrl != "" && 
-                            _imagenes[index] == widget.trabajador.fotoUrl))
-                        Container(
-                          margin: const EdgeInsets.only(right: 8),
-                          decoration: BoxDecoration(
-                            color: AppColors.error.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.white),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              _deleteImage(index, _imagenes[index]);
-                            },
-                          ),
-                        ),
-                      // Botón de cerrar
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios),
+                        onPressed:
+                            index > 0
+                                ? () {
+                                  Navigator.of(context).pop();
+                                  _viewImage(index - 1);
+                                }
+                                : null,
+                      ),
+                      Text('${index + 1} / ${_imagenes.length}'),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_forward_ios),
+                        onPressed:
+                            index < _imagenes.length - 1
+                                ? () {
+                                  Navigator.of(context).pop();
+                                  _viewImage(index + 1);
+                                }
+                                : null,
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed: index > 0
-                        ? () {
-                            Navigator.of(context).pop();
-                            _viewImage(index - 1);
-                          }
-                        : null,
-                  ),
-                  Text('${index + 1} / ${_imagenes.length}'),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios),
-                    onPressed: index < _imagenes.length - 1
-                        ? () {
-                            Navigator.of(context).pop();
-                            _viewImage(index + 1);
-                          }
-                        : null,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -470,9 +468,10 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
             children: [
               _buildHeader(context),
               Expanded(
-                child: _imagenes.isEmpty
-                    ? _buildEmptyState()
-                    : _buildGalleryGrid(scrollController),
+                child:
+                    _imagenes.isEmpty
+                        ? _buildEmptyState()
+                        : _buildGalleryGrid(scrollController),
               ),
               _buildAddButton(),
             ],
@@ -510,19 +509,22 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Título y contador de imágenes
           Row(
             children: [
               Text(
                 'Galería de Imágenes',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(16),
@@ -539,21 +541,23 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
             ],
           ),
           const SizedBox(height: 8),
-          
+
           // Información del trabajador
           Row(
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundImage: widget.trabajador.fotoUrl != "" 
-                    ? NetworkImage(widget.trabajador.fotoUrl) 
-                    : null,
-                child: widget.trabajador.fotoUrl == "" 
-                    ? Text(
-                        widget.trabajador.nombre[0].toUpperCase(),
-                        style: const TextStyle(fontSize: 14),
-                      ) 
-                    : null,
+                backgroundImage:
+                    widget.trabajador.fotoUrl != ""
+                        ? NetworkImage(widget.trabajador.fotoUrl)
+                        : null,
+                child:
+                    widget.trabajador.fotoUrl == ""
+                        ? Text(
+                          widget.trabajador.nombre[0].toUpperCase(),
+                          style: const TextStyle(fontSize: 14),
+                        )
+                        : null,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -587,8 +591,9 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
       itemCount: _imagenes.length,
       itemBuilder: (context, index) {
         final String imageUrl = _imagenes[index];
-        final bool isProfilePhoto = widget.trabajador.fotoUrl != "" && 
-                                   imageUrl == widget.trabajador.fotoUrl;
+        final bool isProfilePhoto =
+            widget.trabajador.fotoUrl != "" &&
+            imageUrl == widget.trabajador.fotoUrl;
         final bool isDeleting = _deletingImageUrl == imageUrl;
 
         return AnimatedBuilder(
@@ -603,10 +608,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.grey[300]!,
-                        width: 1,
-                      ),
+                      border: Border.all(color: Colors.grey[300]!, width: 1),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.05),
@@ -627,10 +629,13 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
                               if (loadingProgress == null) return child;
                               return Center(
                                 child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded / 
-                                        loadingProgress.expectedTotalBytes!
-                                      : null,
+                                  value:
+                                      loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress
+                                                  .cumulativeBytesLoaded /
+                                              loadingProgress
+                                                  .expectedTotalBytes!
+                                          : null,
                                 ),
                               );
                             },
@@ -643,7 +648,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
                               );
                             },
                           ),
-                          
+
                           // Overlay de eliminación
                           if (isDeleting)
                             Container(
@@ -654,7 +659,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
                                 ),
                               ),
                             ),
-                          
+
                           // Indicador para la foto de perfil
                           if (isProfilePhoto)
                             Positioned(
@@ -673,7 +678,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
                                 ),
                               ),
                             ),
-                          
+
                           // Botón de eliminar (solo si no es la foto de perfil)
                           if (!isProfilePhoto && !isDeleting)
                             Positioned(
@@ -708,11 +713,11 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
     );
   }
 
-    Future<void> _registerFace(Trabajador trabajador) async {
+  Future<void> _registerFace(Trabajador trabajador) async {
     final reconocimientoNotifier = ref.read(
       reconocimientoFacialNotifierProvider.notifier,
     );
-    final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
+
     final trabajadorNotifier = ref.read(trabajadorNotifierProvider.notifier);
     final ubicacionState = ref.read(ubicacionNotifierProvider);
 
@@ -721,6 +726,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
       final path = directory.path;
 
       await reconocimientoNotifier.setLoading(true);
+      await reconocimientoNotifier.setTrabajadorBiometricoActual(trabajador);
 
       final image = await _imagePicker.pickImage(source: ImageSource.camera);
 
@@ -754,22 +760,12 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
       // Update UI
       if (name != 'No Registrado') {
         if (name != trabajador.nombre) {
-
           await reconocimientoNotifier.setLoading(false);
-
-          final Trabajador? existingWorker = trabajadores.cast<Trabajador?>().firstWhere(
-            (t) => t?.nombre == name,
-            orElse: () => null,
+          await reconocimientoNotifier.cambiarEstado(
+            ReconocimientoFacialEstado.rostroExiste,
           );
 
-          if (mounted) {
-            await _showExistingFaceRegistrationDialog(existingWorker!);
-            return;
- 
-          } else {
-            return;
-          }
-
+          return;
         }
       }
 
@@ -805,49 +801,12 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
     }
   }
 
-  // Mostrar diálogo detallado cuando la cara ya está registrada
-  Future<void> _showExistingFaceRegistrationDialog(Trabajador existingWorker) async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: ExistingFaceRegistrationWidget(
-            existingWorker: existingWorker,
-            currentWorker: widget.trabajador,
-            onViewProfile: () {
-              Navigator.of(context).pop();
-             
-            },
-            onContactSupport: () {
-              Navigator.of(context).pop();
-            },
-            onCancel: () {
-              Navigator.of(context).pop();
-            },
-            onForceRegister: () async {
-              Navigator.of(context).pop();
-            },
-          ),
-        );
-      },
-    );
-  }
-  
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.photo_library_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.photo_library_outlined, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No hay imágenes disponibles',
@@ -860,16 +819,13 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
           const SizedBox(height: 8),
           Text(
             'Añade imágenes a la galería del trabajador',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.of(context).pop();
               _registerFace(widget.trabajador);
             },
             icon: const Icon(Icons.add_photo_alternate),
@@ -895,20 +851,24 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
         ],
       ),
       child: FilledButton.icon(
-        onPressed: _isLoading ? null : () {
-          Navigator.pop(context);
-          _registerFace(widget.trabajador);
-        },
-        icon: _isLoading 
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Icon(Icons.add_photo_alternate),
+        onPressed:
+            _isLoading
+                ? null
+                : () {
+                  Navigator.of(context).pop();
+                  _registerFace(widget.trabajador);
+                },
+        icon:
+            _isLoading
+                ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+                : const Icon(Icons.add_photo_alternate),
         label: Text(_isLoading ? 'Añadiendo...' : 'Añadir Imagen'),
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 12),
