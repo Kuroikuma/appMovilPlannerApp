@@ -43,6 +43,7 @@ class ReconocimientoFacialStateData {
   final List<RegistroBiometrico> cachedFaces;
   final bool isInitialized;
   final File? imageFile;
+  final String? registroBiometricoIdSeleccionado;
 
   const ReconocimientoFacialStateData({
     this.estado = ReconocimientoFacialEstado.inicial,
@@ -56,6 +57,7 @@ class ReconocimientoFacialStateData {
     this.cachedFaces = const [],
     this.isInitialized = false,
     this.imageFile,
+    this.registroBiometricoIdSeleccionado,
   });
 
   ReconocimientoFacialStateData copyWith({
@@ -70,6 +72,7 @@ class ReconocimientoFacialStateData {
     List<RegistroBiometrico>? cachedFaces,
     bool? isInitialized,
     File? imageFile,
+    String? registroBiometricoIdSeleccionado,
   }) {
     return ReconocimientoFacialStateData(
       estado: estado ?? this.estado,
@@ -85,6 +88,8 @@ class ReconocimientoFacialStateData {
       cachedFaces: cachedFaces ?? this.cachedFaces,
       isInitialized: isInitialized ?? this.isInitialized,
       imageFile: imageFile ?? this.imageFile,
+      registroBiometricoIdSeleccionado:
+          registroBiometricoIdSeleccionado ?? this.registroBiometricoIdSeleccionado,
     );
   }
 
@@ -460,6 +465,7 @@ class ReconocimientoFacialNotifier
   }) async {
     double minDistance = double.maxFinite;
     int trabajadorId = 0;
+    String registroBiometricoId = '';
 
     final trabajadores = ref.read(trabajadorNotifierProvider).trabajadores;
 
@@ -471,6 +477,7 @@ class ReconocimientoFacialNotifier
       if (validateDistance) {
         minDistance = distance;
         trabajadorId = face.trabajadorId;
+        registroBiometricoId = face.id;
       }
     }
 
@@ -488,6 +495,7 @@ class ReconocimientoFacialNotifier
         trabajadorIdentificado: trabajador,
         isLoading: false,
         estado: ReconocimientoFacialEstado.exito,
+        registroBiometricoIdSeleccionado: registroBiometricoId,
       );
 
       if (!shouldYouClockIn) {

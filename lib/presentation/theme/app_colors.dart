@@ -10,6 +10,8 @@ class AppColors {
   static const Color secondary = Color(0xFF4CAF50);
   static const Color secondaryLight = Color(0xFFE8F5E9);
   static const Color secondaryDark = Color(0xFF388E3C);
+
+  static const Color naranja = Color(0xffff5003);
   
   // Colores de estado
   static const Color success = Color(0xFF4CAF50);

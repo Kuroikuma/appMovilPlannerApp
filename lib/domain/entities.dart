@@ -59,7 +59,7 @@ class Trabajador {
   }
 
   String get nombreCompleto {
-    return '${primerApellido} ${segundoApellido}';
+    return '$nombre $primerApellido $segundoApellido';
   }
 }
 

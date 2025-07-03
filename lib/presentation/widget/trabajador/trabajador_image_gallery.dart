@@ -126,7 +126,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
         _notifyImagesUpdated();
 
         // Mostrar mensaje de éxito
-        _showSuccessSnackBar('Imagen eliminada exitosamente');
+        _showSuccessSnackBar('Rostro eliminado exitosamente');
       } catch (e) {
         setState(() {
           _isDeleting = false;
@@ -164,7 +164,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
-                  'Eliminar Imagen',
+                  'Eliminar Rostro',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -175,7 +175,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                '¿Estás seguro de que deseas eliminar esta imagen?',
+                '¿Estás seguro de que deseas eliminar este rostro?',
                 style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 16),
@@ -514,7 +514,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
           Row(
             children: [
               Text(
-                'Galería de Imágenes',
+                'Galería de Rostros',
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -530,7 +530,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  '${_imagenes.length} ${_imagenes.length == 1 ? 'imagen' : 'imágenes'}',
+                  '${_imagenes.length} ${_imagenes.length == 1 ? 'rostro' : 'rostros'}',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -869,7 +869,7 @@ class _TrabajadorImageGalleryState extends ConsumerState<TrabajadorImageGallery>
                   ),
                 )
                 : const Icon(Icons.add_photo_alternate),
-        label: Text(_isLoading ? 'Añadiendo...' : 'Añadir Imagen'),
+        label: Text(_isLoading ? 'Añadiendo...' : 'Añadir Rostro'),
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),

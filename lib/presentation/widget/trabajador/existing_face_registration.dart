@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../domain/entities.dart';
+import '../../../domain/models/registro_biometrico.dart';
+import '../../providers/use_case/reconocimiento_facial.dart';
+import '../../routes/app_routes.dart';
 import '../../theme/app_colors.dart';
 import '../custom_app_bar.dart';
 import '../loading_overlay.dart';
@@ -9,11 +12,15 @@ import '../loading_overlay.dart';
 class ExistingFaceRegistrationScreen extends ConsumerStatefulWidget {
   final Trabajador existingWorker;
   final Trabajador currentWorker;
+  final String registroBiometricoId;
+  final List<RegistroBiometrico> registroBiometricos;
 
   const ExistingFaceRegistrationScreen({
     super.key,
     required this.existingWorker,
     required this.currentWorker,
+    required this.registroBiometricoId,
+    required this.registroBiometricos,
   });
 
   @override
@@ -87,11 +94,22 @@ class _ExistingFaceRegistrationScreenState
     }
   }
 
-  Future<void> _transferRegistration() async {
+  Future<void> _deleteRegistration() async {
+    final reconocimientoNotifier = ref.read(
+      reconocimientoFacialNotifierProvider.notifier,
+    );
+
+    final imageUrl =
+        widget.registroBiometricos
+            .firstWhere(
+              (registro) => registro.id == widget.registroBiometricoId,
+            )
+            .blobFileString;
+
     // Mostrar diálogo de confirmación
     final bool? confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => _buildTransferConfirmationDialog(),
+      builder: (context) => _buildDeleteConfirmationDialog(),
     );
 
     if (confirm != true) return;
@@ -99,28 +117,30 @@ class _ExistingFaceRegistrationScreenState
     setState(() => _isLoading = true);
 
     try {
-      // Simular transferencia
-      await Future.delayed(const Duration(seconds: 2));
+      await reconocimientoNotifier.deleteFace(
+        widget.existingWorker.id,
+        imageUrl,
+      );
 
       if (!mounted) return;
 
       // Mostrar confirmación y volver
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Registro facial transferido exitosamente'),
+          content: Text('Registro facial eliminado exitosamente'),
           backgroundColor: Colors.green,
         ),
       );
 
-      Navigator.of(context).pop('transfer_completed');
+      Navigator.of(context).pushNamed(AppRoutes.trabajadores);
     } catch (e) {
-      setState(() => _errorMessage = 'Error en la transferencia: $e');
+      setState(() => _errorMessage = 'Error en la eliminación: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Widget _buildTransferConfirmationDialog() {
+  Widget _buildDeleteConfirmationDialog() {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
@@ -128,19 +148,19 @@ class _ExistingFaceRegistrationScreenState
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.1),
+              color: AppColors.error.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               Icons.warning_amber_outlined,
-              color: AppColors.warning,
+              color: AppColors.error,
               size: 24,
             ),
           ),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
-              'Confirmar Transferencia',
+              'Confirmar Eliminación',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -151,7 +171,7 @@ class _ExistingFaceRegistrationScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '¿Estás seguro de que deseas transferir el registro facial de ${widget.existingWorker.nombreCompleto} a ${widget.currentWorker.nombreCompleto}?',
+            '¿Estás seguro de que deseas eliminar el registro facial de ${widget.existingWorker.nombreCompleto}?',
             style: const TextStyle(fontSize: 16),
           ),
           const SizedBox(height: 16),
@@ -181,7 +201,6 @@ class _ExistingFaceRegistrationScreenState
                 const SizedBox(height: 8),
                 Text(
                   '• El registro facial será removido de ${widget.existingWorker.nombreCompleto}\n'
-                  '• ${widget.currentWorker.nombreCompleto} será asociado con esta cara\n'
                   '• Esta acción puede requerir aprobación administrativa',
                   style: const TextStyle(fontSize: 13),
                 ),
@@ -204,11 +223,11 @@ class _ExistingFaceRegistrationScreenState
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.warning,
+            backgroundColor: AppColors.error,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
           child: const Text(
-            'Transferir',
+            'Eliminar',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -328,15 +347,15 @@ class _ExistingFaceRegistrationScreenState
           _buildHelpSection(
             title: '¿Qué opciones tengo?',
             content:
-                'Puedes ver el perfil del trabajador existente para verificar su identidad, contactar al soporte técnico para resolver el conflicto, o si tienes permisos administrativos, transferir el registro facial al nuevo trabajador.',
+                'Puedes ver el perfil del trabajador existente para verificar su identidad, contactar al soporte técnico para resolver el conflicto, o si tienes permisos administrativos, eliminar el registro facial al trabajador existente.',
             icon: Icons.list_alt,
           ),
           const SizedBox(height: 16),
           _buildHelpSection(
-            title: '¿Qué ocurre si transfiero el registro?',
+            title: '¿Qué ocurre si elimino el registro?',
             content:
-                'Al transferir el registro facial, el trabajador anterior ya no será reconocido con esta cara y el nuevo trabajador será asociado con ella. Esta acción puede requerir aprobación administrativa y afecta directamente al sistema de reconocimiento facial.',
-            icon: Icons.swap_horiz,
+                'Al eliminar el registro facial, el trabajador ya no será reconocido con esta cara. Esta acción puede requerir aprobación administrativa y afecta directamente al sistema de reconocimiento facial.',
+            icon: Icons.delete_forever_outlined,
           ),
           const SizedBox(height: 16),
           _buildHelpSection(
@@ -413,7 +432,20 @@ class _ExistingFaceRegistrationScreenState
             ),
             const SizedBox(height: 16),
             Text(
-              'La cara que intentas registrar para "${widget.currentWorker.nombreCompleto}" '
+              'ID del Registro Biométrico: ',
+              style: const TextStyle(fontSize: 15, height: 1.5),
+            ),
+            Text(
+              widget.registroBiometricoId,
+              style: const TextStyle(
+                fontSize: 15,
+                height: 1.5,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'El rostro que intentas registrar para "${widget.currentWorker.nombreCompleto}" '
               'ya está asociada con otro trabajador en el sistema. '
               'Esto puede deberse a un registro previo o a una coincidencia facial.',
               style: const TextStyle(fontSize: 15, height: 1.5),
@@ -727,19 +759,19 @@ class _ExistingFaceRegistrationScreenState
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
-                onPressed: _transferRegistration,
-                icon: const Icon(Icons.swap_horiz),
-                label: const Text('Transferir Registro Facial'),
+                onPressed: _deleteRegistration,
+                icon: const Icon(Icons.delete),
+                label: const Text('Eliminar Registro Facial'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.warning,
+                  backgroundColor: AppColors.error,
                   minimumSize: const Size(double.infinity, 48),
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Esta acción transferirá el registro facial del trabajador actual al nuevo trabajador. '
-                'El trabajador anterior ya no será reconocido con esta cara.',
-                style: TextStyle(
+              Text(
+                'Esta acción eliminará el registro facial del trabajador ${widget.existingWorker.nombreCompleto}. '
+                'El trabajador ya no será reconocido con esta cara.',
+                style: const TextStyle(
                   fontSize: 12,
                   fontStyle: FontStyle.italic,
                   color: Colors.grey,

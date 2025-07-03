@@ -91,6 +91,8 @@ class _TrabajadoresScreenState extends ConsumerState<TrabajadoresScreen>
       return ExistingFaceRegistrationScreen(
         currentWorker: state.trabajadorBiometricoActual!,
         existingWorker: state.trabajadorIdentificado!,
+        registroBiometricoId: state.registroBiometricoIdSeleccionado!,
+        registroBiometricos: state.cachedFaces,
       );
     }
 

@@ -12,6 +12,8 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../../data/converters/time_converter.dart';
+import '../providers/use_case/horario_notifier.dart';
 import '../providers/use_case/reconocimiento_facial.dart';
 import '../providers/use_case/trabajador.dart';
 import '../theme/app_colors.dart';
@@ -204,7 +206,7 @@ class _ReconocimientoFacialScreenState
       );
 
       await _cameraController!.initialize();
-       // Inicia la cuenta regresiva
+      // Inicia la cuenta regresiva
       _startCountdown();
 
       if (mounted) {
@@ -221,7 +223,7 @@ class _ReconocimientoFacialScreenState
     }
   }
 
-    void _startCountdown() {
+  void _startCountdown() {
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_countdown > 0) {
@@ -241,6 +243,7 @@ class _ReconocimientoFacialScreenState
 
   Future<void> _toggleCamera() async {
     if (_cameras == null || _cameras!.length < 2) return;
+    if (_showCountdown) return;
 
     setState(() {
       _isFrontCameraSelected = !_isFrontCameraSelected;
@@ -263,10 +266,15 @@ class _ReconocimientoFacialScreenState
         _cameras![newCameraIndex],
         ResolutionPreset.high,
         enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.nv21,
+        imageFormatGroup: ImageFormatGroup.jpeg,
       );
 
       await _cameraController!.initialize();
+
+       // Inicia la cuenta regresiva
+      _showCountdown = true;
+      _countdown = 3;
+      _startCountdown();
 
       if (mounted) {
         setState(() {
@@ -367,7 +375,7 @@ class _ReconocimientoFacialScreenState
       final faces = await reconocimientoNotifier.detectFaces(inputImage);
       if (faces.isEmpty) {
         detectionMessage = 'No se detectaron rostros.';
-        
+
         if (mounted) {
           setState(() => customPaint = null);
         }
@@ -630,13 +638,10 @@ class _ReconocimientoFacialScreenState
           foregroundColor: theme.colorScheme.onPrimary,
           actions: [
             IconButton(
-              icon: const Icon(Icons.photo_library),
-              onPressed:
-                  state.estado == ReconocimientoFacialEstado.inicial ||
-                          state.estado == ReconocimientoFacialEstado.inactivo
-                      ? _seleccionarImagen
-                      : null,
-              tooltip: 'Seleccionar de galería',
+              icon: const Icon(Icons.cameraswitch_outlined),
+              onPressed: _toggleCamera,
+              tooltip: 'Cambiar cámara',
+              iconSize: 38,
             ),
           ],
         ),
@@ -850,6 +855,11 @@ class _ReconocimientoFacialScreenState
   Widget _buildCameraPreview(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
+    final horario = ref.watch(horarioNotifierProvider).horario;
+    final horarioUbicacion =
+        horario != null
+            ? '${TimeOfDayConverter().toSql(horario.horaInicio)} - ${TimeOfDayConverter().toSql(horario.horaFin)}'
+            : 'Sin horario asignado';
 
     if (!_isPermissionGranted) {
       return _buildPermissionDenied(context);
@@ -884,6 +894,11 @@ class _ReconocimientoFacialScreenState
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
+                ),
+                Text(
+                  'Horario: $horarioUbicacion',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: theme.colorScheme.onPrimary),
                 ),
               ],
             ),
@@ -1114,10 +1129,7 @@ class _ReconocimientoFacialScreenState
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppColors.primary,
-                    width: 3,
-                  ),
+                  border: Border.all(color: AppColors.primary, width: 3),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(13),
@@ -1256,9 +1268,7 @@ class _ReconocimientoFacialScreenState
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3),
-                  ),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
                 ),
                 child: Column(
                   children: [
