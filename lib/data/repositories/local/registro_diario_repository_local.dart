@@ -185,11 +185,11 @@ class RegistroDiarioRepositoryLocal {
         iniciaLabores: horario.horaInicio,
         estado: true,
         nombreTrabajador:
-            '$trabajador.nombre $trabajador.primerApellido $trabajador.segundoApellido',
+            '${trabajador.nombre} ${trabajador.primerApellido} ${trabajador.segundoApellido}',
         fotoTrabajador: trabajador.fotoUrl,
         cargoTrabajador: trabajador.cargo,
         horarioId: horaAprobadaId,
-        registroId: trabajadorId,
+        registroId: trabajadorId ?? 0,
       );
 
       // En una implementación real, aquí se guardaría en la base de datos

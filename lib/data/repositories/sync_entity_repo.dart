@@ -37,7 +37,7 @@ class SyncEntityLocalDataSource implements ISyncEntityRepository {
 
   @override
   Future<void> insertSyncEntity(SyncsEntitysCompanion syncEntity) async {
-    await _db.into(_db.syncsEntitys).insertOnConflictUpdate(syncEntity);
+    await _db.into(_db.syncsEntitys).insert(syncEntity);
   }
 
   @override

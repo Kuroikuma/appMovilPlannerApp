@@ -58,7 +58,7 @@ class SyncEntityNotifier extends StateNotifier<AsyncValue<List<SyncEntity>>> {
   Future<void> insertSyncEntity(SyncsEntitysCompanion syncEntity) async {
     try {
       await _repository.insertSyncEntity(syncEntity);
-      await loadSyncEntity();
+      // await loadSyncEntity();
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
