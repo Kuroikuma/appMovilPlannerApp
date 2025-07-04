@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:intl/intl.dart';
 import '../../core/network/network_info.dart';
 import '../../domain/repositories/i_horario_repositorio.dart';
 import '../converters/date_converter.dart';
@@ -28,16 +29,23 @@ class HorarioRepository implements IHorarioRepository {
     );
   }
 
+  String _formatDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
+
   @override
   Future<Horario?> obtenerTodos(String ubicacionId) async {
     final localData = await _db.select(_db.horarios).get();
 
     final isConnected = await networkInfo.isConnected;
     final now = DateTime.now();
+
+    final nowString = _formatDate(now);
+
     if (isConnected) {
       try {
         final remoteData = await _client.get(
-          '/GetListHorarioByUbicacionId?ubicacionId=$ubicacionId&fechaInicio=$now&fechaFin=$now',
+          '/GetListHorarioByUbicacionId?ubicacionId=$ubicacionId&fechaInicio=$nowString&fechaFin=$nowString',
         );
 
         if (remoteData.data.isEmpty) {
