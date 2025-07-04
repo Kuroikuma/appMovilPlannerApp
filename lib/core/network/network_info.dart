@@ -10,5 +10,9 @@ class NetworkInfoImpl implements NetworkInfo {
   NetworkInfoImpl(this.connectionChecker);
 
   @override
-  Future<bool> get isConnected => connectionChecker.hasConnection;
+  Future<bool> get isConnected async {
+    final status = await connectionChecker.connectionStatus;
+    print("Estado de conexión: ${status == InternetConnectionStatus.connected} $status");
+    return status == InternetConnectionStatus.connected;
+  }
 }
